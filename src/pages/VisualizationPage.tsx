@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mic, Square, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 // Vowel positions mapped to the vowel trapezoid
-// These coordinates are relative to the oral cavity area
 const vowelPositions: Record<string, { x: number; y: number; label: string }> = {
   "i": { x: 20, y: 15, label: "i" },
   "ɪ": { x: 30, y: 25, label: "ɪ" },
@@ -25,10 +24,56 @@ const vowelPositions: Record<string, { x: number; y: number; label: string }> = 
 const VisualizationPage = () => {
   const [selectedVowel, setSelectedVowel] = useState<string | null>("æ");
   const [userVowel] = useState<{ x: number; y: number } | null>({ x: 42, y: 58 });
+  const [isRecording, setIsRecording] = useState(false);
+  const [hasRecording, setHasRecording] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  const handleStartRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        setHasRecording(true);
+        stream.getTracks().forEach((track) => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+    }
+  };
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const handlePlayRecording = () => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+    }
+  };
 
   // Convert vowel chart coordinates to SVG coordinates within the oral cavity
   const toSvgCoords = (x: number, y: number) => {
-    // Map to the oral cavity area between palate and tongue
     const svgX = 130 + (x / 100) * 140;
     const svgY = 120 + (y / 100) * 100;
     return { svgX, svgY };
@@ -370,35 +415,84 @@ const VisualizationPage = () => {
               </svg>
             </div>
 
-            {/* Vowel selector panel */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-              <h3 className="font-semibold text-foreground mb-4">Select Vowel</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {Object.entries(vowelPositions).map(([key, pos]) => (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedVowel(key)}
-                    className={`w-11 h-11 rounded-lg text-lg font-medium transition-all ${
-                      selectedVowel === key
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    }`}
-                  >
-                    {pos.label}
-                  </button>
-                ))}
+            {/* Control panel */}
+            <div className="space-y-6">
+              {/* Recording controls */}
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                <h3 className="font-semibold text-foreground mb-4">Record Your Voice</h3>
+                <div className="flex items-center gap-3">
+                  {!isRecording ? (
+                    <Button
+                      onClick={handleStartRecording}
+                      className="gap-2"
+                      variant="default"
+                    >
+                      <Mic className="h-4 w-4" />
+                      Start Recording
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleStopRecording}
+                      variant="destructive"
+                      className="gap-2"
+                    >
+                      <Square className="h-4 w-4" />
+                      Stop
+                    </Button>
+                  )}
+                  {hasRecording && !isRecording && (
+                    <Button
+                      onClick={handlePlayRecording}
+                      variant="outline"
+                      size="icon"
+                    >
+                      <Play className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {isRecording && (
+                  <div className="flex items-center gap-2 mt-3 text-sm text-destructive">
+                    <span className="w-2 h-2 rounded-full bg-destructive animate-pulse"></span>
+                    Recording...
+                  </div>
+                )}
+                {hasRecording && !isRecording && (
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Recording saved. Click play to listen.
+                  </p>
+                )}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-border">
-                <h4 className="text-sm font-medium text-foreground mb-3">Legend</h4>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3">
-                    <span className="w-4 h-4 rounded-full bg-primary"></span>
-                    <span className="text-muted-foreground">Target vowel</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="w-4 h-4 rounded-full bg-[hsl(0_70%_55%)]"></span>
-                    <span className="text-muted-foreground">Your pronunciation</span>
+              {/* Vowel selector panel */}
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                <h3 className="font-semibold text-foreground mb-4">Select Vowel</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  {Object.entries(vowelPositions).map(([key, pos]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedVowel(key)}
+                      className={`w-11 h-11 rounded-lg text-lg font-medium transition-all ${
+                        selectedVowel === key
+                          ? "bg-primary text-primary-foreground shadow-md"
+                          : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      }`}
+                    >
+                      {pos.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-border">
+                  <h4 className="text-sm font-medium text-foreground mb-3">Legend</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="w-4 h-4 rounded-full bg-primary"></span>
+                      <span className="text-muted-foreground">Target vowel</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-4 h-4 rounded-full bg-[hsl(0_70%_55%)]"></span>
+                      <span className="text-muted-foreground">Your pronunciation</span>
+                    </div>
                   </div>
                 </div>
               </div>
