@@ -3,34 +3,34 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-// Vowel positions mapped to approximate tongue positions in the mouth
-// x: front (0) to back (100), y: high (0) to low (100)
+// Vowel positions mapped to the vowel trapezoid
+// These coordinates are relative to the oral cavity area
 const vowelPositions: Record<string, { x: number; y: number; label: string }> = {
-  "i": { x: 15, y: 10, label: "i" },
-  "ɪ": { x: 25, y: 18, label: "ɪ" },
-  "e": { x: 20, y: 30, label: "e" },
-  "ɛ": { x: 30, y: 42, label: "ɛ" },
-  "æ": { x: 35, y: 55, label: "æ" },
-  "a": { x: 50, y: 70, label: "a" },
-  "ɑ": { x: 70, y: 75, label: "ɑ" },
-  "ɔ": { x: 75, y: 55, label: "ɔ" },
-  "o": { x: 80, y: 35, label: "o" },
-  "ʊ": { x: 75, y: 22, label: "ʊ" },
-  "u": { x: 85, y: 12, label: "u" },
-  "ʌ": { x: 60, y: 50, label: "ʌ" },
-  "ə": { x: 50, y: 45, label: "ə" },
-  "ɜ": { x: 45, y: 40, label: "ɜ" },
+  "i": { x: 20, y: 15, label: "i" },
+  "ɪ": { x: 30, y: 25, label: "ɪ" },
+  "e": { x: 25, y: 35, label: "e" },
+  "ɛ": { x: 35, y: 45, label: "ɛ" },
+  "æ": { x: 40, y: 60, label: "æ" },
+  "a": { x: 55, y: 75, label: "a" },
+  "ɑ": { x: 70, y: 80, label: "ɑ" },
+  "ɔ": { x: 75, y: 65, label: "ɔ" },
+  "o": { x: 80, y: 45, label: "o" },
+  "ʊ": { x: 75, y: 30, label: "ʊ" },
+  "u": { x: 85, y: 18, label: "u" },
+  "ʌ": { x: 65, y: 55, label: "ʌ" },
+  "ə": { x: 55, y: 50, label: "ə" },
+  "ɜ": { x: 50, y: 42, label: "ɜ" },
 };
 
 const VisualizationPage = () => {
-  const [selectedVowel, setSelectedVowel] = useState<string | null>("ɛ");
-  const [userVowel, setUserVowel] = useState<{ x: number; y: number } | null>({ x: 38, y: 48 });
+  const [selectedVowel, setSelectedVowel] = useState<string | null>("æ");
+  const [userVowel] = useState<{ x: number; y: number } | null>({ x: 42, y: 58 });
 
-  // Convert vowel chart coordinates to SVG coordinates within the mouth cavity
+  // Convert vowel chart coordinates to SVG coordinates within the oral cavity
   const toSvgCoords = (x: number, y: number) => {
-    // Map to the mouth cavity area (roughly 120-220 x, 80-180 y in SVG space)
-    const svgX = 120 + (x / 100) * 100;
-    const svgY = 80 + (y / 100) * 100;
+    // Map to the oral cavity area between palate and tongue
+    const svgX = 130 + (x / 100) * 140;
+    const svgY = 120 + (y / 100) * 100;
     return { svgX, svgY };
   };
 
@@ -44,7 +44,7 @@ const VisualizationPage = () => {
           </Button>
         </Link>
         
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl font-bold text-foreground mb-2 text-center">
             Vowel Position Visualization
           </h1>
@@ -52,96 +52,81 @@ const VisualizationPage = () => {
             See where vowels are produced in the vocal tract
           </p>
           
-          <div className="grid md:grid-cols-[1fr,auto] gap-8 items-start">
+          <div className="grid md:grid-cols-[1fr,280px] gap-8 items-start">
             {/* Sagittal Diagram */}
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <div className="bg-muted/50 rounded-xl p-4">
               <svg
-                viewBox="0 0 350 320"
-                className="w-full max-w-md mx-auto"
-                style={{ background: "hsl(var(--muted))" }}
+                viewBox="0 0 450 400"
+                className="w-full max-w-lg mx-auto"
               >
-                {/* Head outline - sagittal cross-section */}
+                {/* Background */}
+                <rect x="0" y="0" width="450" height="400" fill="hsl(var(--muted) / 0.3)" />
+                
+                {/* Head outline - back of head and neck */}
                 <path
-                  d="M 280 20 
-                     C 320 20, 340 60, 340 100
-                     L 340 280
-                     C 340 300, 320 310, 300 310
-                     L 100 310
-                     C 80 310, 60 300, 60 280
-                     L 60 240
-                     C 60 220, 80 200, 100 200
-                     L 100 180
-                     C 80 180, 60 160, 60 140
-                     L 60 100
-                     C 60 60, 100 20, 140 20
-                     Z"
-                  fill="hsl(var(--background))"
+                  d="M 380 30
+                     C 420 30, 440 80, 440 130
+                     L 440 380
+                     L 320 380
+                     L 320 340
+                     C 320 300, 340 280, 340 250"
+                  fill="none"
                   stroke="hsl(var(--foreground))"
                   strokeWidth="2"
                 />
 
-                {/* Nasal cavity */}
+                {/* Top of head */}
                 <path
-                  d="M 140 20
-                     C 140 40, 120 60, 100 60
+                  d="M 100 30
+                     C 200 10, 300 10, 380 30"
+                  fill="none"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="2"
+                />
+
+                {/* Nasal cavity - upper chamber */}
+                <path
+                  d="M 100 30
+                     L 100 70
+                     C 100 90, 120 100, 140 100
+                     L 280 100
+                     C 300 100, 320 90, 320 70
+                     L 320 50
+                     C 320 35, 300 30, 280 30"
+                  fill="hsl(var(--muted))"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="2"
+                />
+
+                {/* Nose bridge and tip */}
+                <path
+                  d="M 100 30
                      L 80 60
-                     C 60 60, 60 80, 80 80
-                     L 220 80
-                     C 240 80, 240 60, 220 60
-                     L 180 60
-                     C 160 60, 140 40, 140 20"
-                  fill="hsl(var(--muted))"
-                  stroke="hsl(var(--foreground))"
-                  strokeWidth="1.5"
-                />
-
-                {/* Palate (roof of mouth) */}
-                <path
-                  d="M 100 80
-                     C 120 85, 180 90, 220 80"
+                     L 60 100
+                     C 50 120, 40 140, 50 160
+                     L 70 170
+                     L 90 165"
                   fill="none"
                   stroke="hsl(var(--foreground))"
                   strokeWidth="2"
                 />
 
-                {/* Velum (soft palate) */}
-                <path
-                  d="M 220 80
-                     C 240 90, 250 110, 240 130
-                     C 235 140, 225 145, 215 140"
-                  fill="none"
-                  stroke="hsl(var(--foreground))"
-                  strokeWidth="2"
-                />
-
-                {/* Uvula */}
+                {/* Nostril */}
                 <ellipse
-                  cx="218"
-                  cy="148"
+                  cx="75"
+                  cy="155"
                   rx="8"
-                  ry="12"
-                  fill="hsl(var(--muted))"
+                  ry="5"
+                  fill="none"
                   stroke="hsl(var(--foreground))"
                   strokeWidth="1.5"
                 />
 
-                {/* Tongue body */}
+                {/* Upper lip */}
                 <path
-                  d="M 80 200
-                     C 100 180, 140 160, 180 170
-                     C 200 175, 210 190, 200 210
-                     C 180 240, 120 240, 80 220
-                     Z"
-                  fill="hsl(var(--accent) / 0.3)"
-                  stroke="hsl(var(--foreground))"
-                  strokeWidth="2"
-                />
-
-                {/* Lips */}
-                <path
-                  d="M 60 140
-                     C 40 140, 30 150, 30 160
-                     C 30 170, 40 180, 60 180"
+                  d="M 90 165
+                     C 85 175, 75 185, 85 195
+                     L 110 195"
                   fill="none"
                   stroke="hsl(var(--foreground))"
                   strokeWidth="2"
@@ -149,41 +134,87 @@ const VisualizationPage = () => {
 
                 {/* Lower lip */}
                 <path
-                  d="M 60 180
-                     C 50 185, 45 195, 60 200"
+                  d="M 110 210
+                     L 85 210
+                     C 70 210, 65 230, 80 245
+                     L 100 255"
                   fill="none"
                   stroke="hsl(var(--foreground))"
                   strokeWidth="2"
                 />
 
-                {/* Teeth (upper) */}
+                {/* Upper teeth */}
                 <rect
-                  x="58"
-                  y="130"
-                  width="8"
+                  x="105"
+                  y="190"
+                  width="12"
+                  height="18"
+                  rx="2"
+                  fill="hsl(var(--background))"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="1.5"
+                />
+
+                {/* Lower teeth */}
+                <rect
+                  x="105"
+                  y="210"
+                  width="12"
                   height="15"
+                  rx="2"
                   fill="hsl(var(--background))"
                   stroke="hsl(var(--foreground))"
-                  strokeWidth="1"
+                  strokeWidth="1.5"
                 />
 
-                {/* Teeth (lower) */}
-                <rect
-                  x="58"
-                  y="185"
-                  width="8"
-                  height="12"
-                  fill="hsl(var(--background))"
-                  stroke="hsl(var(--foreground))"
-                  strokeWidth="1"
-                />
-
-                {/* Pharynx/throat area */}
+                {/* Hard palate */}
                 <path
-                  d="M 240 160
-                     L 250 200
-                     L 250 280
-                     C 250 300, 230 310, 200 310"
+                  d="M 120 120
+                     C 150 115, 220 115, 280 125"
+                  fill="none"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="2"
+                />
+
+                {/* Soft palate (velum) */}
+                <path
+                  d="M 280 125
+                     C 310 130, 330 150, 320 180
+                     C 315 200, 295 210, 280 200"
+                  fill="none"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="2"
+                />
+
+                {/* Uvula */}
+                <path
+                  d="M 280 200
+                     C 275 210, 280 225, 290 230
+                     C 295 232, 300 228, 298 220
+                     C 296 212, 290 205, 285 200"
+                  fill="hsl(var(--background))"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="1.5"
+                />
+
+                {/* Tongue - main body */}
+                <path
+                  d="M 115 230
+                     C 130 210, 160 180, 220 175
+                     C 280 170, 310 200, 300 240
+                     C 290 280, 250 310, 180 310
+                     C 130 310, 100 280, 100 260
+                     L 115 230"
+                  fill="hsl(172 50% 80%)"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="2"
+                />
+
+                {/* Pharynx wall (back of throat) */}
+                <path
+                  d="M 340 250
+                     C 340 280, 350 320, 340 360
+                     L 320 380"
                   fill="none"
                   stroke="hsl(var(--foreground))"
                   strokeWidth="2"
@@ -191,23 +222,51 @@ const VisualizationPage = () => {
 
                 {/* Epiglottis */}
                 <path
-                  d="M 215 200
-                     C 225 190, 235 195, 230 210
-                     C 228 220, 220 225, 215 220"
-                  fill="hsl(var(--accent) / 0.3)"
+                  d="M 290 265
+                     C 300 250, 320 255, 315 275
+                     C 312 290, 295 300, 285 290
+                     C 280 285, 285 270, 290 265"
+                  fill="hsl(172 50% 85%)"
                   stroke="hsl(var(--foreground))"
                   strokeWidth="1.5"
                 />
 
-                {/* Larynx outline */}
+                {/* Larynx / voice box */}
                 <path
-                  d="M 200 250
-                     L 180 270
-                     L 180 290
-                     L 220 290
-                     L 220 270
-                     L 200 250"
+                  d="M 260 330
+                     L 240 360
+                     L 240 385
+                     L 300 385
+                     L 300 360
+                     L 280 330
+                     Z"
                   fill="none"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="1.5"
+                />
+
+                {/* Larynx internal structure */}
+                <path
+                  d="M 255 345 L 270 355 L 285 345"
+                  fill="none"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="1"
+                />
+                <path
+                  d="M 250 360 L 270 370 L 290 360"
+                  fill="none"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="1"
+                />
+
+                {/* Trachea hint */}
+                <path
+                  d="M 255 385 L 255 400"
+                  stroke="hsl(var(--foreground))"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M 285 385 L 285 400"
                   stroke="hsl(var(--foreground))"
                   strokeWidth="1.5"
                 />
@@ -221,52 +280,88 @@ const VisualizationPage = () => {
                       <circle
                         cx={svgX}
                         cy={svgY}
-                        r={isSelected ? 14 : 10}
-                        fill={isSelected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.3)"}
-                        stroke={isSelected ? "hsl(var(--primary))" : "hsl(var(--foreground))"}
-                        strokeWidth={isSelected ? 2 : 1}
+                        r={12}
+                        fill="hsl(var(--muted))"
+                        stroke="hsl(var(--foreground))"
+                        strokeWidth={1.5}
                         className="transition-all duration-200"
                       />
                       <text
                         x={svgX}
-                        y={svgY + 4}
+                        y={svgY + 5}
                         textAnchor="middle"
-                        fontSize={isSelected ? 14 : 11}
-                        fontWeight={isSelected ? "bold" : "normal"}
-                        fill={isSelected ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))"}
+                        fontSize={12}
+                        fontWeight="500"
+                        fill="hsl(var(--foreground))"
                         className="pointer-events-none select-none"
                       >
                         {pos.label}
                       </text>
+                      {isSelected && (
+                        <circle
+                          cx={svgX}
+                          cy={svgY}
+                          r={16}
+                          fill="hsl(var(--primary))"
+                          stroke="hsl(var(--primary))"
+                          strokeWidth={2}
+                          className="transition-all duration-200"
+                        />
+                      )}
+                      {isSelected && (
+                        <text
+                          x={svgX}
+                          y={svgY + 5}
+                          textAnchor="middle"
+                          fontSize={13}
+                          fontWeight="600"
+                          fill="hsl(var(--primary-foreground))"
+                          className="pointer-events-none select-none"
+                        >
+                          {pos.label}
+                        </text>
+                      )}
                     </g>
                   );
                 })}
 
-                {/* User's vowel position (highlighted) */}
+                {/* User's vowel position (highlighted in red) */}
                 {userVowel && (
                   <g>
+                    {/* Outer pulsing ring */}
                     <circle
-                      cx={120 + (userVowel.x / 100) * 100}
-                      cy={80 + (userVowel.y / 100) * 100}
+                      cx={130 + (userVowel.x / 100) * 140}
+                      cy={120 + (userVowel.y / 100) * 100}
+                      r={22}
+                      fill="none"
+                      stroke="hsl(0 70% 55%)"
+                      strokeWidth={2}
+                      opacity={0.5}
+                      className="animate-ping"
+                    />
+                    {/* Main ring */}
+                    <circle
+                      cx={130 + (userVowel.x / 100) * 140}
+                      cy={120 + (userVowel.y / 100) * 100}
                       r={18}
-                      fill="hsl(var(--destructive) / 0.2)"
-                      stroke="hsl(var(--destructive))"
-                      strokeWidth={3}
-                      className="animate-pulse"
+                      fill="hsl(0 70% 55% / 0.15)"
+                      stroke="hsl(0 70% 55%)"
+                      strokeWidth={2.5}
                     />
+                    {/* Center dot */}
                     <circle
-                      cx={120 + (userVowel.x / 100) * 100}
-                      cy={80 + (userVowel.y / 100) * 100}
+                      cx={130 + (userVowel.x / 100) * 140}
+                      cy={120 + (userVowel.y / 100) * 100}
                       r={6}
-                      fill="hsl(var(--destructive))"
+                      fill="hsl(0 70% 55%)"
                     />
+                    {/* Label */}
                     <text
-                      x={120 + (userVowel.x / 100) * 100}
-                      y={80 + (userVowel.y / 100) * 100 - 25}
-                      textAnchor="middle"
+                      x={130 + (userVowel.x / 100) * 140 - 45}
+                      y={120 + (userVowel.y / 100) * 100 - 5}
                       fontSize={11}
-                      fontWeight="bold"
-                      fill="hsl(var(--destructive))"
+                      fontWeight="600"
+                      fill="hsl(0 70% 45%)"
                     >
                       Your vowel
                     </text>
@@ -283,7 +378,7 @@ const VisualizationPage = () => {
                   <button
                     key={key}
                     onClick={() => setSelectedVowel(key)}
-                    className={`w-10 h-10 rounded-lg text-lg font-medium transition-all ${
+                    className={`w-11 h-11 rounded-lg text-lg font-medium transition-all ${
                       selectedVowel === key
                         ? "bg-primary text-primary-foreground shadow-md"
                         : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -295,14 +390,14 @@ const VisualizationPage = () => {
               </div>
 
               <div className="mt-6 pt-4 border-t border-border">
-                <h4 className="text-sm font-medium text-foreground mb-2">Legend</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
+                <h4 className="text-sm font-medium text-foreground mb-3">Legend</h4>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-3">
                     <span className="w-4 h-4 rounded-full bg-primary"></span>
                     <span className="text-muted-foreground">Target vowel</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-full bg-destructive"></span>
+                  <div className="flex items-center gap-3">
+                    <span className="w-4 h-4 rounded-full bg-[hsl(0_70%_55%)]"></span>
                     <span className="text-muted-foreground">Your pronunciation</span>
                   </div>
                 </div>
