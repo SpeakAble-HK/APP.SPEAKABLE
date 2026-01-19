@@ -1,23 +1,47 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Mic, Square, Volume2, Sparkles, Play } from "lucide-react";
+import { ArrowLeft, Mic, Square, Volume2, Sparkles, Play, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
+import { toast } from "sonner";
 
 const PronunciationPage = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [spokenText, setSpokenText] = useState("");
   const [hasRecording, setHasRecording] = useState(false);
-  const [hasGeneratedAudio, setHasGeneratedAudio] = useState(false);
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
+  const { 
+    processRecording, 
+    isProcessing, 
+    asrResult, 
+    voiceCloneResult, 
+    error,
+    getGeneratedAudioUrl 
+  } = usePronunciationAPI();
 
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
       
-      mediaRecorder.ondataavailable = () => {
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        setRecordingUrl(url);
+        setAudioBlob(blob);
         setHasRecording(true);
       };
       
@@ -25,6 +49,7 @@ const PronunciationPage = () => {
       setIsRecording(true);
     } catch (error) {
       console.error("Error accessing microphone:", error);
+      toast.error("Failed to access microphone");
     }
   };
 
@@ -36,9 +61,33 @@ const PronunciationPage = () => {
     }
   };
 
-  const handleGenerateExample = () => {
-    // Placeholder for generating example audio
-    setHasGeneratedAudio(true);
+  const handleProcessRecording = async () => {
+    if (!audioBlob || !spokenText.trim()) {
+      toast.error("Please record audio and enter the text you're speaking");
+      return;
+    }
+
+    const result = await processRecording(audioBlob, spokenText);
+    if (result) {
+      toast.success("Processing complete!");
+    } else if (error) {
+      toast.error(error);
+    }
+  };
+
+  const handlePlayRecording = () => {
+    if (recordingUrl) {
+      const audio = new Audio(recordingUrl);
+      audio.play();
+    }
+  };
+
+  const handlePlayGenerated = () => {
+    const url = getGeneratedAudioUrl();
+    if (url) {
+      const audio = new Audio(url);
+      audio.play();
+    }
   };
 
   return (
@@ -110,52 +159,69 @@ const PronunciationPage = () => {
 
               {hasRecording && (
                 <div className="w-full mt-4 p-4 bg-muted/50 rounded-xl flex items-center gap-3">
-                  <Button variant="outline" size="icon" className="shrink-0">
+                  <Button variant="outline" size="icon" className="shrink-0" onClick={handlePlayRecording}>
                     <Play className="h-4 w-4" />
                   </Button>
                   <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full w-1/3 bg-primary rounded-full" />
                   </div>
-                  <span className="text-sm text-muted-foreground">0:03</span>
+                  <span className="text-sm text-muted-foreground">Recording ready</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Generate Example Section */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          {/* Process Recording Section */}
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm mb-6">
             <div className="flex items-center justify-between mb-4">
               <label className="block text-sm font-medium text-foreground">
-                Example Pronunciation
+                Process Your Recording
               </label>
               <Button 
-                onClick={handleGenerateExample} 
-                variant="secondary" 
+                onClick={handleProcessRecording} 
+                variant="default" 
                 className="gap-2"
-                disabled={!spokenText.trim()}
+                disabled={!hasRecording || !spokenText.trim() || isProcessing}
               >
-                <Sparkles className="h-4 w-4" />
-                Generate Example
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Process & Generate
+                  </>
+                )}
               </Button>
             </div>
 
-            {hasGeneratedAudio ? (
+            {asrResult && (
+              <div className="mb-4 p-4 bg-muted/50 rounded-xl">
+                <p className="text-sm font-medium text-foreground mb-1">ASR Transcription:</p>
+                <p className="text-sm text-muted-foreground">{asrResult.transcription}</p>
+                <p className="text-xs text-muted-foreground mt-2">Confidence: {(asrResult.confidence * 100).toFixed(1)}%</p>
+              </div>
+            )}
+
+            {voiceCloneResult ? (
               <div className="p-4 bg-muted/50 rounded-xl flex items-center gap-3">
-                <Button variant="outline" size="icon" className="shrink-0">
+                <Button variant="outline" size="icon" className="shrink-0" onClick={handlePlayGenerated}>
                   <Volume2 className="h-4 w-4" />
                 </Button>
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full w-0 bg-primary rounded-full" />
+                <div className="flex-1">
+                  <p className="text-sm text-foreground">Generated pronunciation ready</p>
+                  <p className="text-xs text-muted-foreground">{voiceCloneResult.message}</p>
                 </div>
-                <span className="text-sm text-muted-foreground">0:00</span>
               </div>
             ) : (
               <div className="p-8 bg-muted/30 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-center">
                 <Volume2 className="h-8 w-8 text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  {spokenText.trim() 
-                    ? "Click 'Generate Example' to hear the correct pronunciation"
-                    : "Enter text above to generate an example pronunciation"
+                  {hasRecording && spokenText.trim() 
+                    ? "Click 'Process & Generate' to analyze your pronunciation"
+                    : "Record audio and enter text to generate corrected pronunciation"
                   }
                 </p>
               </div>
