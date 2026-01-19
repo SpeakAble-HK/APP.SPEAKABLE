@@ -200,8 +200,10 @@ const PronunciationPage = () => {
             {asrResult && (
               <div className="mb-4 p-4 bg-muted/50 rounded-xl">
                 <p className="text-sm font-medium text-foreground mb-1">ASR Transcription:</p>
-                <p className="text-sm text-muted-foreground">{asrResult.transcription}</p>
-                <p className="text-xs text-muted-foreground mt-2">Confidence: {(asrResult.confidence * 100).toFixed(1)}%</p>
+                <p className="text-sm text-muted-foreground">{asrResult.text}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Language: {asrResult.language} • Duration: {asrResult.duration?.toFixed(1)}s
+                </p>
               </div>
             )}
 
@@ -212,7 +214,7 @@ const PronunciationPage = () => {
                 </Button>
                 <div className="flex-1">
                   <p className="text-sm text-foreground">Generated pronunciation ready</p>
-                  <p className="text-xs text-muted-foreground">{voiceCloneResult.message}</p>
+                  <p className="text-xs text-muted-foreground">Size: {(voiceCloneResult.size / 1024).toFixed(1)} KB</p>
                 </div>
               </div>
             ) : (

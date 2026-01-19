@@ -5,8 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const API_BASE_URL = "http://comp.naozumi.me"
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -14,6 +15,7 @@ serve(async (req) => {
   try {
     const formData = await req.formData()
     const audioFile = formData.get('audio') as File
+    const language = formData.get('language') as string || 'auto'
     
     if (!audioFile) {
       return new Response(
@@ -22,28 +24,41 @@ serve(async (req) => {
       )
     }
 
-    console.log('Received audio file:', audioFile.name, 'Size:', audioFile.size)
+    console.log('Received audio file:', audioFile.name, 'Size:', audioFile.size, 'Language:', language)
 
-    // DUMMY RESPONSE - Replace with actual ASR API call
-    // In production, this would call an ASR service like Whisper, Google Speech-to-Text, etc.
-    const dummyTranscription = "This is a dummy transcription of your speech."
-    
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    // Forward to the ASR API
+    const asrFormData = new FormData()
+    asrFormData.append('file', audioFile)
+    asrFormData.append('language', language)
+
+    const asrResponse = await fetch(`${API_BASE_URL}/api/asr`, {
+      method: 'POST',
+      body: asrFormData,
+    })
+
+    if (!asrResponse.ok) {
+      const errorText = await asrResponse.text()
+      console.error('ASR API error:', asrResponse.status, errorText)
+      throw new Error(`ASR API returned ${asrResponse.status}: ${errorText}`)
+    }
+
+    const asrResult = await asrResponse.json()
+    console.log('ASR Result:', asrResult)
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        transcription: dummyTranscription,
-        confidence: 0.95,
-        duration_ms: 3200
+        text: asrResult.text,
+        language: asrResult.language,
+        duration: asrResult.duration
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
     console.error('ASR Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to process audio'
     return new Response(
-      JSON.stringify({ error: 'Failed to process audio' }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

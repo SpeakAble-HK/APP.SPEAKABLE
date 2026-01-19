@@ -5,61 +5,90 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const API_BASE_URL = "http://comp.naozumi.me"
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const formData = await req.formData()
-    const userVoiceAudio = formData.get('user_voice') as File
-    const intendedText = formData.get('intended_text') as string
-    const asrResult = formData.get('asr_result') as string
+    const promptAudio = formData.get('prompt_audio') as File
+    const text = formData.get('text') as string
+    const promptText = formData.get('prompt_text') as string
 
-    if (!userVoiceAudio) {
+    if (!promptAudio) {
       return new Response(
-        JSON.stringify({ error: 'No user voice audio provided' }),
+        JSON.stringify({ error: 'No prompt audio provided' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!intendedText) {
+    if (!text) {
       return new Response(
-        JSON.stringify({ error: 'No intended text provided' }),
+        JSON.stringify({ error: 'No text provided' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('Voice clone request:')
-    console.log('- User voice file size:', userVoiceAudio.size)
-    console.log('- Intended text:', intendedText)
-    console.log('- ASR result:', asrResult)
+    if (!promptText) {
+      return new Response(
+        JSON.stringify({ error: 'No prompt text provided' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
-    // DUMMY RESPONSE - Replace with actual zero-shot voice cloning API
-    // In production, this would call a voice cloning service like Coqui, ElevenLabs, etc.
+    console.log('TTS Request:')
+    console.log('- Text to speak:', text)
+    console.log('- Prompt text (ASR result):', promptText)
+    console.log('- Prompt audio size:', promptAudio.size)
+
+    // Forward to the TTS API
+    const ttsFormData = new FormData()
+    ttsFormData.append('text', text)
+    ttsFormData.append('prompt_text', promptText)
+    ttsFormData.append('prompt_audio', promptAudio)
+
+    const ttsResponse = await fetch(`${API_BASE_URL}/api/tts`, {
+      method: 'POST',
+      body: ttsFormData,
+    })
+
+    if (!ttsResponse.ok) {
+      const errorText = await ttsResponse.text()
+      console.error('TTS API error:', ttsResponse.status, errorText)
+      throw new Error(`TTS API returned ${ttsResponse.status}: ${errorText}`)
+    }
+
+    // Get the audio as ArrayBuffer and convert to base64
+    const audioBuffer = await ttsResponse.arrayBuffer()
+    const audioBytes = new Uint8Array(audioBuffer)
     
-    // Simulate processing delay for voice synthesis
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // Return a dummy audio URL (in production, this would be the generated audio)
-    // For now, we return a base64 placeholder or URL to generated audio
-    const dummyAudioBase64 = "UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" // Silent WAV
+    // Convert to base64
+    let binary = ''
+    for (let i = 0; i < audioBytes.byteLength; i++) {
+      binary += String.fromCharCode(audioBytes[i])
+    }
+    const audioBase64 = btoa(binary)
+    
+    const contentType = ttsResponse.headers.get('content-type') || 'audio/wav'
+    console.log('TTS audio received, size:', audioBuffer.byteLength, 'type:', contentType)
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        audio_base64: dummyAudioBase64,
-        intended_text: intendedText,
-        original_transcription: asrResult,
-        message: "This is a dummy response. In production, this would contain AI-generated audio using your voice."
+        audio_base64: audioBase64,
+        content_type: contentType,
+        size: audioBuffer.byteLength
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
     console.error('Voice Clone Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate voice clone'
     return new Response(
-      JSON.stringify({ error: 'Failed to generate voice clone' }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
