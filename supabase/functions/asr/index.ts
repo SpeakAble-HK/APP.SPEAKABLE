@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const API_BASE_URL = "https://comp.naozumi.me"
+const API_BASE_URL = "http://comp.naozumi.me"
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
