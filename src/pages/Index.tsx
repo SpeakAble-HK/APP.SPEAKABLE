@@ -23,9 +23,14 @@ const Index = () => {
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Greeting */}
         <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center">
             Hello, {displayName}
-            <span className="text-primary">📊</span>
+            <div className="wave-visualizer">
+              <div className="wave-bar"></div>
+              <div className="wave-bar"></div>
+              <div className="wave-bar"></div>
+              <div className="wave-bar"></div>
+            </div>
           </h1>
           <p className="text-muted-foreground mt-1">
             Your clinical-grade AI speech coach is ready.
