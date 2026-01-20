@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,35 +16,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    )
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data, error: authError } = await supabaseClient.auth.getUser(token)
-    
-    if (authError || !data?.user) {
-      console.error('Auth error:', authError)
-      return new Response(
-        JSON.stringify({ error: 'Invalid or expired session. Please sign in again.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const userId = data.user.id
-    console.log('Authenticated user:', userId)
-
     const formData = await req.formData()
     const promptAudio = formData.get('prompt_audio') as File
     const text = formData.get('text') as string
@@ -102,7 +72,7 @@ serve(async (req) => {
       )
     }
 
-    console.log('TTS Request for user', userId, ':')
+    console.log('TTS Request:')
     console.log('- Text to speak:', text.substring(0, 100))
     console.log('- Prompt text (ASR result):', promptText.substring(0, 100))
     console.log('- Prompt audio size:', promptAudio.size)
@@ -150,7 +120,7 @@ serve(async (req) => {
     const audioBase64 = btoa(binary)
     
     const contentType = ttsResponse.headers.get('content-type') || 'audio/wav'
-    console.log('TTS audio received for user', userId, ', size:', audioBuffer.byteLength, 'type:', contentType)
+    console.log('TTS audio received, size:', audioBuffer.byteLength, 'type:', contentType)
 
     return new Response(
       JSON.stringify({ 

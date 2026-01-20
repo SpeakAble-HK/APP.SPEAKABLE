@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,35 +15,6 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate user
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Authentication required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    )
-
-    const token = authHeader.replace('Bearer ', '')
-    const { data, error: authError } = await supabaseClient.auth.getUser(token)
-    
-    if (authError || !data?.user) {
-      console.error('Auth error:', authError)
-      return new Response(
-        JSON.stringify({ error: 'Invalid or expired session. Please sign in again.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const userId = data.user.id
-    console.log('Authenticated user:', userId)
-
     const formData = await req.formData()
     const audioFile = formData.get('audio') as File
     const language = formData.get('language') as string || 'yue'
@@ -72,7 +42,7 @@ serve(async (req) => {
       )
     }
 
-    console.log('Received audio file:', audioFile.name, 'Size:', audioFile.size, 'Language:', language, 'User:', userId)
+    console.log('Received audio file:', audioFile.name, 'Size:', audioFile.size, 'Language:', language)
 
     // Forward to the ASR API
     const asrFormData = new FormData()
@@ -105,7 +75,7 @@ serve(async (req) => {
     }
 
     const asrResult = await asrResponse.json()
-    console.log('ASR Result for user', userId, ':', asrResult)
+    console.log('ASR Result:', asrResult)
 
     return new Response(
       JSON.stringify({ 
