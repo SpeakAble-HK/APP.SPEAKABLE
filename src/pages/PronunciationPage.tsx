@@ -1,12 +1,13 @@
 import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Mic, Square, Volume2, Sparkles, Play, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Mic, Square, Play, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { toast } from "sonner";
 
 const PronunciationPage = () => {
+  const navigate = useNavigate();
   const [isRecording, setIsRecording] = useState(false);
   const [spokenText, setSpokenText] = useState("");
   const [hasRecording, setHasRecording] = useState(false);
@@ -18,8 +19,6 @@ const PronunciationPage = () => {
   const { 
     processRecording, 
     isProcessing, 
-    asrResult, 
-    voiceCloneResult, 
     error,
     getGeneratedAudioUrl 
   } = usePronunciationAPI();
@@ -70,6 +69,15 @@ const PronunciationPage = () => {
     const result = await processRecording(audioBlob, spokenText);
     if (result) {
       toast.success("Processing complete!");
+      // Navigate to results page with the data
+      navigate('/pronunciation/results', {
+        state: {
+          spokenPhonemes: result.spoken,
+          intendedPhonemes: result.intended,
+          generatedAudioUrl: getGeneratedAudioUrl(),
+          recordingUrl: recordingUrl
+        }
+      });
     } else if (error) {
       toast.error(error);
     }
@@ -78,14 +86,6 @@ const PronunciationPage = () => {
   const handlePlayRecording = () => {
     if (recordingUrl) {
       const audio = new Audio(recordingUrl);
-      audio.play();
-    }
-  };
-
-  const handlePlayGenerated = () => {
-    const url = getGeneratedAudioUrl();
-    if (url) {
-      const audio = new Audio(url);
       audio.play();
     }
   };
@@ -173,13 +173,11 @@ const PronunciationPage = () => {
 
           {/* Process Recording Section */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <label className="block text-sm font-medium text-foreground">
-                Process Your Recording
-              </label>
+            <div className="flex items-center justify-center">
               <Button 
                 onClick={handleProcessRecording} 
                 variant="default" 
+                size="lg"
                 className="gap-2"
                 disabled={!hasRecording || !spokenText.trim() || isProcessing}
               >
@@ -196,38 +194,6 @@ const PronunciationPage = () => {
                 )}
               </Button>
             </div>
-
-            {asrResult && (
-              <div className="mb-4 p-4 bg-muted/50 rounded-xl">
-                <p className="text-sm font-medium text-foreground mb-1">ASR Transcription:</p>
-                <p className="text-sm text-muted-foreground">{asrResult.text}</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Language: {asrResult.language} • Duration: {asrResult.duration?.toFixed(1)}s
-                </p>
-              </div>
-            )}
-
-            {voiceCloneResult ? (
-              <div className="p-4 bg-muted/50 rounded-xl flex items-center gap-3">
-                <Button variant="outline" size="icon" className="shrink-0" onClick={handlePlayGenerated}>
-                  <Volume2 className="h-4 w-4" />
-                </Button>
-                <div className="flex-1">
-                  <p className="text-sm text-foreground">Generated pronunciation ready</p>
-                  <p className="text-xs text-muted-foreground">Size: {(voiceCloneResult.size / 1024).toFixed(1)} KB</p>
-                </div>
-              </div>
-            ) : (
-              <div className="p-8 bg-muted/30 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-center">
-                <Volume2 className="h-8 w-8 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  {hasRecording && spokenText.trim() 
-                    ? "Click 'Process & Generate' to analyze your pronunciation"
-                    : "Record audio and enter text to generate corrected pronunciation"
-                  }
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>
