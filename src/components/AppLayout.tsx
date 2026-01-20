@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -10,7 +11,15 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { user, profile, signOut, updateLanguage } = useAuth();
+  const { user, profile, loading, signOut, updateLanguage } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to auth page if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -33,6 +42,24 @@ export function AppLayout({ children }: AppLayoutProps) {
       toast.success("Language preference updated");
     }
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center hero-gradient">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Don't render content if not authenticated (will redirect)
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center hero-gradient">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const currentLanguage = profile?.preferred_language || "en-GB";
 
