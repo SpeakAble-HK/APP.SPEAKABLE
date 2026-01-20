@@ -69,12 +69,16 @@ const PronunciationPage = () => {
     const result = await processRecording(audioBlob, spokenText);
     if (result) {
       toast.success("Processing complete!");
+      // Construct audio URL directly from the result
+      const contentType = result.clone.content_type || 'audio/wav';
+      const generatedAudioUrl = `data:${contentType};base64,${result.clone.audio_base64}`;
+      
       // Navigate to results page with the data
       navigate('/pronunciation/results', {
         state: {
           spokenPhonemes: result.spoken,
           intendedPhonemes: result.intended,
-          generatedAudioUrl: getGeneratedAudioUrl(),
+          generatedAudioUrl: generatedAudioUrl,
           recordingUrl: recordingUrl
         }
       });
