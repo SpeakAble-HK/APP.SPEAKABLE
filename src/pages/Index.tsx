@@ -1,14 +1,10 @@
 import { Link } from "react-router-dom";
-import { Mic, BarChart3, Sparkles, Target, TrendingUp, Flame, LogIn, LogOut } from "lucide-react";
+import { Mic, BarChart3, Sparkles, Target, TrendingUp, Flame, Mic2, Cpu } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
-import logo from "@/assets/logo.png";
 
 const Index = () => {
-  const { user, profile, loading, signOut, updateLanguage } = useAuth();
+  const { user, profile } = useAuth();
 
   // Mock data - replace with real data when connected to backend
   const userStats = {
@@ -20,86 +16,40 @@ const Index = () => {
     bestStreak: 12
   };
 
-  const handleLanguageChange = async (language: string) => {
-    if (!user) {
-      toast.error('Please sign in to change language');
-      return;
-    }
-    const { error } = await updateLanguage(language);
-    if (error) {
-      toast.error('Failed to update language preference');
-    } else {
-      toast.success('Language preference updated');
-    }
-  };
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error('Failed to sign out');
-    } else {
-      toast.success('Signed out successfully');
-    }
-  };
-
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Guest';
-  const currentLanguage = profile?.preferred_language || 'en-GB';
 
   return (
-    <div className="min-h-screen hero-gradient">
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        {/* Header with Logo and Controls */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <img src={logo} alt="SpeakRight Logo" className="h-12 w-12 object-contain" />
-            <span className="text-2xl font-bold text-primary">SpeakRight</span>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher value={currentLanguage} onChange={handleLanguageChange} />
-            {user ? (
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
-            ) : (
-              <Link to="/auth">
-                <Button variant="outline" size="sm">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-
+    <div className="hero-gradient min-h-full">
+      <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Greeting */}
-        <p className="text-lg text-muted-foreground mb-8">
-          Hello, <span className="font-semibold text-foreground">{displayName}</span>
-        </p>
-
-        {/* Hero Section */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-            <Sparkles className="h-4 w-4" />
-            AI-Powered Learning
-          </div>
-          
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 tracking-tight">
-            Master Your
-            <span className="text-primary"> Pronunciation</span>
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+            Hello, {displayName}
+            <span className="text-primary">📊</span>
           </h1>
-          
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Improve your speaking skills with real-time feedback and track your progress with beautiful visualizations.
+          <p className="text-muted-foreground mt-1">
+            Your clinical-grade AI speech coach is ready.
           </p>
         </div>
 
+        {/* AI Insight Banner */}
+        <div className="bg-primary rounded-xl p-4 mb-6 flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-primary-foreground/20">
+            <Cpu className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <div>
+            <p className="font-semibold text-primary-foreground">AI Insight</p>
+            <p className="text-sm text-primary-foreground/90">
+              Your "Golden Self" model detects a 12% improvement in your /th/ vs /f/ differentiation. Keep using the biofeedback!
+            </p>
+          </div>
+        </div>
+
         {/* Stats Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {/* Daily Goal Card */}
-          <div className="bg-card border border-border rounded-2xl p-6 card-shadow">
-            <div className="flex items-start justify-between mb-4">
+          <div className="bg-card border border-border rounded-2xl p-5 card-shadow">
+            <div className="flex items-start justify-between mb-3">
               <div>
                 <p className="text-3xl font-bold text-foreground">
                   {userStats.dailyGoalMinutes} <span className="text-lg font-normal text-muted-foreground">min</span>
@@ -114,7 +64,7 @@ const Index = () => {
           </div>
 
           {/* Fluency Score Card */}
-          <div className="bg-card border border-border rounded-2xl p-6 card-shadow">
+          <div className="bg-card border border-border rounded-2xl p-5 card-shadow">
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="text-3xl font-bold text-foreground">
@@ -133,7 +83,7 @@ const Index = () => {
           </div>
 
           {/* Streak Card */}
-          <div className="bg-card border border-border rounded-2xl p-6 card-shadow">
+          <div className="bg-card border border-border rounded-2xl p-5 card-shadow">
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="text-3xl font-bold text-foreground">
@@ -151,51 +101,58 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Feature Cards */}
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {/* Pronunciation Card */}
-          <Link to="/pronunciation" className="group">
-            <div className="bg-card border border-border rounded-2xl p-8 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 hover:border-primary/30">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 mb-6 group-hover:bg-primary/20 transition-colors">
-                <Mic className="h-7 w-7 text-primary" />
-              </div>
-              
-              <h2 className="text-2xl font-semibold text-foreground mb-3">
-                Pronunciation Correction
-              </h2>
-              
-              <p className="text-muted-foreground mb-6">
-                Get instant feedback on your pronunciation with AI-powered speech analysis.
-              </p>
-              
-              <div className="inline-flex items-center text-primary font-medium group-hover:gap-3 gap-2 transition-all">
-                Start practicing
-                <span className="transition-transform group-hover:translate-x-1">→</span>
-              </div>
-            </div>
-          </Link>
+        {/* Start Training Section */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Start Training</h2>
+          </div>
 
-          {/* Visualization Card */}
-          <Link to="/visualization" className="group">
-            <div className="bg-card border border-border rounded-2xl p-8 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 hover:border-accent/30">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-accent/10 mb-6 group-hover:bg-accent/20 transition-colors">
-                <BarChart3 className="h-7 w-7 text-accent" />
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Voice Lab Card */}
+            <Link to="/pronunciation" className="group">
+              <div className="bg-card border border-border rounded-2xl p-6 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 hover:border-primary/30">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Mic2 className="h-6 w-6 text-primary" />
+                </div>
+                
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  Voice Lab
+                </h3>
+                
+                <p className="text-muted-foreground text-sm mb-4">
+                  Calibrate your "Golden Self" AI model to fix timbre mismatch.
+                </p>
+                
+                <div className="inline-flex items-center text-primary font-medium group-hover:gap-3 gap-2 transition-all text-sm">
+                  Start now
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </div>
               </div>
-              
-              <h2 className="text-2xl font-semibold text-foreground mb-3">
-                Visualization
-              </h2>
-              
-              <p className="text-muted-foreground mb-6">
-                Track your learning journey with detailed analytics and progress charts.
-              </p>
-              
-              <div className="inline-flex items-center text-accent font-medium group-hover:gap-3 gap-2 transition-all">
-                View progress
-                <span className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
+
+            {/* Visualization Card */}
+            <Link to="/visualization" className="group">
+              <div className="bg-card border border-border rounded-2xl p-6 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 hover:border-accent/30">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 mb-4 group-hover:bg-accent/20 transition-colors">
+                  <BarChart3 className="h-6 w-6 text-accent" />
+                </div>
+                
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  Progress Analytics
+                </h3>
+                
+                <p className="text-muted-foreground text-sm mb-4">
+                  Track your learning journey with detailed analytics and progress charts.
+                </p>
+                
+                <div className="inline-flex items-center text-accent font-medium group-hover:gap-3 gap-2 transition-all text-sm">
+                  View progress
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
