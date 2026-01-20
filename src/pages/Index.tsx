@@ -1,25 +1,82 @@
 import { Link } from "react-router-dom";
-import { Mic, BarChart3, Sparkles, Target, TrendingUp, Flame } from "lucide-react";
+import { Mic, BarChart3, Sparkles, Target, TrendingUp, Flame, LogIn, LogOut } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 import logo from "@/assets/logo.png";
+
 const Index = () => {
+  const { user, profile, loading, signOut, updateLanguage } = useAuth();
+
   // Mock data - replace with real data when connected to backend
   const userStats = {
     dailyGoalMinutes: 15,
     dailyGoalProgress: 60,
-    // percentage
     fluencyScore: 87,
     fluencyChange: 2,
     streakDays: 5,
     bestStreak: 12
   };
-  return <div className="min-h-screen hero-gradient">
+
+  const handleLanguageChange = async (language: string) => {
+    if (!user) {
+      toast.error('Please sign in to change language');
+      return;
+    }
+    const { error } = await updateLanguage(language);
+    if (error) {
+      toast.error('Failed to update language preference');
+    } else {
+      toast.success('Language preference updated');
+    }
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error('Failed to sign out');
+    } else {
+      toast.success('Signed out successfully');
+    }
+  };
+
+  const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Guest';
+  const currentLanguage = profile?.preferred_language || 'en-GB';
+
+  return (
+    <div className="min-h-screen hero-gradient">
       <div className="container mx-auto px-4 py-8 md:py-12">
-        {/* Header with Logo */}
-        <div className="flex items-center gap-3 mb-12">
-          <img src={logo} alt="SpeakRight Logo" className="h-12 w-12 object-contain" />
-          <span className="text-2xl font-bold text-[#5048e5]">SpeakRight</span>
+        {/* Header with Logo and Controls */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="SpeakRight Logo" className="h-12 w-12 object-contain" />
+            <span className="text-2xl font-bold text-primary">SpeakRight</span>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher value={currentLanguage} onChange={handleLanguageChange} />
+            {user ? (
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
+
+        {/* Greeting */}
+        <p className="text-lg text-muted-foreground mb-8">
+          Hello, <span className="font-semibold text-foreground">{displayName}</span>
+        </p>
 
         {/* Hero Section */}
         <div className="text-center mb-10">
@@ -69,7 +126,7 @@ const Index = () => {
                 <TrendingUp className="h-5 w-5 text-accent" />
               </div>
             </div>
-          <p className="text-sm text-primary font-medium flex items-center gap-1">
+            <p className="text-sm text-primary font-medium flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
               +{userStats.fluencyChange}% this week
             </p>
@@ -141,6 +198,8 @@ const Index = () => {
           </Link>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
