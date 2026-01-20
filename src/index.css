@@ -6,80 +6,89 @@
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
+
+Brand Colors:
+--primary: #4F46E5 → 243 76% 59%
+--primary-dark: #3730a3 → 244 55% 41%
+--secondary: #818CF8 → 234 89% 74%
 */
 
 @layer base {
   :root {
-    --background: 180 20% 99%;
-    --foreground: 200 25% 10%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 200 25% 10%;
+    --card-foreground: 240 10% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 200 25% 10%;
+    --popover-foreground: 240 10% 10%;
 
-    --primary: 174 62% 40%;
+    /* Brand Colors */
+    --primary: 243 76% 59%;
     --primary-foreground: 0 0% 100%;
+    --primary-dark: 244 55% 41%;
 
-    --secondary: 200 20% 96%;
-    --secondary-foreground: 200 25% 20%;
+    --secondary: 234 89% 74%;
+    --secondary-foreground: 240 10% 10%;
 
-    --muted: 200 15% 95%;
-    --muted-foreground: 200 10% 45%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 5% 45%;
 
-    --accent: 200 80% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 234 89% 74%;
+    --accent-foreground: 240 10% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 20% 90%;
-    --input: 200 20% 90%;
-    --ring: 174 62% 40%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 243 76% 59%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --gradient-hero: linear-gradient(135deg, hsl(174 62% 40% / 0.08) 0%, hsl(200 80% 55% / 0.08) 100%);
-    --gradient-card-hover: linear-gradient(135deg, hsl(174 62% 40% / 0.05) 0%, hsl(200 80% 55% / 0.05) 100%);
-    --shadow-card: 0 4px 24px -4px hsl(200 25% 10% / 0.08);
-    --shadow-card-hover: 0 12px 40px -8px hsl(174 62% 40% / 0.2);
+    --gradient-hero: linear-gradient(135deg, hsl(243 76% 59% / 0.08) 0%, hsl(234 89% 74% / 0.08) 100%);
+    --gradient-card-hover: linear-gradient(135deg, hsl(243 76% 59% / 0.05) 0%, hsl(234 89% 74% / 0.05) 100%);
+    --shadow-card: 0 4px 24px -4px hsl(240 10% 10% / 0.08);
+    --shadow-card-hover: 0 12px 40px -8px hsl(243 76% 59% / 0.2);
   }
 
   .dark {
-    --background: 200 25% 8%;
-    --foreground: 180 20% 98%;
+    --background: 240 10% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 200 20% 12%;
-    --card-foreground: 180 20% 98%;
+    --card: 240 8% 12%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 200 20% 12%;
-    --popover-foreground: 180 20% 98%;
+    --popover: 240 8% 12%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 174 62% 50%;
-    --primary-foreground: 200 25% 8%;
+    /* Brand Colors - Dark Mode */
+    --primary: 243 76% 65%;
+    --primary-foreground: 240 10% 8%;
+    --primary-dark: 244 55% 50%;
 
-    --secondary: 200 15% 18%;
-    --secondary-foreground: 180 20% 98%;
+    --secondary: 234 89% 78%;
+    --secondary-foreground: 240 10% 8%;
 
-    --muted: 200 15% 18%;
-    --muted-foreground: 200 10% 60%;
+    --muted: 240 5% 18%;
+    --muted-foreground: 240 5% 60%;
 
-    --accent: 200 80% 60%;
-    --accent-foreground: 200 25% 8%;
+    --accent: 234 89% 78%;
+    --accent-foreground: 240 10% 8%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 15% 20%;
-    --input: 200 15% 20%;
-    --ring: 174 62% 50%;
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: 243 76% 65%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(174 62% 50% / 0.1) 0%, hsl(200 80% 60% / 0.1) 100%);
-    --gradient-card-hover: linear-gradient(135deg, hsl(174 62% 50% / 0.08) 0%, hsl(200 80% 60% / 0.08) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(243 76% 65% / 0.1) 0%, hsl(234 89% 78% / 0.1) 100%);
+    --gradient-card-hover: linear-gradient(135deg, hsl(243 76% 65% / 0.08) 0%, hsl(234 89% 78% / 0.08) 100%);
     --shadow-card: 0 4px 24px -4px hsl(0 0% 0% / 0.3);
-    --shadow-card-hover: 0 12px 40px -8px hsl(174 62% 50% / 0.3);
+    --shadow-card-hover: 0 12px 40px -8px hsl(243 76% 65% / 0.3);
   }
 }
 
