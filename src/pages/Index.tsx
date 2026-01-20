@@ -2,25 +2,23 @@ import { Link } from "react-router-dom";
 import { Mic, BarChart3, Sparkles, Target, TrendingUp, Flame } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import logo from "@/assets/logo.png";
-
 const Index = () => {
   // Mock data - replace with real data when connected to backend
   const userStats = {
     dailyGoalMinutes: 15,
-    dailyGoalProgress: 60, // percentage
+    dailyGoalProgress: 60,
+    // percentage
     fluencyScore: 87,
     fluencyChange: 2,
     streakDays: 5,
-    bestStreak: 12,
+    bestStreak: 12
   };
-
-  return (
-    <div className="min-h-screen hero-gradient">
+  return <div className="min-h-screen hero-gradient">
       <div className="container mx-auto px-4 py-8 md:py-12">
         {/* Header with Logo */}
         <div className="flex items-center gap-3 mb-12">
           <img src={logo} alt="SpeakRight Logo" className="h-12 w-12 object-contain" />
-          <span className="text-2xl font-bold text-primary">SpeakRight</span>
+          <span className="text-2xl font-bold text-[#5048e5]">SpeakRight</span>
         </div>
 
         {/* Hero Section */}
@@ -143,8 +141,6 @@ const Index = () => {
           </Link>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
