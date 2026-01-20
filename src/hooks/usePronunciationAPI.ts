@@ -1,11 +1,19 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+export interface PhonemeResult {
+  character: string;
+  phoneme: string | null;
+}
+
 interface ASRResult {
   success: boolean;
-  text: string;
-  language: string;
-  duration: number;
+  result: [string, string | null][]; // Array of [character, jyutping] pairs
+}
+
+interface JyutpingResult {
+  success: boolean;
+  result: [string, string | null][]; // Array of [character, jyutping] pairs
 }
 
 interface VoiceCloneResult {
@@ -17,18 +25,38 @@ interface VoiceCloneResult {
 
 export const usePronunciationAPI = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [asrResult, setAsrResult] = useState<ASRResult | null>(null);
+  const [spokenPhonemes, setSpokenPhonemes] = useState<PhonemeResult[]>([]);
+  const [intendedPhonemes, setIntendedPhonemes] = useState<PhonemeResult[]>([]);
   const [voiceCloneResult, setVoiceCloneResult] = useState<VoiceCloneResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const processRecording = async (audioBlob: Blob, intendedText: string, language: string = 'auto') => {
+  const processRecording = async (audioBlob: Blob, intendedText: string, language: string = 'yue') => {
     setIsProcessing(true);
     setError(null);
-    setAsrResult(null);
+    setSpokenPhonemes([]);
+    setIntendedPhonemes([]);
     setVoiceCloneResult(null);
 
     try {
-      // Step 1: Send to ASR endpoint
+      // Step 1: Get intended phonemes from jyutping API
+      const jyutpingFormData = new FormData();
+      jyutpingFormData.append('text', intendedText);
+
+      const { data: jyutpingData, error: jyutpingError } = await supabase.functions.invoke('jyutping', {
+        body: jyutpingFormData,
+      });
+
+      if (jyutpingError) throw new Error(jyutpingError.message);
+      if (!jyutpingData.success) throw new Error(jyutpingData.error || 'Jyutping conversion failed');
+      
+      const intended: PhonemeResult[] = (jyutpingData as JyutpingResult).result.map(([char, phoneme]) => ({
+        character: char,
+        phoneme: phoneme
+      }));
+      setIntendedPhonemes(intended);
+      console.log('Intended Phonemes:', intended);
+
+      // Step 2: Send audio to ASR endpoint to get spoken phonemes
       const asrFormData = new FormData();
       asrFormData.append('audio', audioBlob, 'recording.webm');
       asrFormData.append('language', language);
@@ -40,17 +68,20 @@ export const usePronunciationAPI = () => {
       if (asrError) throw new Error(asrError.message);
       if (!asrData.success) throw new Error(asrData.error || 'ASR failed');
       
-      const asr = asrData as ASRResult;
-      setAsrResult(asr);
-      console.log('ASR Result:', asr);
+      const spoken: PhonemeResult[] = (asrData as ASRResult).result.map(([char, phoneme]) => ({
+        character: char,
+        phoneme: phoneme
+      }));
+      setSpokenPhonemes(spoken);
+      console.log('Spoken Phonemes:', spoken);
 
-      // Step 2: Send to TTS/voice-clone endpoint
-      // - text: what we want the AI to speak (intended pronunciation)
-      // - prompt_text: the ASR transcription (what user actually said)
-      // - prompt_audio: the user's voice recording (for voice cloning)
+      // Step 3: Generate voice clone with correct pronunciation
+      // Get the transcribed text from ASR for prompt_text
+      const transcribedText = spoken.map(p => p.character).join('');
+      
       const ttsFormData = new FormData();
       ttsFormData.append('text', intendedText);
-      ttsFormData.append('prompt_text', asr.text);
+      ttsFormData.append('prompt_text', transcribedText);
       ttsFormData.append('prompt_audio', audioBlob, 'recording.webm');
 
       const { data: cloneData, error: cloneError } = await supabase.functions.invoke('voice-clone', {
@@ -64,7 +95,7 @@ export const usePronunciationAPI = () => {
       setVoiceCloneResult(clone);
       console.log('Voice Clone Result:', clone);
 
-      return { asr, clone };
+      return { spoken, intended, clone };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
@@ -84,7 +115,8 @@ export const usePronunciationAPI = () => {
   return {
     processRecording,
     isProcessing,
-    asrResult,
+    spokenPhonemes,
+    intendedPhonemes,
     voiceCloneResult,
     error,
     getGeneratedAudioUrl,

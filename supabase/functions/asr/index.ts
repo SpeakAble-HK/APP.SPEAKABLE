@@ -48,9 +48,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        text: asrResult.text,
-        language: asrResult.language,
-        duration: asrResult.duration
+        result: asrResult.result // Array of [character, jyutping] pairs
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
