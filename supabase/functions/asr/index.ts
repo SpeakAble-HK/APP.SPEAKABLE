@@ -1,11 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const API_BASE_URL = "http://comp.naozumi.me"
+const API_BASE_URL = "https://comp.naozumi.me"
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -13,9 +14,24 @@ serve(async (req) => {
   }
 
   try {
+    // Verify authentication
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+    )
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const formData = await req.formData()
     const audioFile = formData.get('audio') as File
-    const language = formData.get('language') as string || 'auto'
+    const language = formData.get('language') as string || 'yue'
     
     if (!audioFile) {
       return new Response(
