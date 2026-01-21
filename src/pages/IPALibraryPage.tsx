@@ -1,8 +1,7 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const IPALibraryPage = () => {
-  const { t, language, setLanguage } = useLanguage();
+  const { t } = useLanguage();
 
   // Phoneme data with translation keys
   const plosives = [
@@ -67,37 +66,17 @@ const IPALibraryPage = () => {
     </div>
   );
 
-  const languages = [
-    { value: "en-GB", label: "English (UK)" },
-    { value: "zh-TW", label: "繁體中文" },
-    { value: "zh-CN", label: "简体中文" },
-  ];
-
   return (
     <div className="hero-gradient min-h-full">
       <div className="container mx-auto px-4 py-6 md:py-8">
         {/* Header */}
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-              {t("ipa.title")}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {t("ipa.subtitle")}
-            </p>
-          </div>
-          <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
-            <SelectTrigger className="w-[140px] bg-card">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {languages.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value}>
-                  {lang.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+            {t("ipa.title")}
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {t("ipa.subtitle")}
+          </p>
         </div>
 
         {/* Phoneme Sections */}
