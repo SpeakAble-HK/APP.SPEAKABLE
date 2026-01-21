@@ -40,7 +40,7 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-card">
+    <Sidebar collapsible="icon" className="border-r border-border bg-background">
       <div className="flex items-center gap-2 p-4 border-b border-border">
         <img src={logo} alt="SpeakRight Logo" className="h-8 w-8 object-contain flex-shrink-0" />
         {!collapsed && (
