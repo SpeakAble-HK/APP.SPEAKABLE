@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import { Mic, BarChart3, Sparkles, Target, TrendingUp, Flame, Mic2, Cpu } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const { user, profile } = useAuth();
+  const { t } = useLanguage();
 
   // Mock data - replace with real data when connected to backend
   const userStats = {
@@ -24,7 +26,7 @@ const Index = () => {
         {/* Greeting */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center">
-            Hello, {displayName}
+            {t("dashboard.hello")}, {displayName}
             <div className="wave-visualizer">
               <div className="wave-bar"></div>
               <div className="wave-bar"></div>
@@ -33,7 +35,7 @@ const Index = () => {
             </div>
           </h1>
           <p className="text-muted-foreground mt-1">
-            Your clinical-grade AI speech coach is ready.
+            {t("dashboard.subtitle")}
           </p>
         </div>
 
@@ -43,9 +45,9 @@ const Index = () => {
             <Cpu className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <p className="font-semibold text-primary-foreground">AI Insight</p>
+            <p className="font-semibold text-primary-foreground">{t("dashboard.aiInsight")}</p>
             <p className="text-sm text-primary-foreground/90">
-              Your "Golden Self" model detects a 12% improvement in your /th/ vs /f/ differentiation. Keep using the biofeedback!
+              {t("dashboard.aiInsightText")}
             </p>
           </div>
         </div>
@@ -57,9 +59,9 @@ const Index = () => {
             <div className="flex items-start justify-between mb-3">
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {userStats.dailyGoalMinutes} <span className="text-lg font-normal text-muted-foreground">min</span>
+                  {userStats.dailyGoalMinutes} <span className="text-lg font-normal text-muted-foreground">{t("dashboard.min")}</span>
                 </p>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Daily Goal</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("dashboard.dailyGoal")}</p>
               </div>
               <div className="p-2 rounded-full bg-primary/10">
                 <Target className="h-5 w-5 text-primary" />
@@ -75,7 +77,7 @@ const Index = () => {
                 <p className="text-3xl font-bold text-foreground">
                   {userStats.fluencyScore}<span className="text-lg font-normal text-muted-foreground">%</span>
                 </p>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Fluency Score</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("dashboard.fluencyScore")}</p>
               </div>
               <div className="p-2 rounded-full bg-accent/10">
                 <TrendingUp className="h-5 w-5 text-accent" />
@@ -83,7 +85,7 @@ const Index = () => {
             </div>
             <p className="text-sm text-primary font-medium flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
-              +{userStats.fluencyChange}% this week
+              +{userStats.fluencyChange}% {t("dashboard.thisWeek")}
             </p>
           </div>
 
@@ -92,16 +94,16 @@ const Index = () => {
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {userStats.streakDays} <span className="text-lg font-normal text-muted-foreground">days</span>
+                  {userStats.streakDays} <span className="text-lg font-normal text-muted-foreground">{t("dashboard.days")}</span>
                 </p>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Streak</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("dashboard.streak")}</p>
               </div>
               <div className="p-2 rounded-full bg-destructive/10">
                 <Flame className="h-5 w-5 text-destructive" />
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              Best: {userStats.bestStreak} days
+              {t("dashboard.best")}: {userStats.bestStreak} {t("dashboard.days")}
             </p>
           </div>
         </div>
@@ -110,7 +112,7 @@ const Index = () => {
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold text-foreground">Start Training</h2>
+            <h2 className="text-lg font-semibold text-foreground">{t("dashboard.startTraining")}</h2>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -122,15 +124,15 @@ const Index = () => {
                 </div>
                 
                 <h3 className="text-xl font-semibold text-foreground mb-2">
-                  Voice Lab
+                  {t("dashboard.voiceLabTitle")}
                 </h3>
                 
                 <p className="text-muted-foreground text-sm mb-4">
-                  Calibrate your "Golden Self" AI model to fix timbre mismatch.
+                  {t("dashboard.voiceLabDesc")}
                 </p>
                 
                 <div className="inline-flex items-center text-primary font-medium group-hover:gap-3 gap-2 transition-all text-sm">
-                  Start now
+                  {t("dashboard.startNow")}
                   <span className="transition-transform group-hover:translate-x-1">→</span>
                 </div>
               </div>
@@ -144,15 +146,15 @@ const Index = () => {
                 </div>
                 
                 <h3 className="text-xl font-semibold text-foreground mb-2">
-                  Progress Analytics
+                  {t("dashboard.progressAnalytics")}
                 </h3>
                 
                 <p className="text-muted-foreground text-sm mb-4">
-                  Track your learning journey with detailed analytics and progress charts.
+                  {t("dashboard.progressDesc")}
                 </p>
                 
                 <div className="inline-flex items-center text-accent font-medium group-hover:gap-3 gap-2 transition-all text-sm">
-                  View progress
+                  {t("dashboard.viewProgress")}
                   <span className="transition-transform group-hover:translate-x-1">→</span>
                 </div>
               </div>
