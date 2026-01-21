@@ -1,4 +1,4 @@
-import { Home, Mic2, BookOpen, BookText, LogIn, LogOut, Settings } from "lucide-react";
+import { Home, Mic2, BookOpen, BookText, LogIn, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -14,6 +14,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 import logo from "@/assets/logo.png";
 
 interface AppSidebarProps {
@@ -21,18 +22,19 @@ interface AppSidebarProps {
   onSignOut: () => void;
 }
 
-const menuItems = [
-  { title: "Dashboard", url: "/", icon: Home },
-  { title: "Voice Lab", url: "/pronunciation", icon: Mic2 },
-  { title: "Practice", url: "/practice", icon: BookOpen },
-  { title: "IPA Library", url: "/ipa-library", icon: BookText },
-];
-
 export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
   const currentPath = location.pathname;
+  const { t } = useLanguage();
+
+  const menuItems = [
+    { title: t("nav.dashboard"), url: "/", icon: Home },
+    { title: t("nav.voiceLab"), url: "/pronunciation", icon: Mic2 },
+    { title: t("nav.practice"), url: "/practice", icon: BookOpen },
+    { title: t("nav.ipaLibrary"), url: "/ipa-library", icon: BookText },
+  ];
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
@@ -53,7 +55,7 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
@@ -85,7 +87,7 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
             className="w-full justify-start gap-3"
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
-            {!collapsed && <span>Sign Out</span>}
+            {!collapsed && <span>{t("nav.signOut")}</span>}
           </Button>
         ) : (
           <Link to="/auth" className="w-full">
@@ -95,7 +97,7 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
               className="w-full justify-start gap-3"
             >
               <LogIn className="h-5 w-5 flex-shrink-0" />
-              {!collapsed && <span>Sign In</span>}
+              {!collapsed && <span>{t("nav.signIn")}</span>}
             </Button>
           </Link>
         )}
