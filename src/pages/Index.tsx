@@ -138,23 +138,23 @@ const Index = () => {
               </div>
             </Link>
 
-            {/* Visualization Card */}
-            <Link to="/visualization" className="group">
+            {/* Learning & Progress Card */}
+            <Link to="/learning" className="group">
               <div className="bg-card border border-border rounded-2xl p-6 card-shadow transition-all duration-300 hover:card-shadow-hover hover:-translate-y-1 hover:border-accent/30">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 mb-4 group-hover:bg-accent/20 transition-colors">
                   <BarChart3 className="h-6 w-6 text-accent" />
                 </div>
                 
                 <h3 className="text-xl font-semibold text-foreground mb-2">
-                  {t("dashboard.progressAnalytics")}
+                  {t("dashboard.learningProgress")}
                 </h3>
                 
                 <p className="text-muted-foreground text-sm mb-4">
-                  {t("dashboard.progressDesc")}
+                  {t("dashboard.learningProgressDesc")}
                 </p>
                 
                 <div className="inline-flex items-center text-accent font-medium group-hover:gap-3 gap-2 transition-all text-sm">
-                  {t("dashboard.viewProgress")}
+                  {t("dashboard.viewLearning")}
                   <span className="transition-transform group-hover:translate-x-1">→</span>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import { Home, Mic2, BookOpen, BookText, LogIn, LogOut } from "lucide-react";
+import { Home, Mic2, BookOpen, GraduationCap, LogIn, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -33,7 +33,7 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
     { title: t("nav.dashboard"), url: "/", icon: Home },
     { title: t("nav.voiceLab"), url: "/pronunciation", icon: Mic2 },
     { title: t("nav.practice"), url: "/practice", icon: BookOpen },
-    { title: t("nav.ipaLibrary"), url: "/ipa-library", icon: BookText },
+    { title: t("nav.learning"), url: "/learning", icon: GraduationCap },
   ];
 
   const isActive = (path: string) => {
