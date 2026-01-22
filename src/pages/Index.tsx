@@ -3,20 +3,12 @@ import { Mic, BarChart3, Sparkles, Target, TrendingUp, Flame, Mic2, Cpu } from "
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUserStats } from "@/hooks/useUserStats";
 
 const Index = () => {
   const { user, profile } = useAuth();
   const { t } = useLanguage();
-
-  // Mock data - replace with real data when connected to backend
-  const userStats = {
-    dailyGoalMinutes: 15,
-    dailyGoalProgress: 60,
-    fluencyScore: 87,
-    fluencyChange: 2,
-    streakDays: 5,
-    bestStreak: 12
-  };
+  const { stats, dailyGoalProgress } = useUserStats();
 
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Guest';
 
@@ -59,7 +51,7 @@ const Index = () => {
             <div className="flex items-start justify-between mb-3">
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {userStats.dailyGoalMinutes} <span className="text-lg font-normal text-muted-foreground">{t("dashboard.min")}</span>
+                  {stats.daily_goal_minutes} <span className="text-lg font-normal text-muted-foreground">{t("dashboard.min")}</span>
                 </p>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("dashboard.dailyGoal")}</p>
               </div>
@@ -67,7 +59,7 @@ const Index = () => {
                 <Target className="h-5 w-5 text-primary" />
               </div>
             </div>
-            <Progress value={userStats.dailyGoalProgress} className="h-2" />
+            <Progress value={dailyGoalProgress} className="h-2" />
           </div>
 
           {/* Fluency Score Card */}
@@ -75,7 +67,7 @@ const Index = () => {
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {userStats.fluencyScore}<span className="text-lg font-normal text-muted-foreground">%</span>
+                  {stats.fluency_score}<span className="text-lg font-normal text-muted-foreground">%</span>
                 </p>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("dashboard.fluencyScore")}</p>
               </div>
@@ -85,7 +77,7 @@ const Index = () => {
             </div>
             <p className="text-sm text-primary font-medium flex items-center gap-1">
               <TrendingUp className="h-3 w-3" />
-              +{userStats.fluencyChange}% {t("dashboard.thisWeek")}
+              +{stats.fluency_change}% {t("dashboard.thisWeek")}
             </p>
           </div>
 
@@ -94,7 +86,7 @@ const Index = () => {
             <div className="flex items-start justify-between mb-2">
               <div>
                 <p className="text-3xl font-bold text-foreground">
-                  {userStats.streakDays} <span className="text-lg font-normal text-muted-foreground">{t("dashboard.days")}</span>
+                  {stats.streak_days} <span className="text-lg font-normal text-muted-foreground">{t("dashboard.days")}</span>
                 </p>
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("dashboard.streak")}</p>
               </div>
@@ -103,7 +95,7 @@ const Index = () => {
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              {t("dashboard.best")}: {userStats.bestStreak} {t("dashboard.days")}
+              {t("dashboard.best")}: {stats.best_streak} {t("dashboard.days")}
             </p>
           </div>
         </div>
