@@ -17,7 +17,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.dashboard": "Dashboard",
     "nav.voiceLab": "Voice Lab",
     "nav.practice": "Practice",
-    "nav.ipaLibrary": "IPA Library",
+    "nav.learning": "Learning & Progress",
     "nav.signIn": "Sign In",
     "nav.signOut": "Sign Out",
 
@@ -37,9 +37,9 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.voiceLabTitle": "Voice Lab",
     "dashboard.voiceLabDesc": "Calibrate your \"Golden Self\" AI model to fix timbre mismatch.",
     "dashboard.startNow": "Start now",
-    "dashboard.progressAnalytics": "Progress Analytics",
-    "dashboard.progressDesc": "Track your learning journey with detailed analytics and progress charts.",
-    "dashboard.viewProgress": "View progress",
+    "dashboard.learningProgress": "Learning & Progress",
+    "dashboard.learningProgressDesc": "Learn IPA sounds and test your pronunciation progress.",
+    "dashboard.viewLearning": "Start learning",
 
     // Guest Banner
     "guest.banner": "You're using SpeakRight as a guest.",
@@ -47,8 +47,20 @@ const translations: Record<Language, Record<string, string>> = {
     "guest.saveProgress": "to save your progress!",
     "guest.signInToSave": "Sign in to save your language preference",
 
+    // Learning Page
+    "learning.title": "Learning & Progress",
+    "learning.subtitle": "Master the International Phonetic Alphabet and track your pronunciation progress.",
+    "learning.libraryTitle": "International Phonetic Alphabet (IPA) Library",
+    "learning.libraryDesc": "Learn and explore all English phonemes with detailed articulatory descriptions and example words.",
+    "learning.startLearning": "Start learning",
+    "learning.progressTitle": "Progress Analytics",
+    "learning.progressDesc": "Test your pronunciation and see how well you've mastered each IPA sound with visual feedback.",
+    "learning.testProgress": "Test your progress",
+    "learning.tipTitle": "Learning Tip",
+    "learning.tipText": "Start by learning the IPA sounds first, then test your progress to see which sounds you've mastered!",
+
     // IPA Library
-    "ipa.title": "IPA Library",
+    "ipa.title": "International Phonetic Alphabet (IPA) Library",
     "ipa.subtitle": "A comprehensive reference of standard English sounds and their articulatory features.",
     "ipa.plosives": "Plosives (Stops)",
     "ipa.fricatives": "Fricatives",
@@ -79,7 +91,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.dashboard": "儀表板",
     "nav.voiceLab": "語音實驗室",
     "nav.practice": "練習",
-    "nav.ipaLibrary": "國際音標庫",
+    "nav.learning": "學習與進度",
     "nav.signIn": "登入",
     "nav.signOut": "登出",
 
@@ -99,9 +111,9 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.voiceLabTitle": "語音實驗室",
     "dashboard.voiceLabDesc": "校準您的「黃金自我」AI模型以修復音色不匹配。",
     "dashboard.startNow": "立即開始",
-    "dashboard.progressAnalytics": "進度分析",
-    "dashboard.progressDesc": "通過詳細的分析和進度圖表追蹤您的學習旅程。",
-    "dashboard.viewProgress": "查看進度",
+    "dashboard.learningProgress": "學習與進度",
+    "dashboard.learningProgressDesc": "學習國際音標並測試您的發音進度。",
+    "dashboard.viewLearning": "開始學習",
 
     // Guest Banner
     "guest.banner": "您正在以訪客身份使用 SpeakRight。",
@@ -109,8 +121,20 @@ const translations: Record<Language, Record<string, string>> = {
     "guest.saveProgress": "以保存您的進度！",
     "guest.signInToSave": "登入以保存您的語言偏好",
 
+    // Learning Page
+    "learning.title": "學習與進度",
+    "learning.subtitle": "掌握國際音標並追蹤您的發音進度。",
+    "learning.libraryTitle": "國際音標（IPA）庫",
+    "learning.libraryDesc": "學習和探索所有英語音素，包含詳細的發音描述和示例詞。",
+    "learning.startLearning": "開始學習",
+    "learning.progressTitle": "進度分析",
+    "learning.progressDesc": "測試您的發音，通過視覺反饋查看您對每個音標的掌握程度。",
+    "learning.testProgress": "測試進度",
+    "learning.tipTitle": "學習提示",
+    "learning.tipText": "先學習國際音標，然後測試您的進度，看看您已經掌握了哪些發音！",
+
     // IPA Library
-    "ipa.title": "國際音標庫",
+    "ipa.title": "國際音標（IPA）庫",
     "ipa.subtitle": "標準英語發音及其發音特徵的完整參考。",
     "ipa.plosives": "塞音（爆破音）",
     "ipa.fricatives": "擦音",
@@ -141,7 +165,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.dashboard": "仪表板",
     "nav.voiceLab": "语音实验室",
     "nav.practice": "练习",
-    "nav.ipaLibrary": "国际音标库",
+    "nav.learning": "学习与进度",
     "nav.signIn": "登录",
     "nav.signOut": "退出",
 
@@ -161,9 +185,9 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.voiceLabTitle": "语音实验室",
     "dashboard.voiceLabDesc": "校准您的「黄金自我」AI模型以修复音色不匹配。",
     "dashboard.startNow": "立即开始",
-    "dashboard.progressAnalytics": "进度分析",
-    "dashboard.progressDesc": "通过详细的分析和进度图表追踪您的学习旅程。",
-    "dashboard.viewProgress": "查看进度",
+    "dashboard.learningProgress": "学习与进度",
+    "dashboard.learningProgressDesc": "学习国际音标并测试您的发音进度。",
+    "dashboard.viewLearning": "开始学习",
 
     // Guest Banner
     "guest.banner": "您正在以访客身份使用 SpeakRight。",
@@ -171,8 +195,20 @@ const translations: Record<Language, Record<string, string>> = {
     "guest.saveProgress": "以保存您的进度！",
     "guest.signInToSave": "登录以保存您的语言偏好",
 
+    // Learning Page
+    "learning.title": "学习与进度",
+    "learning.subtitle": "掌握国际音标并追踪您的发音进度。",
+    "learning.libraryTitle": "国际音标（IPA）库",
+    "learning.libraryDesc": "学习和探索所有英语音素，包含详细的发音描述和示例词。",
+    "learning.startLearning": "开始学习",
+    "learning.progressTitle": "进度分析",
+    "learning.progressDesc": "测试您的发音，通过视觉反馈查看您对每个音标的掌握程度。",
+    "learning.testProgress": "测试进度",
+    "learning.tipTitle": "学习提示",
+    "learning.tipText": "先学习国际音标，然后测试您的进度，看看您已经掌握了哪些发音！",
+
     // IPA Library
-    "ipa.title": "国际音标库",
+    "ipa.title": "国际音标（IPA）库",
     "ipa.subtitle": "标准英语发音及其发音特征的完整参考。",
     "ipa.plosives": "塞音（爆破音）",
     "ipa.fricatives": "擦音",

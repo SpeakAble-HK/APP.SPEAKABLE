@@ -11,6 +11,7 @@ import PronunciationPage from "./pages/PronunciationPage";
 import PronunciationResultsPage from "./pages/PronunciationResultsPage";
 import VisualizationPage from "./pages/VisualizationPage";
 import PracticePage from "./pages/PracticePage";
+import LearningPage from "./pages/LearningPage";
 import IPALibraryPage from "./pages/IPALibraryPage";
 import NotFound from "./pages/NotFound";
 
@@ -33,9 +34,10 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/pronunciation" element={<PronunciationPage />} />
                     <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
-                    <Route path="/visualization" element={<VisualizationPage />} />
                     <Route path="/practice" element={<PracticePage />} />
-                    <Route path="/ipa-library" element={<IPALibraryPage />} />
+                    <Route path="/learning" element={<LearningPage />} />
+                    <Route path="/learning/library" element={<IPALibraryPage />} />
+                    <Route path="/learning/progress" element={<VisualizationPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </AppLayout>
