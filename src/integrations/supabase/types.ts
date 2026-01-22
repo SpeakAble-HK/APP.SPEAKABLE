@@ -41,6 +41,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_stats: {
+        Row: {
+          best_streak: number
+          created_at: string
+          daily_goal_minutes: number
+          daily_progress_minutes: number
+          fluency_change: number
+          fluency_score: number
+          id: string
+          last_activity_date: string | null
+          streak_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_streak?: number
+          created_at?: string
+          daily_goal_minutes?: number
+          daily_progress_minutes?: number
+          fluency_change?: number
+          fluency_score?: number
+          id?: string
+          last_activity_date?: string | null
+          streak_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_streak?: number
+          created_at?: string
+          daily_goal_minutes?: number
+          daily_progress_minutes?: number
+          fluency_change?: number
+          fluency_score?: number
+          id?: string
+          last_activity_date?: string | null
+          streak_days?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
