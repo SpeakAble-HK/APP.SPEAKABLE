@@ -1,6 +1,7 @@
 import { Link, useLocation, Navigate } from "react-router-dom";
 import { ArrowLeft, Volume2, Play, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { parsePhonemeResult, getToneDescription, ParsedPhoneme } from "@/utils/jyutpingParser";
 
 interface PhonemeResult {
   character: string;
@@ -24,31 +25,45 @@ const PronunciationResultsPage = () => {
 
   const { spokenPhonemes, intendedPhonemes, generatedAudioUrl, recordingUrl } = state;
 
-  // Compare phonemes - create a map of position -> match status
+  // Parse phonemes into initials, finals, and tones
+  const parsedIntended: ParsedPhoneme[] = intendedPhonemes
+    .filter(p => p.phoneme !== null)
+    .map(parsePhonemeResult);
+  
+  const parsedSpoken: ParsedPhoneme[] = spokenPhonemes
+    .filter(p => p.phoneme !== null)
+    .map(parsePhonemeResult);
+
+  // Compare phonemes
   const comparePhonemes = () => {
     const comparisons: { 
-      intended: PhonemeResult; 
-      spoken: PhonemeResult | null; 
-      isMatch: boolean;
+      intended: ParsedPhoneme; 
+      spoken: ParsedPhoneme | null; 
+      initialMatch: boolean;
+      finalMatch: boolean;
+      toneMatch: boolean;
+      isFullMatch: boolean;
     }[] = [];
 
-    // Filter out punctuation (null phonemes) for comparison
-    const filteredIntended = intendedPhonemes.filter(p => p.phoneme !== null);
-    const filteredSpoken = spokenPhonemes.filter(p => p.phoneme !== null);
-
-    filteredIntended.forEach((intended, index) => {
-      const spoken = filteredSpoken[index] || null;
-      const isMatch = spoken?.phoneme === intended.phoneme;
-      comparisons.push({ intended, spoken, isMatch });
+    parsedIntended.forEach((intended, index) => {
+      const spoken = parsedSpoken[index] || null;
+      const initialMatch = spoken?.initial === intended.initial;
+      const finalMatch = spoken?.final === intended.final;
+      const toneMatch = spoken?.tone === intended.tone;
+      const isFullMatch = initialMatch && finalMatch && toneMatch;
+      comparisons.push({ intended, spoken, initialMatch, finalMatch, toneMatch, isFullMatch });
     });
 
     // Add any extra spoken phonemes
-    if (filteredSpoken.length > filteredIntended.length) {
-      for (let i = filteredIntended.length; i < filteredSpoken.length; i++) {
+    if (parsedSpoken.length > parsedIntended.length) {
+      for (let i = parsedIntended.length; i < parsedSpoken.length; i++) {
         comparisons.push({
-          intended: { character: '', phoneme: null },
-          spoken: filteredSpoken[i],
-          isMatch: false
+          intended: { character: '', phoneme: null, initial: null, final: null, tone: null },
+          spoken: parsedSpoken[i],
+          initialMatch: false,
+          finalMatch: false,
+          toneMatch: false,
+          isFullMatch: false
         });
       }
     }
@@ -57,9 +72,14 @@ const PronunciationResultsPage = () => {
   };
 
   const comparisons = comparePhonemes();
-  const correctCount = comparisons.filter(c => c.isMatch).length;
+  const correctCount = comparisons.filter(c => c.isFullMatch).length;
   const totalCount = comparisons.length;
   const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+
+  // Calculate component-level accuracy
+  const initialCorrect = comparisons.filter(c => c.initialMatch).length;
+  const finalCorrect = comparisons.filter(c => c.finalMatch).length;
+  const toneCorrect = comparisons.filter(c => c.toneMatch).length;
 
   const handlePlayRecording = () => {
     if (recordingUrl) {
@@ -74,6 +94,11 @@ const PronunciationResultsPage = () => {
       audio.play();
     }
   };
+
+  const getMatchClass = (isMatch: boolean) => 
+    isMatch 
+      ? 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30' 
+      : 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30';
 
   return (
     <div className="min-h-screen bg-background">
@@ -91,12 +116,38 @@ const PronunciationResultsPage = () => {
               Pronunciation Results
             </h1>
             
+            {/* Overall Accuracy */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
-              <span className="text-lg font-semibold">Accuracy:</span>
+              <span className="text-lg font-semibold">Overall Accuracy:</span>
               <span className={`text-2xl font-bold ${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
                 {accuracy}%
               </span>
               <span className="text-muted-foreground">({correctCount}/{totalCount})</span>
+            </div>
+          </div>
+
+          {/* Component Accuracy Cards */}
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="bg-card border border-border rounded-xl p-4 text-center">
+              <p className="text-sm text-muted-foreground mb-1">Initials</p>
+              <p className={`text-2xl font-bold ${initialCorrect === totalCount ? 'text-green-500' : 'text-yellow-500'}`}>
+                {totalCount > 0 ? Math.round((initialCorrect / totalCount) * 100) : 0}%
+              </p>
+              <p className="text-xs text-muted-foreground">{initialCorrect}/{totalCount}</p>
+            </div>
+            <div className="bg-card border border-border rounded-xl p-4 text-center">
+              <p className="text-sm text-muted-foreground mb-1">Finals</p>
+              <p className={`text-2xl font-bold ${finalCorrect === totalCount ? 'text-green-500' : 'text-yellow-500'}`}>
+                {totalCount > 0 ? Math.round((finalCorrect / totalCount) * 100) : 0}%
+              </p>
+              <p className="text-xs text-muted-foreground">{finalCorrect}/{totalCount}</p>
+            </div>
+            <div className="bg-card border border-border rounded-xl p-4 text-center">
+              <p className="text-sm text-muted-foreground mb-1">Tones</p>
+              <p className={`text-2xl font-bold ${toneCorrect === totalCount ? 'text-green-500' : 'text-yellow-500'}`}>
+                {totalCount > 0 ? Math.round((toneCorrect / totalCount) * 100) : 0}%
+              </p>
+              <p className="text-xs text-muted-foreground">{toneCorrect}/{totalCount}</p>
             </div>
           </div>
 
@@ -129,107 +180,122 @@ const PronunciationResultsPage = () => {
             </div>
           </div>
 
-          {/* Phoneme Comparison */}
-          <div className="bg-card border border-border rounded-2xl p-6 mb-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Phoneme Comparison</h2>
-            
-            {/* Intended Phonemes */}
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-primary" />
-                Intended Pronunciation
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {intendedPhonemes.filter(p => p.phoneme !== null).map((item, index) => {
-                  const comparison = comparisons[index];
-                  const isMatch = comparison?.isMatch;
-                  return (
-                    <div 
-                      key={index}
-                      className={`flex flex-col items-center px-3 py-2 rounded-lg border-2 transition-all ${
-                        isMatch 
-                          ? 'bg-green-500/10 border-green-500/50 text-green-700 dark:text-green-400' 
-                          : 'bg-red-500/10 border-red-500/50 text-red-700 dark:text-red-400'
-                      }`}
-                    >
-                      <span className="text-lg font-medium">{item.character}</span>
-                      <span className="text-xs opacity-80">{item.phoneme}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Spoken Phonemes */}
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
-                <XCircle className="h-4 w-4 text-muted-foreground" />
-                Your Pronunciation
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {spokenPhonemes.filter(p => p.phoneme !== null).map((item, index) => {
-                  const intendedItem = intendedPhonemes.filter(p => p.phoneme !== null)[index];
-                  const isMatch = intendedItem?.phoneme === item.phoneme;
-                  return (
-                    <div 
-                      key={index}
-                      className={`flex flex-col items-center px-3 py-2 rounded-lg border-2 transition-all ${
-                        isMatch 
-                          ? 'bg-green-500/10 border-green-500/50 text-green-700 dark:text-green-400' 
-                          : 'bg-red-500/10 border-red-500/50 text-red-700 dark:text-red-400'
-                      }`}
-                    >
-                      <span className="text-lg font-medium">{item.character}</span>
-                      <span className="text-xs opacity-80">{item.phoneme}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Detailed Comparison Table */}
+          {/* Detailed Breakdown Table */}
           <div className="bg-card border border-border rounded-2xl p-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">Detailed Breakdown</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">#</th>
-                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">Character</th>
-                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">Expected</th>
-                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">Your Pronunciation</th>
-                    <th className="text-left py-2 px-3 text-muted-foreground font-medium">Status</th>
+                    <th className="text-left py-3 px-3 text-muted-foreground font-medium">Character</th>
+                    <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Initial</th>
+                    <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Final</th>
+                    <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Tone</th>
+                    <th className="text-center py-3 px-3 text-muted-foreground font-medium">Status</th>
+                  </tr>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="py-2 px-3"></th>
+                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
+                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
+                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
+                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
+                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
+                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
+                    <th className="py-2 px-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {comparisons.map((comparison, index) => (
                     <tr key={index} className="border-b border-border/50 last:border-0">
-                      <td className="py-2 px-3 text-muted-foreground">{index + 1}</td>
-                      <td className="py-2 px-3 font-medium text-lg">
-                        {comparison.intended.character || comparison.spoken?.character || '-'}
+                      <td className="py-3 px-3">
+                        <div className="flex flex-col items-start">
+                          <span className="text-lg font-medium">
+                            {comparison.intended.character || comparison.spoken?.character || '-'}
+                          </span>
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {comparison.intended.phoneme || comparison.spoken?.phoneme || '-'}
+                          </span>
+                        </div>
                       </td>
-                      <td className="py-2 px-3">
+                      {/* Initial */}
+                      <td className="py-3 px-3 text-center">
                         <span className="font-mono text-primary">
-                          {comparison.intended.phoneme || '-'}
+                          {comparison.intended.initial || '-'}
                         </span>
                       </td>
-                      <td className="py-2 px-3">
-                        <span className={`font-mono ${comparison.isMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {comparison.spoken?.phoneme || '-'}
+                      <td className="py-3 px-3 text-center">
+                        <span className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.initialMatch)}`}>
+                          {comparison.spoken?.initial || '-'}
                         </span>
                       </td>
-                      <td className="py-2 px-3">
-                        {comparison.isMatch ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
+                      {/* Final */}
+                      <td className="py-3 px-3 text-center">
+                        <span className="font-mono text-primary">
+                          {comparison.intended.final || '-'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <span className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.finalMatch)}`}>
+                          {comparison.spoken?.final || '-'}
+                        </span>
+                      </td>
+                      {/* Tone */}
+                      <td className="py-3 px-3 text-center">
+                        <span className="font-mono text-primary" title={getToneDescription(comparison.intended.tone)}>
+                          {comparison.intended.tone || '-'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-center">
+                        <span 
+                          className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.toneMatch)}`}
+                          title={getToneDescription(comparison.spoken?.tone || null)}
+                        >
+                          {comparison.spoken?.tone || '-'}
+                        </span>
+                      </td>
+                      {/* Status */}
+                      <td className="py-3 px-3 text-center">
+                        {comparison.isFullMatch ? (
+                          <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
                         ) : (
-                          <XCircle className="h-5 w-5 text-red-500" />
+                          <XCircle className="h-5 w-5 text-red-500 mx-auto" />
                         )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Legend */}
+            <div className="mt-6 pt-4 border-t border-border">
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">Tone Reference</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono bg-muted px-2 py-1 rounded">1</span>
+                  <span className="text-muted-foreground">High Level (陰平)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono bg-muted px-2 py-1 rounded">2</span>
+                  <span className="text-muted-foreground">High Rising (陰上)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono bg-muted px-2 py-1 rounded">3</span>
+                  <span className="text-muted-foreground">Mid Level (陰去)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono bg-muted px-2 py-1 rounded">4</span>
+                  <span className="text-muted-foreground">Low Falling (陽平)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono bg-muted px-2 py-1 rounded">5</span>
+                  <span className="text-muted-foreground">Low Rising (陽上)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono bg-muted px-2 py-1 rounded">6</span>
+                  <span className="text-muted-foreground">Low Level (陽去)</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
