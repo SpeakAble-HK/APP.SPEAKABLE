@@ -18,6 +18,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.voiceLab": "Voice Lab",
     "nav.practice": "Practice",
     "nav.learning": "Learning & Progress",
+    "nav.results": "Results",
     "nav.signIn": "Sign In",
     "nav.signOut": "Sign Out",
 
@@ -92,6 +93,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.voiceLab": "語音實驗室",
     "nav.practice": "練習",
     "nav.learning": "學習與進度",
+    "nav.results": "分析結果",
     "nav.signIn": "登入",
     "nav.signOut": "登出",
 
@@ -166,6 +168,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.voiceLab": "语音实验室",
     "nav.practice": "练习",
     "nav.learning": "学习与进度",
+    "nav.results": "分析结果",
     "nav.signIn": "登录",
     "nav.signOut": "退出",
 

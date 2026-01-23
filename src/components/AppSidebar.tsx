@@ -1,4 +1,4 @@
-import { Home, Mic2, BookOpen, GraduationCap, LogIn, LogOut } from "lucide-react";
+import { Home, Mic2, BookOpen, GraduationCap, LogIn, LogOut, BarChart3 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -32,6 +32,7 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
   const menuItems = [
     { title: t("nav.dashboard"), url: "/", icon: Home },
     { title: t("nav.voiceLab"), url: "/pronunciation", icon: Mic2 },
+    { title: t("nav.results"), url: "/pronunciation/results", icon: BarChart3 },
     { title: t("nav.practice"), url: "/practice", icon: BookOpen },
     { title: t("nav.learning"), url: "/learning", icon: GraduationCap },
   ];
