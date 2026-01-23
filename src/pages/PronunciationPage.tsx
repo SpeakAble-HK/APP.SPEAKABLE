@@ -207,11 +207,11 @@ const PronunciationPage = () => {
             </div>
             
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              Voice Lab
+              {t("voiceLab.title")}
             </h1>
             
             <p className="text-lg text-muted-foreground">
-              Practice your pronunciation with real-time feedback and corrections.
+              {t("voiceLab.subtitle")}
             </p>
           </div>
 
@@ -221,10 +221,10 @@ const PronunciationPage = () => {
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
                 1
               </div>
-              <h2 className="text-lg font-semibold text-foreground">Enter Your Target Sentence</h2>
+              <h2 className="text-lg font-semibold text-foreground">{t("voiceLab.step1Title")}</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              Type the sentence or word you want to practice pronouncing.
+              {t("voiceLab.step1Desc")}
             </p>
             <Textarea placeholder="e.g., 你好 or Hello, how are you today?" value={spokenText} onChange={e => setSpokenText(e.target.value)} className="min-h-[100px] resize-none" />
           </div>
@@ -235,21 +235,21 @@ const PronunciationPage = () => {
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
                 2
               </div>
-              <h2 className="text-lg font-semibold text-foreground">Record or Upload Your Voice</h2>
+              <h2 className="text-lg font-semibold text-foreground">{t("voiceLab.step2Title")}</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Record yourself saying the sentence above, or upload an existing audio file.
+              {t("voiceLab.step2Desc")}
             </p>
             
             <Tabs value={audioSource} onValueChange={v => setAudioSource(v as 'record' | 'upload')}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="record" className="gap-2">
                   <Mic className="h-4 w-4" />
-                  Record
+                  {t("voiceLab.record")}
                 </TabsTrigger>
                 <TabsTrigger value="upload" className="gap-2">
                   <Upload className="h-4 w-4" />
-                  Upload
+                  {t("voiceLab.upload")}
                 </TabsTrigger>
               </TabsList>
 
@@ -262,10 +262,10 @@ const PronunciationPage = () => {
                   <div className="flex gap-3">
                     {!isRecording ? <Button onClick={handleStartRecording} size="lg" className="gap-2">
                         <Mic className="h-5 w-5" />
-                        Start Recording
+                        {t("voiceLab.startRecording")}
                       </Button> : <Button onClick={handleStopRecording} size="lg" variant="destructive" className="gap-2">
                         <Square className="h-5 w-5" />
-                        Stop Recording
+                        {t("voiceLab.stopRecording")}
                       </Button>}
                   </div>
                 </div>
@@ -277,14 +277,14 @@ const PronunciationPage = () => {
                   <div className="w-full border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors">
                     <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
                     <p className="text-sm text-muted-foreground mb-4">
-                      Drag and drop an audio file, or click to browse
+                      {t("voiceLab.dragDrop")}
                     </p>
                     <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="gap-2">
                       <Upload className="h-4 w-4" />
-                      Choose File
+                      {t("voiceLab.chooseFile")}
                     </Button>
                     <p className="text-xs text-muted-foreground mt-3">
-                      Supported: MP3, WAV, WebM, OGG, M4A (max 10MB)
+                      {t("voiceLab.supportedFormats")}
                     </p>
                   </div>
                 </div>
@@ -306,7 +306,7 @@ const PronunciationPage = () => {
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <p className="text-sm text-muted-foreground">
-                        {uploadedFileName || "Recording ready"}
+                        {uploadedFileName || t("voiceLab.recordingReady")}
                       </p>
                       <p className="text-sm font-medium text-foreground">
                         {formatDuration(audioDuration)}
@@ -326,19 +326,19 @@ const PronunciationPage = () => {
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
                 3
               </div>
-              <h2 className="text-lg font-semibold text-foreground">Analyze Your Pronunciation</h2>
+              <h2 className="text-lg font-semibold text-foreground">{t("voiceLab.step3Title")}</h2>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Click below to process your recording and see detailed feedback on your pronunciation.
+              {t("voiceLab.step3Desc")}
             </p>
             <div className="flex items-center justify-center">
               <Button onClick={handleProcessRecording} variant="default" size="lg" className="gap-2" disabled={!hasRecording || !spokenText.trim() || isProcessing}>
                 {isProcessing ? <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Processing...
+                    {t("voiceLab.processing")}
                   </> : <>
                     <Sparkles className="h-4 w-4" />
-                    Process & Generate
+                    {t("voiceLab.processGenerate")}
                   </>}
               </Button>
             </div>
