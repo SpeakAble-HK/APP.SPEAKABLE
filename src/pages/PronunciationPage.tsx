@@ -18,14 +18,26 @@ const PronunciationPage = () => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioSource, setAudioSource] = useState<'record' | 'upload'>('record');
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackProgress, setPlaybackProgress] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recordingStartTimeRef = useRef<number>(0);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const {
     processRecording,
     isProcessing,
     error
   } = usePronunciationAPI();
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -34,12 +46,29 @@ const PronunciationPage = () => {
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
+      
+      // Start duration tracking
+      recordingStartTimeRef.current = Date.now();
+      setAudioDuration(0);
+      recordingIntervalRef.current = setInterval(() => {
+        const elapsed = (Date.now() - recordingStartTimeRef.current) / 1000;
+        setAudioDuration(elapsed);
+      }, 100);
+
       mediaRecorder.ondataavailable = event => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
       mediaRecorder.onstop = () => {
+        // Stop duration tracking
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current);
+          recordingIntervalRef.current = null;
+        }
+        const finalDuration = (Date.now() - recordingStartTimeRef.current) / 1000;
+        setAudioDuration(finalDuration);
+
         const blob = new Blob(audioChunksRef.current, {
           type: 'audio/webm'
         });
@@ -83,6 +112,13 @@ const PronunciationPage = () => {
     setAudioBlob(file);
     setHasRecording(true);
     setUploadedFileName(file.name);
+    
+    // Get audio duration from uploaded file
+    const audio = new Audio(url);
+    audio.addEventListener('loadedmetadata', () => {
+      setAudioDuration(audio.duration);
+    });
+    
     toast.success(`Uploaded: ${file.name}`);
   };
   const handleClearAudio = () => {
@@ -93,6 +129,13 @@ const PronunciationPage = () => {
     setAudioBlob(null);
     setHasRecording(false);
     setUploadedFileName(null);
+    setAudioDuration(0);
+    setPlaybackProgress(0);
+    setIsPlaying(false);
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current = null;
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -121,10 +164,30 @@ const PronunciationPage = () => {
     }
   };
   const handlePlayRecording = () => {
-    if (recordingUrl) {
-      const audio = new Audio(recordingUrl);
-      audio.play();
+    if (!recordingUrl) return;
+    
+    if (isPlaying && audioElementRef.current) {
+      audioElementRef.current.pause();
+      setIsPlaying(false);
+      return;
     }
+
+    const audio = new Audio(recordingUrl);
+    audioElementRef.current = audio;
+    
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration > 0) {
+        setPlaybackProgress((audio.currentTime / audio.duration) * 100);
+      }
+    });
+    
+    audio.addEventListener('ended', () => {
+      setIsPlaying(false);
+      setPlaybackProgress(0);
+    });
+    
+    audio.play();
+    setIsPlaying(true);
   };
   return <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
@@ -230,15 +293,23 @@ const PronunciationPage = () => {
             {hasRecording && <div className="mt-6 p-4 bg-muted/50 rounded-xl">
                 <div className="flex items-center gap-3">
                   <Button variant="outline" size="icon" className="shrink-0" onClick={handlePlayRecording}>
-                    <Play className="h-4 w-4" />
+                    {isPlaying ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                   </Button>
                   <div className="flex-1">
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full w-1/3 bg-primary rounded-full" />
+                      <div 
+                        className="h-full bg-primary rounded-full transition-all duration-100" 
+                        style={{ width: `${isPlaying ? playbackProgress : 100}%` }}
+                      />
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {uploadedFileName || "Recording ready"}
-                    </p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-sm text-muted-foreground">
+                        {uploadedFileName || "Recording ready"}
+                      </p>
+                      <p className="text-sm font-medium text-foreground">
+                        {formatDuration(audioDuration)}
+                      </p>
+                    </div>
                   </div>
                   <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-destructive" onClick={handleClearAudio}>
                     <X className="h-4 w-4" />
