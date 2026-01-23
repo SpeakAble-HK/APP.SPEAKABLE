@@ -149,16 +149,32 @@ const PronunciationPage = () => {
             </p>
           </div>
 
-          {/* Text Input Section */}
+          {/* Step 1: Text Input Section */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm mb-6">
-            <label className="block text-sm font-medium text-foreground mb-3">
-              ​Please type the sentence you are trying to say here:           
-            </label>
-            <Textarea placeholder="Type the text you want to practice pronouncing..." value={spokenText} onChange={e => setSpokenText(e.target.value)} className="min-h-[100px] resize-none" />
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+                1
+              </div>
+              <h2 className="text-lg font-semibold text-foreground">Enter Your Target Sentence</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Type the sentence or word you want to practice pronouncing.
+            </p>
+            <Textarea placeholder="e.g., 你好 or Hello, how are you today?" value={spokenText} onChange={e => setSpokenText(e.target.value)} className="min-h-[100px] resize-none" />
           </div>
 
-          {/* Audio Input Section with Tabs */}
+          {/* Step 2: Audio Input Section with Tabs */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+                2
+              </div>
+              <h2 className="text-lg font-semibold text-foreground">Record or Upload Your Voice</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Record yourself saying the sentence above, or upload an existing audio file.
+            </p>
+            
             <Tabs value={audioSource} onValueChange={v => setAudioSource(v as 'record' | 'upload')}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="record" className="gap-2">
@@ -230,8 +246,17 @@ const PronunciationPage = () => {
               </div>}
           </div>
 
-          {/* Process Recording Section */}
+          {/* Step 3: Process Recording Section */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+                3
+              </div>
+              <h2 className="text-lg font-semibold text-foreground">Analyze Your Pronunciation</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Click below to process your recording and see detailed feedback on your pronunciation.
+            </p>
             <div className="flex items-center justify-center">
               <Button onClick={handleProcessRecording} variant="default" size="lg" className="gap-2" disabled={!hasRecording || !spokenText.trim() || isProcessing}>
                 {isProcessing ? <>
