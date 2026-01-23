@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { BookOpen, BarChart3, Sparkles } from "lucide-react";
+import { BookOpen, BarChart3, Sparkles, ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Button } from "@/components/ui/button";
 
 const LearningPage = () => {
   const { t } = useLanguage();
@@ -8,6 +9,14 @@ const LearningPage = () => {
   return (
     <div className="hero-gradient min-h-full">
       <div className="container mx-auto px-4 py-6 md:py-8">
+        {/* Back Button */}
+        <Link to="/">
+          <Button variant="ghost" className="mb-6 gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            {t("nav.backToHome")}
+          </Button>
+        </Link>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   BookOpen, 
   Mic, 
@@ -13,7 +13,8 @@ import {
   CheckCircle,
   XCircle,
   Trophy,
-  RotateCcw
+  RotateCcw,
+  ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -287,6 +288,14 @@ const PracticePage = () => {
     return (
       <div className="hero-gradient min-h-full">
         <div className="container mx-auto px-4 py-6 md:py-8">
+          {/* Back Button */}
+          <Link to="/">
+            <Button variant="ghost" className="mb-6 gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              {t("nav.backToHome")}
+            </Button>
+          </Link>
+
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">

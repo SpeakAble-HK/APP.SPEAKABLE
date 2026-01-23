@@ -21,6 +21,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.results": "Results",
     "nav.signIn": "Sign In",
     "nav.signOut": "Sign Out",
+    "nav.backToHome": "Back to Home",
 
     // Dashboard
     "dashboard.hello": "Hello",
@@ -96,6 +97,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.results": "分析結果",
     "nav.signIn": "登入",
     "nav.signOut": "登出",
+    "nav.backToHome": "返回首頁",
 
     // Dashboard
     "dashboard.hello": "你好",
@@ -171,6 +173,7 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.results": "分析结果",
     "nav.signIn": "登录",
     "nav.signOut": "退出",
+    "nav.backToHome": "返回首页",
 
     // Dashboard
     "dashboard.hello": "你好",

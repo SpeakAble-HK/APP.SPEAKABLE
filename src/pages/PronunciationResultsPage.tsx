@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { parsePhonemeResult, getToneDescription, ParsedPhoneme } from "@/utils/jyutpingParser";
 import { usePronunciationResults, PronunciationResult } from "@/hooks/usePronunciationResults";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -24,6 +25,7 @@ interface PronunciationResultsState {
 const PronunciationResultsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const state = location.state as PronunciationResultsState | null;
   const { results, isLoading, saveResult, deleteResult } = usePronunciationResults();
   const { user } = useAuth();
@@ -150,7 +152,7 @@ const PronunciationResultsPage = () => {
           <Link to="/">
             <Button variant="ghost" className="mb-8 gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              {t("nav.backToHome")}
             </Button>
           </Link>
 
@@ -184,7 +186,7 @@ const PronunciationResultsPage = () => {
         <Link to="/">
           <Button variant="ghost" className="mb-8 gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            {t("nav.backToHome")}
           </Button>
         </Link>
 
