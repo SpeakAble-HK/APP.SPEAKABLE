@@ -1,10 +1,14 @@
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Square, Play, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Mic, Square, Play, Sparkles, Loader2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { toast } from "sonner";
+
+const ALLOWED_AUDIO_TYPES = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/webm', 'audio/ogg', 'audio/m4a', 'audio/x-m4a'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const PronunciationPage = () => {
   const navigate = useNavigate();
@@ -13,14 +17,16 @@ const PronunciationPage = () => {
   const [hasRecording, setHasRecording] = useState(false);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioSource, setAudioSource] = useState<'record' | 'upload'>('record');
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { 
     processRecording, 
     isProcessing, 
     error,
-    getGeneratedAudioUrl 
   } = usePronunciationAPI();
 
   const handleStartRecording = async () => {
@@ -42,6 +48,7 @@ const PronunciationPage = () => {
         setRecordingUrl(url);
         setAudioBlob(blob);
         setHasRecording(true);
+        setUploadedFileName(null);
       };
       
       mediaRecorder.start();
@@ -60,20 +67,55 @@ const PronunciationPage = () => {
     }
   };
 
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!ALLOWED_AUDIO_TYPES.includes(file.type) && !file.name.endsWith('.mp3')) {
+      toast.error("Invalid audio format. Supported formats: MP3, WAV, WebM, OGG, M4A");
+      return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File too large. Maximum size is 10MB.");
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    setRecordingUrl(url);
+    setAudioBlob(file);
+    setHasRecording(true);
+    setUploadedFileName(file.name);
+    toast.success(`Uploaded: ${file.name}`);
+  };
+
+  const handleClearAudio = () => {
+    if (recordingUrl) {
+      URL.revokeObjectURL(recordingUrl);
+    }
+    setRecordingUrl(null);
+    setAudioBlob(null);
+    setHasRecording(false);
+    setUploadedFileName(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleProcessRecording = async () => {
     if (!audioBlob || !spokenText.trim()) {
-      toast.error("Please record audio and enter the text you're speaking");
+      toast.error("Please provide audio and enter the text you're speaking");
       return;
     }
 
     const result = await processRecording(audioBlob, spokenText);
     if (result) {
       toast.success("Processing complete!");
-      // Construct audio URL directly from the result
       const contentType = result.clone.content_type || 'audio/wav';
       const generatedAudioUrl = `data:${contentType};base64,${result.clone.audio_base64}`;
       
-      // Navigate to results page with the data
       navigate('/pronunciation/results', {
         state: {
           spokenPhonemes: result.spoken,
@@ -111,7 +153,7 @@ const PronunciationPage = () => {
             </div>
             
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              Pronunciation Correction
+              Voice Lab
             </h1>
             
             <p className="text-lg text-muted-foreground">
@@ -132,47 +174,98 @@ const PronunciationPage = () => {
             />
           </div>
 
-          {/* Recording Section */}
+          {/* Audio Input Section with Tabs */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm mb-6">
-            <label className="block text-sm font-medium text-foreground mb-4">
-              Your Recording
-            </label>
-            
-            <div className="flex flex-col items-center gap-4">
-              <div className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
-                isRecording 
-                  ? "bg-destructive/20 animate-pulse" 
-                  : "bg-primary/10"
-              }`}>
-                <Mic className={`h-10 w-10 ${isRecording ? "text-destructive" : "text-primary"}`} />
-              </div>
-              
-              <div className="flex gap-3">
-                {!isRecording ? (
-                  <Button onClick={handleStartRecording} size="lg" className="gap-2">
-                    <Mic className="h-5 w-5" />
-                    Start Recording
-                  </Button>
-                ) : (
-                  <Button onClick={handleStopRecording} size="lg" variant="destructive" className="gap-2">
-                    <Square className="h-5 w-5" />
-                    Stop Recording
-                  </Button>
-                )}
-              </div>
+            <Tabs value={audioSource} onValueChange={(v) => setAudioSource(v as 'record' | 'upload')}>
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="record" className="gap-2">
+                  <Mic className="h-4 w-4" />
+                  Record
+                </TabsTrigger>
+                <TabsTrigger value="upload" className="gap-2">
+                  <Upload className="h-4 w-4" />
+                  Upload
+                </TabsTrigger>
+              </TabsList>
 
-              {hasRecording && (
-                <div className="w-full mt-4 p-4 bg-muted/50 rounded-xl flex items-center gap-3">
+              <TabsContent value="record" className="mt-0">
+                <div className="flex flex-col items-center gap-4">
+                  <div className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
+                    isRecording 
+                      ? "bg-destructive/20 animate-pulse" 
+                      : "bg-primary/10"
+                  }`}>
+                    <Mic className={`h-10 w-10 ${isRecording ? "text-destructive" : "text-primary"}`} />
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    {!isRecording ? (
+                      <Button onClick={handleStartRecording} size="lg" className="gap-2">
+                        <Mic className="h-5 w-5" />
+                        Start Recording
+                      </Button>
+                    ) : (
+                      <Button onClick={handleStopRecording} size="lg" variant="destructive" className="gap-2">
+                        <Square className="h-5 w-5" />
+                        Stop Recording
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="upload" className="mt-0">
+                <div className="flex flex-col items-center gap-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".mp3,.wav,.webm,.ogg,.m4a,audio/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="audio-upload"
+                  />
+                  <div className="w-full border-2 border-dashed border-border rounded-xl p-8 text-center hover:border-primary/50 transition-colors">
+                    <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Drag and drop an audio file, or click to browse
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Choose File
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-3">
+                      Supported: MP3, WAV, WebM, OGG, M4A (max 10MB)
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            {/* Audio Preview */}
+            {hasRecording && (
+              <div className="mt-6 p-4 bg-muted/50 rounded-xl">
+                <div className="flex items-center gap-3">
                   <Button variant="outline" size="icon" className="shrink-0" onClick={handlePlayRecording}>
                     <Play className="h-4 w-4" />
                   </Button>
-                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full w-1/3 bg-primary rounded-full" />
+                  <div className="flex-1">
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full w-1/3 bg-primary rounded-full" />
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {uploadedFileName || "Recording ready"}
+                    </p>
                   </div>
-                  <span className="text-sm text-muted-foreground">Recording ready</span>
+                  <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-destructive" onClick={handleClearAudio}>
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Process Recording Section */}
