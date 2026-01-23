@@ -380,14 +380,15 @@ const PronunciationResultsPage = () => {
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b border-border">
-                            <th className="text-left py-3 px-3 text-muted-foreground font-medium">{t("results.character")}</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.character")}</th>
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.vowel")}</th>
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.consonant")}</th>
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.tone")}</th>
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium">{t("results.status")}</th>
                           </tr>
                           <tr className="border-b border-border bg-muted/30">
-                            <th className="py-2 px-3"></th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.expected")}</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.yours")}</th>
                             <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.expected")}</th>
                             <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.yours")}</th>
                             <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.expected")}</th>
@@ -400,13 +401,25 @@ const PronunciationResultsPage = () => {
                         <tbody>
                           {comparisons.map((comparison, index) => (
                             <tr key={index} className="border-b border-border/50 last:border-0">
-                              <td className="py-3 px-3">
-                                <div className="flex flex-col items-start">
-                                  <span className="text-lg font-medium">
-                                    {comparison.intended.character || comparison.spoken?.character || '-'}
+                              {/* Expected Character */}
+                              <td className="py-3 px-3 text-center">
+                                <div className="flex flex-col items-center">
+                                  <span className="text-lg font-medium text-primary">
+                                    {comparison.intended.character || '-'}
                                   </span>
                                   <span className="text-xs text-muted-foreground font-mono">
-                                    {comparison.intended.phoneme || comparison.spoken?.phoneme || '-'}
+                                    {comparison.intended.phoneme || '-'}
+                                  </span>
+                                </div>
+                              </td>
+                              {/* Yours Character */}
+                              <td className="py-3 px-3 text-center">
+                                <div className="flex flex-col items-center">
+                                  <span className={`text-lg font-medium px-2 py-0.5 rounded ${comparison.isFullMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                    {comparison.spoken?.character || '-'}
+                                  </span>
+                                  <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${getMatchClass(comparison.isFullMatch)}`}>
+                                    {comparison.spoken?.phoneme || '-'}
                                   </span>
                                 </div>
                               </td>
