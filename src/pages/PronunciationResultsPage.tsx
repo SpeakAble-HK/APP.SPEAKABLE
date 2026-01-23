@@ -160,15 +160,15 @@ const PronunciationResultsPage = () => {
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-6">
               <History className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-4">No Results Yet</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-4">{t("results.noResultsTitle")}</h1>
             <p className="text-muted-foreground mb-8">
               {user 
-                ? "You haven't analyzed any pronunciations yet. Head to the Voice Lab to get started!"
-                : "Sign in to save and view your pronunciation history."}
+                ? t("results.noResultsAuth")
+                : t("results.noResultsGuest")}
             </p>
             <Button onClick={() => navigate('/pronunciation')} size="lg" className="gap-2">
               <Mic2 className="h-5 w-5" />
-              Go to Voice Lab
+              {t("results.goToVoiceLab")}
             </Button>
           </div>
         </div>
@@ -197,19 +197,19 @@ const PronunciationResultsPage = () => {
               <div className="bg-card border border-border rounded-2xl p-4 sticky top-4">
                 <div className="flex items-center gap-2 mb-4">
                   <History className="h-5 w-5 text-primary" />
-                  <h2 className="font-semibold text-foreground">History</h2>
+                  <h2 className="font-semibold text-foreground">{t("results.history")}</h2>
                 </div>
                 
                 {!user && (
                   <p className="text-sm text-muted-foreground mb-4">
-                    Sign in to save your results
+                    {t("results.signInToSave")}
                   </p>
                 )}
 
                 {isLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading...</p>
+                  <p className="text-sm text-muted-foreground">{t("results.loading")}</p>
                 ) : results.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No saved results</p>
+                  <p className="text-sm text-muted-foreground">{t("results.noSavedResults")}</p>
                 ) : (
                   <div className="space-y-2 max-h-[60vh] overflow-y-auto">
                     {results.map((result) => (
@@ -262,7 +262,7 @@ const PronunciationResultsPage = () => {
                   onClick={() => navigate('/pronunciation')}
                 >
                   <Mic2 className="h-4 w-4" />
-                  New Analysis
+                  {t("results.newAnalysis")}
                 </Button>
               </div>
             </div>
@@ -273,19 +273,19 @@ const PronunciationResultsPage = () => {
                 <>
                   <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-foreground mb-4">
-                      Pronunciation Results
+                      {t("results.title")}
                     </h1>
                     
                     {/* Save Button for new results */}
                     {state && user && !hasSaved && !selectedResult && (
                       <Button onClick={handleSaveResult} variant="outline" className="mb-4">
-                        Save to History
+                        {t("results.saveToHistory")}
                       </Button>
                     )}
                     
                     {/* Overall Accuracy */}
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
-                      <span className="text-lg font-semibold">Overall Accuracy:</span>
+                      <span className="text-lg font-semibold">{t("results.overallAccuracy")}:</span>
                       <span className={`text-2xl font-bold ${accuracies.overall >= 80 ? 'text-green-500' : accuracies.overall >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
                         {accuracies.overall}%
                       </span>
@@ -296,21 +296,21 @@ const PronunciationResultsPage = () => {
                   {/* Component Accuracy Cards */}
                   <div className="grid grid-cols-3 gap-4 mb-8">
                     <div className="bg-card border border-border rounded-xl p-4 text-center">
-                      <p className="text-sm text-muted-foreground mb-1">Vowels</p>
+                      <p className="text-sm text-muted-foreground mb-1">{t("results.vowels")}</p>
                       <p className={`text-2xl font-bold ${accuracies.initial === 100 ? 'text-green-500' : 'text-yellow-500'}`}>
                         {accuracies.initial}%
                       </p>
                       <p className="text-xs text-muted-foreground">{accuracies.initialCorrect}/{accuracies.totalCount}</p>
                     </div>
                     <div className="bg-card border border-border rounded-xl p-4 text-center">
-                      <p className="text-sm text-muted-foreground mb-1">Consonants</p>
+                      <p className="text-sm text-muted-foreground mb-1">{t("results.consonants")}</p>
                       <p className={`text-2xl font-bold ${accuracies.final === 100 ? 'text-green-500' : 'text-yellow-500'}`}>
                         {accuracies.final}%
                       </p>
                       <p className="text-xs text-muted-foreground">{accuracies.finalCorrect}/{accuracies.totalCount}</p>
                     </div>
                     <div className="bg-card border border-border rounded-xl p-4 text-center">
-                      <p className="text-sm text-muted-foreground mb-1">Tones</p>
+                      <p className="text-sm text-muted-foreground mb-1">{t("results.tones")}</p>
                       <p className={`text-2xl font-bold ${accuracies.tone === 100 ? 'text-green-500' : 'text-yellow-500'}`}>
                         {accuracies.tone}%
                       </p>
@@ -322,7 +322,7 @@ const PronunciationResultsPage = () => {
                   {state && !selectedResult && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                       <div className="bg-card border border-border rounded-2xl p-6">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-3">Your Recording</h3>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3">{t("results.yourRecording")}</h3>
                         <Button 
                           onClick={() => state.recordingUrl && new Audio(state.recordingUrl).play()} 
                           variant="outline" 
@@ -330,12 +330,12 @@ const PronunciationResultsPage = () => {
                           disabled={!state.recordingUrl}
                         >
                           <Play className="h-4 w-4" />
-                          Play Your Recording
+                          {t("results.playYourRecording")}
                         </Button>
                       </div>
 
                       <div className="bg-card border border-border rounded-2xl p-6">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-3">Correct Pronunciation</h3>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3">{t("results.correctPronunciation")}</h3>
                         <Button 
                           onClick={() => state.generatedAudioUrl && new Audio(state.generatedAudioUrl).play()} 
                           variant="outline" 
@@ -343,7 +343,7 @@ const PronunciationResultsPage = () => {
                           disabled={!state.generatedAudioUrl}
                         >
                           <Volume2 className="h-4 w-4" />
-                          Play Correct Version
+                          {t("results.playCorrectVersion")}
                         </Button>
                       </div>
                     </div>
@@ -351,25 +351,25 @@ const PronunciationResultsPage = () => {
 
                   {/* Detailed Breakdown Table */}
                   <div className="bg-card border border-border rounded-2xl p-6">
-                    <h2 className="text-lg font-semibold text-foreground mb-4">Detailed Breakdown</h2>
+                    <h2 className="text-lg font-semibold text-foreground mb-4">{t("results.detailedBreakdown")}</h2>
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b border-border">
-                            <th className="text-left py-3 px-3 text-muted-foreground font-medium">Character</th>
-                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Vowel</th>
-                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Consonant</th>
-                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Tone</th>
-                            <th className="text-center py-3 px-3 text-muted-foreground font-medium">Status</th>
+                            <th className="text-left py-3 px-3 text-muted-foreground font-medium">{t("results.character")}</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.vowel")}</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.consonant")}</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.tone")}</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium">{t("results.status")}</th>
                           </tr>
                           <tr className="border-b border-border bg-muted/30">
                             <th className="py-2 px-3"></th>
-                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
-                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
-                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
-                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
-                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
-                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.expected")}</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.yours")}</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.expected")}</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.yours")}</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.expected")}</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.yours")}</th>
                             <th className="py-2 px-3"></th>
                           </tr>
                         </thead>
@@ -438,7 +438,7 @@ const PronunciationResultsPage = () => {
 
                     {/* Legend */}
                     <div className="mt-6 pt-4 border-t border-border">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Tone Reference</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">{t("results.toneLegend")}</h3>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                         <div className="flex items-center gap-2">
                           <span className="font-mono bg-muted px-2 py-1 rounded">1</span>
