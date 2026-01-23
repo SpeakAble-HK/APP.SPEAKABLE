@@ -4,13 +4,81 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUserStats } from "@/hooks/useUserStats";
+import { usePronunciationResults } from "@/hooks/usePronunciationResults";
 
 const Index = () => {
   const { user, profile } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { stats, dailyGoalProgress } = useUserStats();
+  const { results } = usePronunciationResults();
 
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'Guest';
+
+  // Calculate AI insight from real pronunciation data
+  const getAiInsight = () => {
+    if (!user || results.length === 0) {
+      return {
+        hasData: false,
+        text: language === 'en-GB' 
+          ? "Complete your first Voice Lab session to get personalized insights!"
+          : language === 'zh-TW'
+          ? "完成您的第一次語音實驗室練習以獲得個人化洞察！"
+          : "完成您的第一次语音实验室练习以获得个性化洞察！"
+      };
+    }
+
+    // Calculate average accuracies from recent results (last 5)
+    const recentResults = results.slice(0, 5);
+    const avgOverall = Math.round(recentResults.reduce((sum, r) => sum + r.overall_accuracy, 0) / recentResults.length);
+    const avgVowel = Math.round(recentResults.reduce((sum, r) => sum + r.initial_accuracy, 0) / recentResults.length);
+    const avgConsonant = Math.round(recentResults.reduce((sum, r) => sum + r.final_accuracy, 0) / recentResults.length);
+    const avgTone = Math.round(recentResults.reduce((sum, r) => sum + r.tone_accuracy, 0) / recentResults.length);
+
+    // Find weakest area
+    const areas = [
+      { name: language === 'en-GB' ? 'vowels' : '元音', score: avgVowel },
+      { name: language === 'en-GB' ? 'consonants' : '辅音', score: avgConsonant },
+      { name: language === 'en-GB' ? 'tones' : '声调', score: avgTone },
+    ];
+    const weakest = areas.reduce((min, area) => area.score < min.score ? area : min, areas[0]);
+    const strongest = areas.reduce((max, area) => area.score > max.score ? area : max, areas[0]);
+
+    // Calculate improvement if we have older results
+    let improvement = 0;
+    if (results.length >= 3) {
+      const olderResults = results.slice(-3);
+      const olderAvg = Math.round(olderResults.reduce((sum, r) => sum + r.overall_accuracy, 0) / olderResults.length);
+      improvement = avgOverall - olderAvg;
+    }
+
+    if (language === 'en-GB') {
+      if (improvement > 0) {
+        return {
+          hasData: true,
+          text: `Your overall accuracy is ${avgOverall}% with a ${improvement}% improvement! Focus on ${weakest.name} (${weakest.score}%) to improve further.`
+        };
+      } else {
+        return {
+          hasData: true,
+          text: `Your overall accuracy is ${avgOverall}%. Your ${strongest.name} are strong (${strongest.score}%), but ${weakest.name} (${weakest.score}%) need more practice.`
+        };
+      }
+    } else {
+      if (improvement > 0) {
+        return {
+          hasData: true,
+          text: `您的整體準確度為 ${avgOverall}%，提升了 ${improvement}%！專注練習${weakest.name}（${weakest.score}%）以進一步提高。`
+        };
+      } else {
+        return {
+          hasData: true,
+          text: `您的整體準確度為 ${avgOverall}%。您的${strongest.name}表現優秀（${strongest.score}%），但${weakest.name}（${weakest.score}%）需要更多練習。`
+        };
+      }
+    }
+  };
+
+  const aiInsight = getAiInsight();
 
   return (
     <div className="hero-gradient min-h-full">
@@ -39,7 +107,7 @@ const Index = () => {
           <div>
             <p className="font-semibold text-primary-foreground">{t("dashboard.aiInsight")}</p>
             <p className="text-sm text-primary-foreground/90">
-              {t("dashboard.aiInsightText")}
+              {aiInsight.text}
             </p>
           </div>
         </div>
