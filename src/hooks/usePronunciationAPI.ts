@@ -4,6 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 export interface PhonemeResult {
   character: string;
   phoneme: string | null;
+  confidence?: number;
+  jyConf?: number;
+  toneConf?: number;
+  isLowConfidence?: boolean;
 }
 
 interface ASRResult {
@@ -16,12 +20,29 @@ interface JyutpingResult {
   result: [string, string | null][]; // Array of [character, jyutping] pairs
 }
 
+interface ASRPhoneVerifyItem {
+  verify: string;
+  predicted: string;
+  match: boolean;
+  conf: number;
+  jy_conf: number;
+  tone_conf: number;
+}
+
+interface ASRPhoneResult {
+  success: boolean;
+  predicted: string;
+  verify_check: ASRPhoneVerifyItem[];
+}
+
 interface VoiceCloneResult {
   success: boolean;
   audio_base64: string;
   content_type: string;
   size: number;
 }
+
+const CONFIDENCE_THRESHOLD = 0.5;
 
 export const usePronunciationAPI = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -68,15 +89,92 @@ export const usePronunciationAPI = () => {
       if (asrError) throw new Error(asrError.message);
       if (!asrData.success) throw new Error(asrData.error || 'ASR failed');
       
-      const spoken: PhonemeResult[] = (asrData as ASRResult).result.map(([char, phoneme]) => ({
+      let spoken: PhonemeResult[] = (asrData as ASRResult).result.map(([char, phoneme]) => ({
         character: char,
         phoneme: phoneme
       }));
-      setSpokenPhonemes(spoken);
-      console.log('Spoken Phonemes:', spoken);
+      console.log('Initial Spoken Phonemes:', spoken);
 
-      // Step 3: Generate voice clone with correct pronunciation
-      // Get the transcribed text from ASR for prompt_text
+      // Step 3: Use ASRPhone API to get confidence scores for verification
+      // Build verify_text from intended phonemes (only phonemes, space-separated)
+      const verifyText = intended
+        .filter(p => p.phoneme !== null)
+        .map(p => p.phoneme)
+        .join(' ');
+
+      if (verifyText) {
+        const asrPhoneFormData = new FormData();
+        asrPhoneFormData.append('audio', audioBlob, 'recording.webm');
+        asrPhoneFormData.append('verify_text', verifyText);
+
+        const { data: asrPhoneData, error: asrPhoneError } = await supabase.functions.invoke('asrphone', {
+          body: asrPhoneFormData,
+        });
+
+        if (asrPhoneError) {
+          console.warn('ASRPhone API error:', asrPhoneError.message);
+          // Continue without confidence data
+        } else if (asrPhoneData?.success && asrPhoneData?.verify_check) {
+          const verifyCheck = (asrPhoneData as ASRPhoneResult).verify_check;
+          console.log('ASRPhone Confidence Data:', verifyCheck);
+
+          // Map confidence scores to intended phonemes
+          const phonemeConfidenceMap = new Map<string, ASRPhoneVerifyItem>();
+          verifyCheck.forEach((item) => {
+            // Use the verify phoneme as key
+            if (!phonemeConfidenceMap.has(item.verify)) {
+              phonemeConfidenceMap.set(item.verify, item);
+            }
+          });
+
+          // Update intended phonemes with confidence data
+          let verifyIndex = 0;
+          const updatedIntended: PhonemeResult[] = intended.map((p) => {
+            if (p.phoneme !== null && verifyIndex < verifyCheck.length) {
+              const confItem = verifyCheck[verifyIndex];
+              verifyIndex++;
+              return {
+                ...p,
+                confidence: confItem.conf,
+                jyConf: confItem.jy_conf,
+                toneConf: confItem.tone_conf,
+                isLowConfidence: confItem.conf < CONFIDENCE_THRESHOLD || 
+                                 confItem.jy_conf < CONFIDENCE_THRESHOLD || 
+                                 confItem.tone_conf < CONFIDENCE_THRESHOLD
+              };
+            }
+            return p;
+          });
+          setIntendedPhonemes(updatedIntended);
+          console.log('Updated Intended Phonemes with Confidence:', updatedIntended);
+
+          // Update spoken phonemes based on predictions
+          const predictedPhonemes = asrPhoneData.predicted?.split(' ') || [];
+          verifyIndex = 0;
+          spoken = spoken.map((p, idx) => {
+            if (p.phoneme !== null && verifyIndex < verifyCheck.length) {
+              const confItem = verifyCheck[verifyIndex];
+              verifyIndex++;
+              return {
+                ...p,
+                phoneme: confItem.predicted || p.phoneme,
+                confidence: confItem.conf,
+                jyConf: confItem.jy_conf,
+                toneConf: confItem.tone_conf,
+                isLowConfidence: confItem.conf < CONFIDENCE_THRESHOLD || 
+                                 confItem.jy_conf < CONFIDENCE_THRESHOLD || 
+                                 confItem.tone_conf < CONFIDENCE_THRESHOLD
+              };
+            }
+            return p;
+          });
+        }
+      }
+
+      setSpokenPhonemes(spoken);
+      console.log('Final Spoken Phonemes:', spoken);
+
+      // Step 4: Generate voice clone with correct pronunciation
       const transcribedText = spoken.map(p => p.character).join('');
       
       const ttsFormData = new FormData();

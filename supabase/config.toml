@@ -3,6 +3,9 @@ project_id = "lemddcxcqrdktzfvfofw"
 [functions.asr]
 verify_jwt = false
 
+[functions.asrphone]
+verify_jwt = false
+
 [functions.jyutping]
 verify_jwt = false
 

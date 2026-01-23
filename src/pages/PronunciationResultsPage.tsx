@@ -12,6 +12,10 @@ import { toast } from "sonner";
 interface PhonemeResult {
   character: string;
   phoneme: string | null;
+  confidence?: number;
+  jyConf?: number;
+  toneConf?: number;
+  isLowConfidence?: boolean;
 }
 
 interface PronunciationResultsState {
@@ -59,15 +63,34 @@ const PronunciationResultsPage = () => {
       finalMatch: boolean;
       toneMatch: boolean;
       isFullMatch: boolean;
+      hasLowConfidence: boolean;
     }[] = [];
+
+    const CONFIDENCE_THRESHOLD = 0.5;
 
     parsedIntended.forEach((intended, index) => {
       const spoken = parsedSpoken[index] || null;
-      const initialMatch = spoken?.initial === intended.initial;
-      const finalMatch = spoken?.final === intended.final;
-      const toneMatch = spoken?.tone === intended.tone;
-      const isFullMatch = initialMatch && finalMatch && toneMatch;
-      comparisons.push({ intended, spoken, initialMatch, finalMatch, toneMatch, isFullMatch });
+      
+      // Check if confidence is low - if so, treat as mismatch
+      const hasLowConfidence = spoken?.isLowConfidence || false;
+      const hasLowJyConf = spoken?.jyConf !== undefined && spoken.jyConf < CONFIDENCE_THRESHOLD;
+      const hasLowToneConf = spoken?.toneConf !== undefined && spoken.toneConf < CONFIDENCE_THRESHOLD;
+      
+      // Initial/Final match considers jyConf, Tone match considers toneConf
+      const initialMatch = spoken?.initial === intended.initial && !hasLowJyConf;
+      const finalMatch = spoken?.final === intended.final && !hasLowJyConf;
+      const toneMatch = spoken?.tone === intended.tone && !hasLowToneConf;
+      const isFullMatch = initialMatch && finalMatch && toneMatch && !hasLowConfidence;
+      
+      comparisons.push({ 
+        intended, 
+        spoken, 
+        initialMatch, 
+        finalMatch, 
+        toneMatch, 
+        isFullMatch,
+        hasLowConfidence: hasLowConfidence || hasLowJyConf || hasLowToneConf
+      });
     });
 
     if (parsedSpoken.length > parsedIntended.length) {
@@ -78,7 +101,8 @@ const PronunciationResultsPage = () => {
           initialMatch: false,
           finalMatch: false,
           toneMatch: false,
-          isFullMatch: false
+          isFullMatch: false,
+          hasLowConfidence: parsedSpoken[i].isLowConfidence || false
         });
       }
     }
