@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +23,7 @@ const signUpSchema = authSchema.extend({
 
 export default function AuthPage() {
   const { user, loading, signIn, signUp } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -103,8 +106,19 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center hero-gradient p-4">
-      <Card className="w-full max-w-md card-shadow">
+    <div className="min-h-screen flex flex-col hero-gradient p-4">
+      {/* Back Button */}
+      <div className="container mx-auto">
+        <Link to="/">
+          <Button variant="ghost" className="mb-4 gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            {t("nav.backToHome")}
+          </Button>
+        </Link>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center">
+        <Card className="w-full max-w-md card-shadow">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
             <img src={logo} alt="SpeakRight Logo" className="h-12 w-12 object-contain" />
@@ -193,6 +207,7 @@ export default function AuthPage() {
           </Tabs>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

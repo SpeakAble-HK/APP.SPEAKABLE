@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Mic, Square, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Vowel positions mapped to the vowel trapezoid
 const vowelPositions: Record<string, { x: number; y: number; label: string }> = {
@@ -22,6 +23,7 @@ const vowelPositions: Record<string, { x: number; y: number; label: string }> = 
 };
 
 const VisualizationPage = () => {
+  const { t } = useLanguage();
   const [selectedVowel, setSelectedVowel] = useState<string | null>("æ");
   const [userVowel] = useState<{ x: number; y: number } | null>({ x: 42, y: 58 });
   const [isRecording, setIsRecording] = useState(false);
@@ -85,7 +87,7 @@ const VisualizationPage = () => {
         <Link to="/">
           <Button variant="ghost" className="mb-8 gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            {t("nav.backToHome")}
           </Button>
         </Link>
         

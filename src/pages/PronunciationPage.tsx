@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 const ALLOWED_AUDIO_TYPES = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/webm', 'audio/ogg', 'audio/m4a', 'audio/x-m4a'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const PronunciationPage = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [isRecording, setIsRecording] = useState(false);
   const [spokenText, setSpokenText] = useState("");
   const [hasRecording, setHasRecording] = useState(false);
@@ -194,7 +196,7 @@ const PronunciationPage = () => {
         <Link to="/">
           <Button variant="ghost" className="mb-8 gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            {t("nav.backToHome")}
           </Button>
         </Link>
         

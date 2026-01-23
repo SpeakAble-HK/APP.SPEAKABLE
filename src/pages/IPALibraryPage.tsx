@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const IPALibraryPage = () => {
@@ -69,6 +72,14 @@ const IPALibraryPage = () => {
   return (
     <div className="hero-gradient min-h-full">
       <div className="container mx-auto px-4 py-6 md:py-8">
+        {/* Back Button */}
+        <Link to="/">
+          <Button variant="ghost" className="mb-6 gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            {t("nav.backToHome")}
+          </Button>
+        </Link>
+
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
