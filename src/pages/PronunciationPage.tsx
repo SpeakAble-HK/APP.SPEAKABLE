@@ -112,7 +112,8 @@ const PronunciationPage = () => {
           spokenPhonemes: result.spoken,
           intendedPhonemes: result.intended,
           generatedAudioUrl: generatedAudioUrl,
-          recordingUrl: recordingUrl
+          recordingUrl: recordingUrl,
+          intendedText: spokenText.trim()
         }
       });
     } else if (error) {

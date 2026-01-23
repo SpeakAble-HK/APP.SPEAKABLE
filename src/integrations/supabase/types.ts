@@ -41,6 +41,45 @@ export type Database = {
         }
         Relationships: []
       }
+      pronunciation_results: {
+        Row: {
+          created_at: string
+          final_accuracy: number
+          id: string
+          initial_accuracy: number
+          intended_phonemes: Json
+          intended_text: string
+          overall_accuracy: number
+          spoken_phonemes: Json
+          tone_accuracy: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          final_accuracy?: number
+          id?: string
+          initial_accuracy?: number
+          intended_phonemes: Json
+          intended_text: string
+          overall_accuracy?: number
+          spoken_phonemes: Json
+          tone_accuracy?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          final_accuracy?: number
+          id?: string
+          initial_accuracy?: number
+          intended_phonemes?: Json
+          intended_text?: string
+          overall_accuracy?: number
+          spoken_phonemes?: Json
+          tone_accuracy?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_stats: {
         Row: {
           best_streak: number
