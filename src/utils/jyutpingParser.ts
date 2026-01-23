@@ -16,6 +16,10 @@ export interface ParsedPhoneme {
   initial: string | null;
   final: string | null;
   tone: string | null;
+  confidence?: number;
+  jyConf?: number;
+  toneConf?: number;
+  isLowConfidence?: boolean;
 }
 
 /**
@@ -67,14 +71,25 @@ export function parseJyutping(phoneme: string | null): { initial: string | null;
 /**
  * Parse a PhonemeResult into a ParsedPhoneme with separated components
  */
-export function parsePhonemeResult(result: { character: string; phoneme: string | null }): ParsedPhoneme {
+export function parsePhonemeResult(result: { 
+  character: string; 
+  phoneme: string | null; 
+  confidence?: number;
+  jyConf?: number;
+  toneConf?: number;
+  isLowConfidence?: boolean;
+}): ParsedPhoneme {
   const { initial, final, tone } = parseJyutping(result.phoneme);
   return {
     character: result.character,
     phoneme: result.phoneme,
     initial,
     final,
-    tone
+    tone,
+    confidence: result.confidence,
+    jyConf: result.jyConf,
+    toneConf: result.toneConf,
+    isLowConfidence: result.isLowConfidence
   };
 }
 
