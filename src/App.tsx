@@ -26,23 +26,16 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
-            <Route
-              path="/*"
-              element={
-                <AppLayout>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/pronunciation" element={<PronunciationPage />} />
-                    <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
-                    <Route path="/practice" element={<PracticePage />} />
-                    <Route path="/learning" element={<LearningPage />} />
-                    <Route path="/learning/library" element={<IPALibraryPage />} />
-                    <Route path="/learning/progress" element={<VisualizationPage />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </AppLayout>
-              }
-            />
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/pronunciation" element={<PronunciationPage />} />
+              <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
+              <Route path="/practice" element={<PracticePage />} />
+              <Route path="/learning" element={<LearningPage />} />
+              <Route path="/learning/library" element={<IPALibraryPage />} />
+              <Route path="/learning/progress" element={<VisualizationPage />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

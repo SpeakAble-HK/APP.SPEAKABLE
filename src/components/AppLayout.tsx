@@ -1,4 +1,5 @@
 import { ReactNode, useEffect } from "react";
+import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -7,7 +8,7 @@ import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 
 interface AppLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -100,7 +101,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Main Content */}
           <main className="flex-1 overflow-auto">
-            {children}
+            {children || <Outlet />}
           </main>
         </div>
       </div>
