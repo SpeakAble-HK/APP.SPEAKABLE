@@ -1,7 +1,12 @@
-import { Link, useLocation, Navigate } from "react-router-dom";
-import { ArrowLeft, Volume2, Play, CheckCircle, XCircle } from "lucide-react";
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, Volume2, Play, CheckCircle, XCircle, History, Trash2, Mic2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { parsePhonemeResult, getToneDescription, ParsedPhoneme } from "@/utils/jyutpingParser";
+import { usePronunciationResults, PronunciationResult } from "@/hooks/usePronunciationResults";
+import { useAuth } from "@/hooks/useAuth";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface PhonemeResult {
   character: string;
@@ -13,29 +18,38 @@ interface PronunciationResultsState {
   intendedPhonemes: PhonemeResult[];
   generatedAudioUrl: string | null;
   recordingUrl: string | null;
+  intendedText?: string;
 }
 
 const PronunciationResultsPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const state = location.state as PronunciationResultsState | null;
+  const { results, isLoading, saveResult, deleteResult } = usePronunciationResults();
+  const { user } = useAuth();
+  const [selectedResult, setSelectedResult] = useState<PronunciationResult | null>(null);
+  const [hasSaved, setHasSaved] = useState(false);
 
-  if (!state) {
-    return <Navigate to="/pronunciation" replace />;
-  }
+  // Determine data source: from navigation state or selected history
+  const displayData = selectedResult 
+    ? {
+        spokenPhonemes: selectedResult.spoken_phonemes,
+        intendedPhonemes: selectedResult.intended_phonemes,
+        generatedAudioUrl: null,
+        recordingUrl: null,
+      }
+    : state;
 
-  const { spokenPhonemes, intendedPhonemes, generatedAudioUrl, recordingUrl } = state;
+  // Parse and compare phonemes
+  const getComparisons = (spokenPhonemes: PhonemeResult[], intendedPhonemes: PhonemeResult[]) => {
+    const parsedIntended: ParsedPhoneme[] = intendedPhonemes
+      .filter(p => p.phoneme !== null)
+      .map(parsePhonemeResult);
+    
+    const parsedSpoken: ParsedPhoneme[] = spokenPhonemes
+      .filter(p => p.phoneme !== null)
+      .map(parsePhonemeResult);
 
-  // Parse phonemes into initials, finals, and tones
-  const parsedIntended: ParsedPhoneme[] = intendedPhonemes
-    .filter(p => p.phoneme !== null)
-    .map(parsePhonemeResult);
-  
-  const parsedSpoken: ParsedPhoneme[] = spokenPhonemes
-    .filter(p => p.phoneme !== null)
-    .map(parsePhonemeResult);
-
-  // Compare phonemes
-  const comparePhonemes = () => {
     const comparisons: { 
       intended: ParsedPhoneme; 
       spoken: ParsedPhoneme | null; 
@@ -54,7 +68,6 @@ const PronunciationResultsPage = () => {
       comparisons.push({ intended, spoken, initialMatch, finalMatch, toneMatch, isFullMatch });
     });
 
-    // Add any extra spoken phonemes
     if (parsedSpoken.length > parsedIntended.length) {
       for (let i = parsedIntended.length; i < parsedSpoken.length; i++) {
         comparisons.push({
@@ -71,28 +84,57 @@ const PronunciationResultsPage = () => {
     return comparisons;
   };
 
-  const comparisons = comparePhonemes();
-  const correctCount = comparisons.filter(c => c.isFullMatch).length;
-  const totalCount = comparisons.length;
-  const accuracy = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+  const calculateAccuracies = (comparisons: ReturnType<typeof getComparisons>) => {
+    const totalCount = comparisons.length;
+    const correctCount = comparisons.filter(c => c.isFullMatch).length;
+    const initialCorrect = comparisons.filter(c => c.initialMatch).length;
+    const finalCorrect = comparisons.filter(c => c.finalMatch).length;
+    const toneCorrect = comparisons.filter(c => c.toneMatch).length;
 
-  // Calculate component-level accuracy
-  const initialCorrect = comparisons.filter(c => c.initialMatch).length;
-  const finalCorrect = comparisons.filter(c => c.finalMatch).length;
-  const toneCorrect = comparisons.filter(c => c.toneMatch).length;
+    return {
+      overall: totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0,
+      initial: totalCount > 0 ? Math.round((initialCorrect / totalCount) * 100) : 0,
+      final: totalCount > 0 ? Math.round((finalCorrect / totalCount) * 100) : 0,
+      tone: totalCount > 0 ? Math.round((toneCorrect / totalCount) * 100) : 0,
+      correctCount,
+      totalCount,
+      initialCorrect,
+      finalCorrect,
+      toneCorrect,
+    };
+  };
 
-  const handlePlayRecording = () => {
-    if (recordingUrl) {
-      const audio = new Audio(recordingUrl);
-      audio.play();
+  // Save new result if from Voice Lab and user is logged in
+  const handleSaveResult = async () => {
+    if (!state || !user || hasSaved) return;
+
+    const comparisons = getComparisons(state.spokenPhonemes, state.intendedPhonemes);
+    const accuracies = calculateAccuracies(comparisons);
+
+    const intendedText = state.intendedText || state.intendedPhonemes.map(p => p.character).join('');
+    
+    const resultId = await saveResult(
+      intendedText,
+      state.spokenPhonemes,
+      state.intendedPhonemes,
+      accuracies.overall,
+      accuracies.initial,
+      accuracies.final,
+      accuracies.tone
+    );
+
+    if (resultId) {
+      setHasSaved(true);
+      toast.success("Result saved to your history!");
     }
   };
 
-  const handlePlayGenerated = () => {
-    if (generatedAudioUrl) {
-      const audio = new Audio(generatedAudioUrl);
-      audio.play();
+  const handleDeleteResult = async (resultId: string) => {
+    await deleteResult(resultId);
+    if (selectedResult?.id === resultId) {
+      setSelectedResult(null);
     }
+    toast.success("Result deleted");
   };
 
   const getMatchClass = (isMatch: boolean) => 
@@ -100,202 +142,335 @@ const PronunciationResultsPage = () => {
       ? 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30' 
       : 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30';
 
+  // Show empty state if no data
+  if (!displayData && !isLoading && results.length === 0) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <Link to="/">
+            <Button variant="ghost" className="mb-8 gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </Link>
+
+          <div className="max-w-2xl mx-auto text-center py-16">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-6">
+              <History className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-4">No Results Yet</h1>
+            <p className="text-muted-foreground mb-8">
+              {user 
+                ? "You haven't analyzed any pronunciations yet. Head to the Voice Lab to get started!"
+                : "Sign in to save and view your pronunciation history."}
+            </p>
+            <Button onClick={() => navigate('/pronunciation')} size="lg" className="gap-2">
+              <Mic2 className="h-5 w-5" />
+              Go to Voice Lab
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Current result comparisons and accuracies
+  const comparisons = displayData ? getComparisons(displayData.spokenPhonemes, displayData.intendedPhonemes) : [];
+  const accuracies = calculateAccuracies(comparisons);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <Link to="/pronunciation">
+        <Link to="/">
           <Button variant="ghost" className="mb-8 gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to Recording
+            Back to Dashboard
           </Button>
         </Link>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-4">
-              Pronunciation Results
-            </h1>
-            
-            {/* Overall Accuracy */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
-              <span className="text-lg font-semibold">Overall Accuracy:</span>
-              <span className={`text-2xl font-bold ${accuracy >= 80 ? 'text-green-500' : accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
-                {accuracy}%
-              </span>
-              <span className="text-muted-foreground">({correctCount}/{totalCount})</span>
-            </div>
-          </div>
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* History Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="bg-card border border-border rounded-2xl p-4 sticky top-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <History className="h-5 w-5 text-primary" />
+                  <h2 className="font-semibold text-foreground">History</h2>
+                </div>
+                
+                {!user && (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Sign in to save your results
+                  </p>
+                )}
 
-          {/* Component Accuracy Cards */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-card border border-border rounded-xl p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-1">Initials</p>
-              <p className={`text-2xl font-bold ${initialCorrect === totalCount ? 'text-green-500' : 'text-yellow-500'}`}>
-                {totalCount > 0 ? Math.round((initialCorrect / totalCount) * 100) : 0}%
-              </p>
-              <p className="text-xs text-muted-foreground">{initialCorrect}/{totalCount}</p>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-1">Finals</p>
-              <p className={`text-2xl font-bold ${finalCorrect === totalCount ? 'text-green-500' : 'text-yellow-500'}`}>
-                {totalCount > 0 ? Math.round((finalCorrect / totalCount) * 100) : 0}%
-              </p>
-              <p className="text-xs text-muted-foreground">{finalCorrect}/{totalCount}</p>
-            </div>
-            <div className="bg-card border border-border rounded-xl p-4 text-center">
-              <p className="text-sm text-muted-foreground mb-1">Tones</p>
-              <p className={`text-2xl font-bold ${toneCorrect === totalCount ? 'text-green-500' : 'text-yellow-500'}`}>
-                {totalCount > 0 ? Math.round((toneCorrect / totalCount) * 100) : 0}%
-              </p>
-              <p className="text-xs text-muted-foreground">{toneCorrect}/{totalCount}</p>
-            </div>
-          </div>
-
-          {/* Audio Playback Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">Your Recording</h3>
-              <Button 
-                onClick={handlePlayRecording} 
-                variant="outline" 
-                className="w-full gap-2"
-                disabled={!recordingUrl}
-              >
-                <Play className="h-4 w-4" />
-                Play Your Recording
-              </Button>
-            </div>
-
-            <div className="bg-card border border-border rounded-2xl p-6">
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">Correct Pronunciation</h3>
-              <Button 
-                onClick={handlePlayGenerated} 
-                variant="outline" 
-                className="w-full gap-2"
-                disabled={!generatedAudioUrl}
-              >
-                <Volume2 className="h-4 w-4" />
-                Play Correct Version
-              </Button>
-            </div>
-          </div>
-
-          {/* Detailed Breakdown Table */}
-          <div className="bg-card border border-border rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Detailed Breakdown</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left py-3 px-3 text-muted-foreground font-medium">Character</th>
-                    <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Initial</th>
-                    <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Final</th>
-                    <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Tone</th>
-                    <th className="text-center py-3 px-3 text-muted-foreground font-medium">Status</th>
-                  </tr>
-                  <tr className="border-b border-border bg-muted/30">
-                    <th className="py-2 px-3"></th>
-                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
-                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
-                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
-                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
-                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
-                    <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
-                    <th className="py-2 px-3"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {comparisons.map((comparison, index) => (
-                    <tr key={index} className="border-b border-border/50 last:border-0">
-                      <td className="py-3 px-3">
-                        <div className="flex flex-col items-start">
-                          <span className="text-lg font-medium">
-                            {comparison.intended.character || comparison.spoken?.character || '-'}
-                          </span>
-                          <span className="text-xs text-muted-foreground font-mono">
-                            {comparison.intended.phoneme || comparison.spoken?.phoneme || '-'}
-                          </span>
+                {isLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading...</p>
+                ) : results.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No saved results</p>
+                ) : (
+                  <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+                    {results.map((result) => (
+                      <div
+                        key={result.id}
+                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                          selectedResult?.id === result.id 
+                            ? 'bg-primary/10 border-primary' 
+                            : 'bg-muted/50 border-border hover:bg-muted'
+                        }`}
+                        onClick={() => setSelectedResult(result)}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">
+                              {result.intended_text}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(result.created_at), 'MMM d, HH:mm')}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold ${
+                              result.overall_accuracy >= 80 ? 'text-green-500' : 
+                              result.overall_accuracy >= 50 ? 'text-yellow-500' : 'text-red-500'
+                            }`}>
+                              {result.overall_accuracy}%
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteResult(result.id);
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
-                      </td>
-                      {/* Initial */}
-                      <td className="py-3 px-3 text-center">
-                        <span className="font-mono text-primary">
-                          {comparison.intended.initial || '-'}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.initialMatch)}`}>
-                          {comparison.spoken?.initial || '-'}
-                        </span>
-                      </td>
-                      {/* Final */}
-                      <td className="py-3 px-3 text-center">
-                        <span className="font-mono text-primary">
-                          {comparison.intended.final || '-'}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.finalMatch)}`}>
-                          {comparison.spoken?.final || '-'}
-                        </span>
-                      </td>
-                      {/* Tone */}
-                      <td className="py-3 px-3 text-center">
-                        <span className="font-mono text-primary" title={getToneDescription(comparison.intended.tone)}>
-                          {comparison.intended.tone || '-'}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        <span 
-                          className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.toneMatch)}`}
-                          title={getToneDescription(comparison.spoken?.tone || null)}
-                        >
-                          {comparison.spoken?.tone || '-'}
-                        </span>
-                      </td>
-                      {/* Status */}
-                      <td className="py-3 px-3 text-center">
-                        {comparison.isFullMatch ? (
-                          <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-500 mx-auto" />
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4 gap-2"
+                  onClick={() => navigate('/pronunciation')}
+                >
+                  <Mic2 className="h-4 w-4" />
+                  New Analysis
+                </Button>
+              </div>
             </div>
 
-            {/* Legend */}
-            <div className="mt-6 pt-4 border-t border-border">
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Tone Reference</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono bg-muted px-2 py-1 rounded">1</span>
-                  <span className="text-muted-foreground">High Level (陰平)</span>
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              {displayData ? (
+                <>
+                  <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-foreground mb-4">
+                      Pronunciation Results
+                    </h1>
+                    
+                    {/* Save Button for new results */}
+                    {state && user && !hasSaved && !selectedResult && (
+                      <Button onClick={handleSaveResult} variant="outline" className="mb-4">
+                        Save to History
+                      </Button>
+                    )}
+                    
+                    {/* Overall Accuracy */}
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border">
+                      <span className="text-lg font-semibold">Overall Accuracy:</span>
+                      <span className={`text-2xl font-bold ${accuracies.overall >= 80 ? 'text-green-500' : accuracies.overall >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>
+                        {accuracies.overall}%
+                      </span>
+                      <span className="text-muted-foreground">({accuracies.correctCount}/{accuracies.totalCount})</span>
+                    </div>
+                  </div>
+
+                  {/* Component Accuracy Cards */}
+                  <div className="grid grid-cols-3 gap-4 mb-8">
+                    <div className="bg-card border border-border rounded-xl p-4 text-center">
+                      <p className="text-sm text-muted-foreground mb-1">Initials</p>
+                      <p className={`text-2xl font-bold ${accuracies.initial === 100 ? 'text-green-500' : 'text-yellow-500'}`}>
+                        {accuracies.initial}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">{accuracies.initialCorrect}/{accuracies.totalCount}</p>
+                    </div>
+                    <div className="bg-card border border-border rounded-xl p-4 text-center">
+                      <p className="text-sm text-muted-foreground mb-1">Finals</p>
+                      <p className={`text-2xl font-bold ${accuracies.final === 100 ? 'text-green-500' : 'text-yellow-500'}`}>
+                        {accuracies.final}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">{accuracies.finalCorrect}/{accuracies.totalCount}</p>
+                    </div>
+                    <div className="bg-card border border-border rounded-xl p-4 text-center">
+                      <p className="text-sm text-muted-foreground mb-1">Tones</p>
+                      <p className={`text-2xl font-bold ${accuracies.tone === 100 ? 'text-green-500' : 'text-yellow-500'}`}>
+                        {accuracies.tone}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">{accuracies.toneCorrect}/{accuracies.totalCount}</p>
+                    </div>
+                  </div>
+
+                  {/* Audio Playback Section - only for fresh results */}
+                  {state && !selectedResult && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                      <div className="bg-card border border-border rounded-2xl p-6">
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3">Your Recording</h3>
+                        <Button 
+                          onClick={() => state.recordingUrl && new Audio(state.recordingUrl).play()} 
+                          variant="outline" 
+                          className="w-full gap-2"
+                          disabled={!state.recordingUrl}
+                        >
+                          <Play className="h-4 w-4" />
+                          Play Your Recording
+                        </Button>
+                      </div>
+
+                      <div className="bg-card border border-border rounded-2xl p-6">
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3">Correct Pronunciation</h3>
+                        <Button 
+                          onClick={() => state.generatedAudioUrl && new Audio(state.generatedAudioUrl).play()} 
+                          variant="outline" 
+                          className="w-full gap-2"
+                          disabled={!state.generatedAudioUrl}
+                        >
+                          <Volume2 className="h-4 w-4" />
+                          Play Correct Version
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Detailed Breakdown Table */}
+                  <div className="bg-card border border-border rounded-2xl p-6">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Detailed Breakdown</h2>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th className="text-left py-3 px-3 text-muted-foreground font-medium">Character</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Initial</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Final</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Tone</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium">Status</th>
+                          </tr>
+                          <tr className="border-b border-border bg-muted/30">
+                            <th className="py-2 px-3"></th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Expected</th>
+                            <th className="py-2 px-3 text-xs text-muted-foreground font-normal">Yours</th>
+                            <th className="py-2 px-3"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {comparisons.map((comparison, index) => (
+                            <tr key={index} className="border-b border-border/50 last:border-0">
+                              <td className="py-3 px-3">
+                                <div className="flex flex-col items-start">
+                                  <span className="text-lg font-medium">
+                                    {comparison.intended.character || comparison.spoken?.character || '-'}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground font-mono">
+                                    {comparison.intended.phoneme || comparison.spoken?.phoneme || '-'}
+                                  </span>
+                                </div>
+                              </td>
+                              {/* Initial */}
+                              <td className="py-3 px-3 text-center">
+                                <span className="font-mono text-primary">
+                                  {comparison.intended.initial || '-'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 text-center">
+                                <span className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.initialMatch)}`}>
+                                  {comparison.spoken?.initial || '-'}
+                                </span>
+                              </td>
+                              {/* Final */}
+                              <td className="py-3 px-3 text-center">
+                                <span className="font-mono text-primary">
+                                  {comparison.intended.final || '-'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 text-center">
+                                <span className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.finalMatch)}`}>
+                                  {comparison.spoken?.final || '-'}
+                                </span>
+                              </td>
+                              {/* Tone */}
+                              <td className="py-3 px-3 text-center">
+                                <span className="font-mono text-primary" title={getToneDescription(comparison.intended.tone)}>
+                                  {comparison.intended.tone || '-'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 text-center">
+                                <span 
+                                  className={`font-mono px-2 py-1 rounded border ${getMatchClass(comparison.toneMatch)}`}
+                                  title={getToneDescription(comparison.spoken?.tone || null)}
+                                >
+                                  {comparison.spoken?.tone || '-'}
+                                </span>
+                              </td>
+                              {/* Status */}
+                              <td className="py-3 px-3 text-center">
+                                {comparison.isFullMatch ? (
+                                  <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />
+                                ) : (
+                                  <XCircle className="h-5 w-5 text-red-500 mx-auto" />
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Legend */}
+                    <div className="mt-6 pt-4 border-t border-border">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-2">Tone Reference</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono bg-muted px-2 py-1 rounded">1</span>
+                          <span className="text-muted-foreground">High Level (陰平)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono bg-muted px-2 py-1 rounded">2</span>
+                          <span className="text-muted-foreground">High Rising (陰上)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono bg-muted px-2 py-1 rounded">3</span>
+                          <span className="text-muted-foreground">Mid Level (陰去)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono bg-muted px-2 py-1 rounded">4</span>
+                          <span className="text-muted-foreground">Low Falling (陽平)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono bg-muted px-2 py-1 rounded">5</span>
+                          <span className="text-muted-foreground">Low Rising (陽上)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono bg-muted px-2 py-1 rounded">6</span>
+                          <span className="text-muted-foreground">Low Level (陽去)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground">Select a result from the history to view details</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono bg-muted px-2 py-1 rounded">2</span>
-                  <span className="text-muted-foreground">High Rising (陰上)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono bg-muted px-2 py-1 rounded">3</span>
-                  <span className="text-muted-foreground">Mid Level (陰去)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono bg-muted px-2 py-1 rounded">4</span>
-                  <span className="text-muted-foreground">Low Falling (陽平)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono bg-muted px-2 py-1 rounded">5</span>
-                  <span className="text-muted-foreground">Low Rising (陽上)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono bg-muted px-2 py-1 rounded">6</span>
-                  <span className="text-muted-foreground">Low Level (陽去)</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
