@@ -294,14 +294,14 @@ const PronunciationResultsPage = () => {
                   {/* Component Accuracy Cards */}
                   <div className="grid grid-cols-3 gap-4 mb-8">
                     <div className="bg-card border border-border rounded-xl p-4 text-center">
-                      <p className="text-sm text-muted-foreground mb-1">Initials</p>
+                      <p className="text-sm text-muted-foreground mb-1">Vowels</p>
                       <p className={`text-2xl font-bold ${accuracies.initial === 100 ? 'text-green-500' : 'text-yellow-500'}`}>
                         {accuracies.initial}%
                       </p>
                       <p className="text-xs text-muted-foreground">{accuracies.initialCorrect}/{accuracies.totalCount}</p>
                     </div>
                     <div className="bg-card border border-border rounded-xl p-4 text-center">
-                      <p className="text-sm text-muted-foreground mb-1">Finals</p>
+                      <p className="text-sm text-muted-foreground mb-1">Consonants</p>
                       <p className={`text-2xl font-bold ${accuracies.final === 100 ? 'text-green-500' : 'text-yellow-500'}`}>
                         {accuracies.final}%
                       </p>
@@ -355,8 +355,8 @@ const PronunciationResultsPage = () => {
                         <thead>
                           <tr className="border-b border-border">
                             <th className="text-left py-3 px-3 text-muted-foreground font-medium">Character</th>
-                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Initial</th>
-                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Final</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Vowel</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Consonant</th>
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>Tone</th>
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium">Status</th>
                           </tr>
