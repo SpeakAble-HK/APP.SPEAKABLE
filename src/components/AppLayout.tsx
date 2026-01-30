@@ -103,11 +103,6 @@ export function AppLayout({ children }: AppLayoutProps) {
           <main className="flex-1 overflow-auto">
             {children || <Outlet />}
           </main>
-
-          {/* Footer */}
-          <footer className="border-t border-border bg-background/95 py-4 px-6 text-center text-sm text-muted-foreground">
-            © 2026 SpeakRight. All rights reserved.
-          </footer>
         </div>
       </div>
     </SidebarProvider>
