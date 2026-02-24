@@ -14,6 +14,7 @@ import VisualizationPage from "./pages/VisualizationPage";
 import PracticePage from "./pages/PracticePage";
 import LearningPage from "./pages/LearningPage";
 import IPALibraryPage from "./pages/IPALibraryPage";
+import FeaturesPage from "./pages/FeaturesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/auth" element={<AuthPage />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
+                <Route path="/features" element={<FeaturesPage />} />
                 <Route path="/pronunciation" element={<PronunciationPage />} />
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                 <Route path="/practice" element={<PracticePage />} />

@@ -13,9 +13,9 @@ interface LanguageSwitcherProps {
 }
 
 const languages = [
-  { value: 'en-GB', label: 'English (UK)' },
   { value: 'zh-TW', label: '繁體中文' },
   { value: 'zh-CN', label: '简体中文' },
+  { value: 'en-GB', label: 'English (UK)' },
 ];
 
 export function LanguageSwitcher({ value, onChange }: LanguageSwitcherProps) {
