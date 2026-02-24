@@ -44,12 +44,12 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar" aria-label="Main navigation">
-      <div className="flex items-center gap-2 p-4 border-b border-sidebar-border">
-        <img src={logo} alt="SpeakAble HK Logo" className="h-8 w-8 object-contain flex-shrink-0" />
+      <Link to="/" className="flex items-center gap-2 p-4 border-b border-sidebar-border hover:bg-sidebar-accent/50 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="SpeakAble HK — Go to home page">
+        <img src={logo} alt="" className="h-8 w-8 object-contain flex-shrink-0" />
         {!collapsed && (
           <span className="text-lg font-bold text-sidebar-foreground whitespace-nowrap">SpeakAble HK</span>
         )}
-      </div>
+      </Link>
 
       <SidebarContent className="py-4">
         <SidebarGroup>

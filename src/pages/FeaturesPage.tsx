@@ -54,7 +54,7 @@ const FeaturesPage = () => {
 
       {/* Features Grid */}
       <section className="pb-16 md:pb-24 px-4">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 px-2 sm:px-0">
           {services.map((svc, i) => (
             <article key={i} className="group relative bg-card border border-border rounded-2xl p-8 transition-all duration-300 hover:border-primary/30 hover:shadow-[var(--shadow-card-hover)]">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
