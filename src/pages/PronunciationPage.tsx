@@ -71,8 +71,9 @@ const PronunciationPage = () => {
         const finalDuration = (Date.now() - recordingStartTimeRef.current) / 1000;
         setAudioDuration(finalDuration);
 
+        const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm;codecs=opus';
         const blob = new Blob(audioChunksRef.current, {
-          type: 'audio/webm'
+          type: mimeType
         });
         // Revoke previous URL to prevent memory leaks
         if (recordingUrl) {
@@ -180,7 +181,9 @@ const PronunciationPage = () => {
       return;
     }
 
-    const audio = new Audio(recordingUrl);
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.src = recordingUrl;
     audioElementRef.current = audio;
 
     const onTimeUpdate = () => {

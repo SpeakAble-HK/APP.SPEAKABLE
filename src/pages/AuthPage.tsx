@@ -19,9 +19,13 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import logo from '@/assets/logo.png';
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{};:'",.<>?/\\|`~]).{6,}$/;
+const PASSWORD_HELPER_EN = 'Password must be at least 6 characters long and include one uppercase letter, one lowercase letter, one number, and one special character.';
+const PASSWORD_HELPER_ZH = '密碼必須至少6個字符，並包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符。';
+
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(6, 'Password must be at least 6 characters').regex(PASSWORD_REGEX, 'Password does not meet requirements'),
 });
 
 const signUpSchema = authSchema.extend({
@@ -290,6 +294,7 @@ export default function AuthPage() {
                       </Button>
                     </div>
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                    <p className="text-xs text-muted-foreground">{isEn ? PASSWORD_HELPER_EN : PASSWORD_HELPER_ZH}</p>
                   </div>
 
                   <MockRecaptcha checked={captchaChecked} onChange={setCaptchaChecked} />
@@ -312,7 +317,7 @@ export default function AuthPage() {
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={isSubmitting || !agreedTerms || !captchaChecked}
+                    disabled={isSubmitting || !agreedTerms || !captchaChecked || !PASSWORD_REGEX.test(signUpForm.password)}
                   >
                     {isSubmitting ? (isEn ? 'Creating account...' : '創建帳號中...') : (isEn ? 'Create Account' : isTW ? '創建帳號' : '创建账号')}
                   </Button>
