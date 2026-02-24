@@ -8,13 +8,11 @@ import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { AppLayout } from "./components/AppLayout";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
-import PronunciationPage from "./pages/PronunciationPage";
 import PronunciationResultsPage from "./pages/PronunciationResultsPage";
-import VisualizationPage from "./pages/VisualizationPage";
-import PracticePage from "./pages/PracticePage";
-import LearningPage from "./pages/LearningPage";
+import SpeechQuestPage from "./pages/SpeechQuestPage";
+import AboutPage from "./pages/AboutPage";
 import IPALibraryPage from "./pages/IPALibraryPage";
-import FeaturesPage from "./pages/FeaturesPage";
+import VisualizationPage from "./pages/VisualizationPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,11 +29,9 @@ const App = () => (
               <Route path="/auth" element={<AuthPage />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
-                <Route path="/features" element={<FeaturesPage />} />
-                <Route path="/pronunciation" element={<PronunciationPage />} />
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
-                <Route path="/practice" element={<PracticePage />} />
-                <Route path="/learning" element={<LearningPage />} />
+                <Route path="/speech-quest" element={<SpeechQuestPage />} />
+                <Route path="/about" element={<AboutPage />} />
                 <Route path="/learning/library" element={<IPALibraryPage />} />
                 <Route path="/learning/progress" element={<VisualizationPage />} />
               </Route>
