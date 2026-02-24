@@ -1,10 +1,11 @@
 import { ReactNode, useEffect, useState, useRef } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { AccessibilityToolbar } from "@/components/AccessibilityToolbar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
+import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 
 interface AppLayoutProps {
@@ -115,15 +116,21 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       {/* Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 md:px-6 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="p-2 rounded-lg hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label={language === 'en-GB' ? 'Open navigation menu' : '打開導航選單'}
-        >
-          <svg className="h-5 w-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="p-2 rounded-lg hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label={language === 'en-GB' ? 'Open navigation menu' : '打開導航選單'}
+          >
+            <svg className="h-5 w-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
+            <img src={logo} alt="" className="h-7 w-7 object-contain" />
+            <span className="text-sm font-bold text-foreground hidden sm:inline">SpeakAble HK</span>
+          </Link>
+        </div>
         <div className="flex items-center gap-2 md:gap-3">
           <AccessibilityToolbar />
           <LanguageSwitcher value={language} onChange={handleLanguageChange} />

@@ -17,27 +17,39 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          date_of_birth: string | null
           display_name: string | null
+          first_name: string | null
           id: string
+          last_name: string | null
           preferred_language: string | null
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           preferred_language?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
           created_at?: string
+          date_of_birth?: string | null
           display_name?: string | null
+          first_name?: string | null
           id?: string
+          last_name?: string | null
           preferred_language?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: []
       }

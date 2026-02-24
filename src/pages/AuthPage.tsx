@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { ArrowLeft, ShieldCheck, Chrome } from 'lucide-react';
+import { ArrowLeft, ShieldCheck } from 'lucide-react';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import { lovable } from '@/integrations/lovable/index';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,6 +13,9 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import logo from '@/assets/logo.png';
 
@@ -20,10 +25,12 @@ const authSchema = z.object({
 });
 
 const signUpSchema = authSchema.extend({
-  displayName: z.string().min(1, 'Please enter your name'),
+  firstName: z.string().min(1, 'Please enter your first name'),
+  lastName: z.string().min(1, 'Please enter your last name'),
+  username: z.string().min(3, 'Username must be at least 3 characters').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+  dateOfBirth: z.date({ required_error: 'Please select your date of birth' }),
 });
 
-// Mock reCAPTCHA widget
 function MockRecaptcha({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div
@@ -56,7 +63,7 @@ export default function AuthPage() {
   const isTW = language === 'zh-TW';
 
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [signUpForm, setSignUpForm] = useState({ email: '', password: '', displayName: '' });
+  const [signUpForm, setSignUpForm] = useState({ email: '', password: '', firstName: '', lastName: '', username: '', dateOfBirth: undefined as Date | undefined });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [captchaChecked, setCaptchaChecked] = useState(false);
@@ -101,13 +108,23 @@ export default function AuthPage() {
       return;
     }
     setIsSubmitting(true);
-    const { error } = await signUp(signUpForm.email, signUpForm.password, signUpForm.displayName);
-    setIsSubmitting(false);
-    if (error) {
-      toast.error(error.message.includes('already registered') ? (isEn ? 'This email is already registered.' : '此電郵已被註冊。') : error.message);
-    } else {
-      toast.success(isEn ? 'Account created successfully!' : '帳號創建成功！');
-      navigate('/');
+    try {
+      const { error } = await signUp(signUpForm.email, signUpForm.password, {
+        firstName: signUpForm.firstName,
+        lastName: signUpForm.lastName,
+        username: signUpForm.username,
+        dateOfBirth: signUpForm.dateOfBirth ? format(signUpForm.dateOfBirth, 'yyyy-MM-dd') : undefined,
+      });
+      setIsSubmitting(false);
+      if (error) {
+        toast.error(error.message.includes('already registered') ? (isEn ? 'This email is already registered.' : '此電郵已被註冊。') : error.message);
+      } else {
+        toast.success(isEn ? 'Account created successfully!' : '帳號創建成功！');
+        navigate('/');
+      }
+    } catch (err) {
+      setIsSubmitting(false);
+      toast.error(isEn ? 'An unexpected error occurred. Please try again.' : '發生意外錯誤，請重試。');
     }
   };
 
@@ -206,10 +223,50 @@ export default function AuthPage() {
               {/* Sign Up */}
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-firstname">{isEn ? 'First Name' : '名'}</Label>
+                      <Input id="signup-firstname" type="text" placeholder={isEn ? 'First name' : '名'} value={signUpForm.firstName} onChange={(e) => setSignUpForm({ ...signUpForm, firstName: e.target.value })} />
+                      {errors.firstName && <p className="text-sm text-destructive">{errors.firstName}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-lastname">{isEn ? 'Last Name' : '姓'}</Label>
+                      <Input id="signup-lastname" type="text" placeholder={isEn ? 'Last name' : '姓'} value={signUpForm.lastName} onChange={(e) => setSignUpForm({ ...signUpForm, lastName: e.target.value })} />
+                      {errors.lastName && <p className="text-sm text-destructive">{errors.lastName}</p>}
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">{isEn ? 'Name' : '姓名'}</Label>
-                    <Input id="signup-name" type="text" placeholder={isEn ? 'Your name' : '您的姓名'} value={signUpForm.displayName} onChange={(e) => setSignUpForm({ ...signUpForm, displayName: e.target.value })} />
-                    {errors.displayName && <p className="text-sm text-destructive">{errors.displayName}</p>}
+                    <Label htmlFor="signup-username">{isEn ? 'Username' : '用戶名'}</Label>
+                    <Input id="signup-username" type="text" placeholder={isEn ? 'username' : '用戶名'} value={signUpForm.username} onChange={(e) => setSignUpForm({ ...signUpForm, username: e.target.value })} />
+                    {errors.username && <p className="text-sm text-destructive">{errors.username}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{isEn ? 'Date of Birth' : '出生日期'}</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !signUpForm.dateOfBirth && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {signUpForm.dateOfBirth ? format(signUpForm.dateOfBirth, "PPP") : (isEn ? 'Pick a date' : '選擇日期')}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={signUpForm.dateOfBirth}
+                          onSelect={(date) => setSignUpForm({ ...signUpForm, dateOfBirth: date })}
+                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    {errors.dateOfBirth && <p className="text-sm text-destructive">{errors.dateOfBirth}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">{isEn ? 'Email' : '電郵'}</Label>
@@ -222,10 +279,8 @@ export default function AuthPage() {
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                   </div>
 
-                  {/* Mock reCAPTCHA */}
                   <MockRecaptcha checked={captchaChecked} onChange={setCaptchaChecked} />
 
-                  {/* Terms & Conditions */}
                   <div className="flex items-start gap-2">
                     <Checkbox
                       id="terms"

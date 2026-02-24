@@ -78,17 +78,28 @@ export function useAuth() {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, displayName?: string) => {
+  const signUp = async (email: string, password: string, profileData?: { firstName?: string; lastName?: string; username?: string; dateOfBirth?: string }) => {
     const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: { display_name: displayName }
-      }
-    });
-    return { error };
+    try {
+      const displayName = profileData ? `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() : undefined;
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            display_name: displayName,
+            first_name: profileData?.firstName,
+            last_name: profileData?.lastName,
+            username: profileData?.username,
+            date_of_birth: profileData?.dateOfBirth,
+          }
+        }
+      });
+      return { error };
+    } catch (err) {
+      return { error: err instanceof Error ? err : new Error('Signup failed') };
+    }
   };
 
   const signOut = async () => {
