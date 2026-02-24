@@ -108,10 +108,27 @@ serve(async (req) => {
     ttsFormData.append('prompt_text', promptText)
     ttsFormData.append('prompt_audio', promptAudio)
 
-    const ttsResponse = await fetch(`${API_BASE_URL}/api/tts`, {
-      method: 'POST',
-      body: ttsFormData,
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30000)
+
+    let ttsResponse: Response
+    try {
+      ttsResponse = await fetch(`${API_BASE_URL}/api/tts`, {
+        method: 'POST',
+        body: ttsFormData,
+        signal: controller.signal,
+      })
+    } catch (e) {
+      clearTimeout(timeout)
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        return new Response(
+          JSON.stringify({ error: 'Request timed out. Please try again.' }),
+          { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      throw e
+    }
+    clearTimeout(timeout)
 
     if (!ttsResponse.ok) {
       const errorText = await ttsResponse.text()

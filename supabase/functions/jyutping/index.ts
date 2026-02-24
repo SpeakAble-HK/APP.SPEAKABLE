@@ -73,10 +73,27 @@ serve(async (req) => {
     const jyutpingFormData = new FormData()
     jyutpingFormData.append('text', text)
 
-    const jyutpingResponse = await fetch(`${API_BASE_URL}/api/jyutping`, {
-      method: 'POST',
-      body: jyutpingFormData,
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30000)
+
+    let jyutpingResponse: Response
+    try {
+      jyutpingResponse = await fetch(`${API_BASE_URL}/api/jyutping`, {
+        method: 'POST',
+        body: jyutpingFormData,
+        signal: controller.signal,
+      })
+    } catch (e) {
+      clearTimeout(timeout)
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        return new Response(
+          JSON.stringify({ error: 'Request timed out. Please try again.' }),
+          { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      throw e
+    }
+    clearTimeout(timeout)
 
     if (!jyutpingResponse.ok) {
       const errorText = await jyutpingResponse.text()
