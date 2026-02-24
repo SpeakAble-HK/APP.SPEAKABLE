@@ -16,6 +16,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{};:'",.<>?/\\|`~]).{6,}$/;
+const PASSWORD_HELPER_EN = 'Password must be at least 6 characters long and include one uppercase letter, one lowercase letter, one number, and one special character.';
+const PASSWORD_HELPER_ZH = '密碼必須至少6個字符，並包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符。';
+
 export default function ProfilePage() {
   const { user, profile, loading } = useAuth();
   const { language } = useLanguage();
@@ -118,8 +122,8 @@ export default function ProfilePage() {
         toast.error(isEn ? 'New passwords do not match' : '新密碼不匹配');
         return;
       }
-      if (newPassword.length < 6) {
-        toast.error(isEn ? 'Password must be at least 6 characters' : '密碼必須至少6個字符');
+      if (!PASSWORD_REGEX.test(newPassword)) {
+        toast.error(isEn ? 'Password does not meet requirements' : '密碼不符合要求');
         return;
       }
       if (!currentPassword) {
@@ -180,7 +184,8 @@ export default function ProfilePage() {
 
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'U';
   const passwordsMatch = newPassword.length === 0 || newPassword === confirmPassword;
-  const canSubmitPassword = newPassword.length === 0 || (newPassword.length >= 6 && passwordsMatch && currentPassword.length > 0);
+  const passwordValid = newPassword.length === 0 || PASSWORD_REGEX.test(newPassword);
+  const canSubmitPassword = newPassword.length === 0 || (passwordValid && passwordsMatch && currentPassword.length > 0);
 
   if (loading) {
     return (
@@ -316,6 +321,10 @@ export default function ProfilePage() {
                     {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
+                <p className="text-xs text-muted-foreground">{isEn ? PASSWORD_HELPER_EN : PASSWORD_HELPER_ZH}</p>
+                {newPassword.length > 0 && !passwordValid && (
+                  <p className="text-xs text-destructive">{isEn ? 'Password does not meet requirements' : '密碼不符合要求'}</p>
+                )}
               </div>
 
               {/* Confirm New Password */}

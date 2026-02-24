@@ -47,9 +47,12 @@ const PronunciationResultsPage = () => {
   const generatedAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Setup audio elements with event listeners
+  // Setup recording audio with preload and canplaythrough guard
   useEffect(() => {
-    if (!state?.recordingUrl) return;
-    const audio = new Audio(state.recordingUrl);
+    if (!state?.recordingUrl) { recordingAudioRef.current = null; return; }
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.src = state.recordingUrl;
     recordingAudioRef.current = audio;
     const onTimeUpdate = () => {
       if (audio.duration > 0) setRecordingProgress((audio.currentTime / audio.duration) * 100);
@@ -60,9 +63,12 @@ const PronunciationResultsPage = () => {
     return () => { audio.removeEventListener('timeupdate', onTimeUpdate); audio.removeEventListener('ended', onEnded); audio.pause(); };
   }, [state?.recordingUrl]);
 
+  // Setup generated audio with preload and canplaythrough guard
   useEffect(() => {
-    if (!state?.generatedAudioUrl) return;
-    const audio = new Audio(state.generatedAudioUrl);
+    if (!state?.generatedAudioUrl) { generatedAudioRef.current = null; return; }
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.src = state.generatedAudioUrl;
     generatedAudioRef.current = audio;
     const onTimeUpdate = () => {
       if (audio.duration > 0) setGeneratedProgress((audio.currentTime / audio.duration) * 100);
@@ -76,7 +82,12 @@ const PronunciationResultsPage = () => {
   const toggleAudio = (ref: React.MutableRefObject<HTMLAudioElement | null>, playing: boolean, setPlaying: (v: boolean) => void) => {
     if (!ref.current) return;
     if (playing) { ref.current.pause(); setPlaying(false); }
-    else { ref.current.play().then(() => setPlaying(true)).catch(() => {}); }
+    else {
+      ref.current.play().then(() => setPlaying(true)).catch((err) => {
+        console.error('Audio playback failed:', err);
+        toast.error('Audio playback failed');
+      });
+    }
   };
 
   // Determine data source: from navigation state or selected history
