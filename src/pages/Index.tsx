@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useGuestTrial } from "@/hooks/useGuestTrial";
+import { TrialLimitModal } from "@/components/TrialLimitModal";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
@@ -17,6 +19,8 @@ const Index = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const isAuthenticated = !!user && !user.is_anonymous;
+  const { trialUsed, showTrialModal, setShowTrialModal, isLocked, markTrialUsed, ensureGuestSession } = useGuestTrial(isAuthenticated);
   const [isRecording, setIsRecording] = useState(false);
   const [spokenText, setSpokenText] = useState("");
   const [hasRecording, setHasRecording] = useState(false);
@@ -132,8 +136,16 @@ const Index = () => {
       toast.error(isEn ? "Please provide audio and enter the text you're speaking" : "請提供音頻並輸入您正在說的文字");
       return;
     }
+    // For unauthenticated users, ensure an anonymous session exists for API access
+    if (!isAuthenticated) {
+      await ensureGuestSession();
+    }
     const result = await processRecording(audioBlob, spokenText);
     if (result) {
+      // Mark trial as used for unauthenticated users
+      if (!isAuthenticated) {
+        markTrialUsed();
+      }
       toast.success(isEn ? "Processing complete!" : "處理完成！");
       const contentType = result.clone.content_type || 'audio/wav';
       const generatedAudioUrl = `data:${contentType};base64,${result.clone.audio_base64}`;
@@ -200,7 +212,7 @@ const Index = () => {
         </div>
 
         {/* Unified Input Card — ChatGPT-style */}
-        <div className="w-full bg-card border border-border rounded-2xl shadow-[var(--shadow-card)] overflow-hidden">
+        <div className={`w-full bg-card border border-border rounded-2xl shadow-[var(--shadow-card)] overflow-hidden ${isLocked ? 'opacity-50 pointer-events-none' : ''}`}>
           {/* Text Input */}
           <div className="p-4 pb-0">
             <label htmlFor="practice-text" className="sr-only">
@@ -241,7 +253,7 @@ const Index = () => {
                   onClick={handleProcessRecording}
                   size="sm"
                   className="gap-1.5 h-8 px-4 rounded-lg"
-                  disabled={!hasRecording || !spokenText.trim() || isProcessing}
+                  disabled={isLocked || !hasRecording || !spokenText.trim() || isProcessing}
                   aria-busy={isProcessing}
                 >
                   {isProcessing ? (
@@ -352,6 +364,9 @@ const Index = () => {
           </p>
         )}
       </div>
+
+      {/* Trial limit modal for unauthenticated users */}
+      <TrialLimitModal open={showTrialModal} onOpenChange={setShowTrialModal} />
     </div>
   );
 };
