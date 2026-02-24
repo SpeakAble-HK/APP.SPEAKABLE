@@ -43,11 +43,11 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-background">
-      <div className="flex items-center gap-2 p-4 border-b border-border">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar" aria-label="Main navigation">
+      <div className="flex items-center gap-2 p-4 border-b border-sidebar-border">
         <img src={logo} alt="SpeakAble HK Logo" className="h-8 w-8 object-contain flex-shrink-0" />
         {!collapsed && (
-          <span className="text-lg font-bold text-primary whitespace-nowrap">SpeakAble HK</span>
+          <span className="text-lg font-bold text-sidebar-foreground whitespace-nowrap">SpeakAble HK</span>
         )}
       </div>
 
@@ -65,10 +65,11 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors hover:bg-muted"
-                      activeClassName="bg-primary/10 text-primary border-l-2 border-primary"
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sidebar-foreground hover:bg-sidebar-accent"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary-foreground font-semibold"
+                      aria-current={isActive(item.url) ? "page" : undefined}
                     >
-                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <item.icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
@@ -79,15 +80,16 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-border">
+      <SidebarFooter className="p-4 border-t border-sidebar-border">
         {user ? (
           <Button
             variant="ghost"
             size={collapsed ? "icon" : "default"}
             onClick={onSignOut}
-            className="w-full justify-start gap-3"
+            className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            aria-label={t("nav.signOut")}
           >
-            <LogOut className="h-5 w-5 flex-shrink-0" />
+            <LogOut className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
             {!collapsed && <span>{t("nav.signOut")}</span>}
           </Button>
         ) : (
@@ -95,9 +97,10 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
             <Button
               variant="ghost"
               size={collapsed ? "icon" : "default"}
-              className="w-full justify-start gap-3"
+              className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              aria-label={t("nav.signIn")}
             >
-              <LogIn className="h-5 w-5 flex-shrink-0" />
+              <LogIn className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
               {!collapsed && <span>{t("nav.signIn")}</span>}
             </Button>
           </Link>
