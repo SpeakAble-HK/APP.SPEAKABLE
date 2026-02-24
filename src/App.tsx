@@ -8,6 +8,7 @@ import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { AppLayout } from "./components/AppLayout";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
+import ProfilePage from "./pages/ProfilePage";
 import PronunciationResultsPage from "./pages/PronunciationResultsPage";
 import SpeechQuestPage from "./pages/SpeechQuestPage";
 import AboutPage from "./pages/AboutPage";
@@ -28,8 +29,10 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/signup" element={<AuthPage />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                 <Route path="/speech-quest" element={<SpeechQuestPage />} />
                 <Route path="/about" element={<AboutPage />} />

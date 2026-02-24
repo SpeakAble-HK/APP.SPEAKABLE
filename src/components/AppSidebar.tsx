@@ -1,4 +1,5 @@
-import { Home, LogIn, LogOut, BarChart3, Info, Swords, X, Languages, Stethoscope } from "lucide-react";
+import { Home, LogIn, LogOut, BarChart3, Info, Swords, X, Languages, Stethoscope, User } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -6,11 +7,12 @@ import logo from "@/assets/logo.png";
 
 interface AppSidebarProps {
   user: any;
+  profile?: { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null;
   onSignOut: () => void;
   onClose?: () => void;
 }
 
-export function AppSidebar({ user, onSignOut, onClose }: AppSidebarProps) {
+export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
@@ -70,17 +72,31 @@ export function AppSidebar({ user, onSignOut, onClose }: AppSidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-[hsl(var(--sidebar-border))]">
+      <div className="p-4 border-t border-[hsl(var(--sidebar-border))] space-y-2">
         {user ? (
-          <Button
-            variant="ghost"
-            onClick={() => { onSignOut(); onClose?.(); }}
-            className="w-full justify-start gap-3 text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))]"
-            aria-label={t("nav.signOut")}
-          >
-            <LogOut className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-            <span>{t("nav.signOut")}</span>
-          </Button>
+          <>
+            <button
+              onClick={() => handleNav("/profile")}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[hsl(var(--sidebar-accent))] text-sm"
+              aria-label={isEn ? 'Profile settings' : '個人資料設定'}
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                  {`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate">{profile?.display_name || user.email}</span>
+            </button>
+            <Button
+              variant="ghost"
+              onClick={() => { onSignOut(); onClose?.(); }}
+              className="w-full justify-start gap-3 text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))]"
+              aria-label={t("nav.signOut")}
+            >
+              <LogOut className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+              <span>{t("nav.signOut")}</span>
+            </Button>
+          </>
         ) : (
           <Button
             variant="ghost"
