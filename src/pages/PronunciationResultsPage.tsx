@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Volume2, Play, CheckCircle, XCircle, History, Trash2, Mic2 } from "lucide-react";
+import { ArrowLeft, Volume2, Play, CheckCircle, XCircle, History, Trash2, Mic2, Eye } from "lucide-react";
+import TonguePositionModal from "@/components/TonguePositionModal";
 import { Button } from "@/components/ui/button";
 import { parsePhonemeResult, getToneDescription, ParsedPhoneme } from "@/utils/jyutpingParser";
 import { usePronunciationResults, PronunciationResult } from "@/hooks/usePronunciationResults";
@@ -35,6 +36,7 @@ const PronunciationResultsPage = () => {
   const { user } = useAuth();
   const [selectedResult, setSelectedResult] = useState<PronunciationResult | null>(null);
   const [hasSaved, setHasSaved] = useState(false);
+  const [tongueModal, setTongueModal] = useState<{ open: boolean; character: string; spoken: string | null; intended: string | null }>({ open: false, character: '', spoken: null, intended: null });
 
   // Determine data source: from navigation state or selected history
   const displayData = selectedResult 
@@ -206,6 +208,13 @@ const PronunciationResultsPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <TonguePositionModal
+        open={tongueModal.open}
+        onOpenChange={(open) => setTongueModal(prev => ({ ...prev, open }))}
+        character={tongueModal.character}
+        spokenPhoneme={tongueModal.spoken}
+        intendedPhoneme={tongueModal.intended}
+      />
       <div className="container mx-auto px-4 py-8">
         <Link to="/">
           <Button variant="ghost" className="mb-8 gap-2">
@@ -385,6 +394,7 @@ const PronunciationResultsPage = () => {
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.consonant")}</th>
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium" colSpan={2}>{t("results.tone")}</th>
                             <th className="text-center py-3 px-3 text-muted-foreground font-medium">{t("results.status")}</th>
+                            <th className="text-center py-3 px-3 text-muted-foreground font-medium">Tongue Position</th>
                           </tr>
                           <tr className="border-b border-border bg-muted/30">
                             <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.expected")}</th>
@@ -395,6 +405,7 @@ const PronunciationResultsPage = () => {
                             <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.yours")}</th>
                             <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.expected")}</th>
                             <th className="py-2 px-3 text-xs text-muted-foreground font-normal">{t("results.yours")}</th>
+                            <th className="py-2 px-3"></th>
                             <th className="py-2 px-3"></th>
                           </tr>
                         </thead>
@@ -466,6 +477,22 @@ const PronunciationResultsPage = () => {
                                 ) : (
                                   <XCircle className="h-5 w-5 text-red-500 mx-auto" />
                                 )}
+                              </td>
+                              {/* Tongue Position */}
+                              <td className="py-3 px-3 text-center">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => setTongueModal({
+                                    open: true,
+                                    character: comparison.intended.character || comparison.spoken?.character || '',
+                                    spoken: comparison.spoken?.phoneme || null,
+                                    intended: comparison.intended.phoneme || null,
+                                  })}
+                                >
+                                  <Eye className="h-4 w-4 text-primary" />
+                                </Button>
                               </td>
                             </tr>
                           ))}
