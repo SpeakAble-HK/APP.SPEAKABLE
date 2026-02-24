@@ -64,7 +64,9 @@ export function IPALibraryModal({ open, onOpenChange }: IPALibraryModalProps) {
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto z-[60]">
         <DialogHeader>
           <DialogTitle>{t("ipa.title")}</DialogTitle>
-          <DialogDescription>{t("ipa.subtitle")}</DialogDescription>
+          <DialogDescription>
+            The International Phonetic Alphabet (IPA) is a standardized system of phonetic notation. It provides a visual representation of speech sounds, helping you understand the exact articulation required for pronunciation.
+          </DialogDescription>
         </DialogHeader>
 
         <PhonemeSection title={t("ipa.plosives")}>
@@ -84,6 +86,13 @@ export function IPALibraryModal({ open, onOpenChange }: IPALibraryModalProps) {
             <PhonemeCard key={p.symbol} symbol={p.symbol} description={p.description} />
           ))}
         </PhonemeSection>
+
+        {/* APA Citation */}
+        <div className="border-t border-border pt-4 mt-4">
+          <p className="text-xs text-muted-foreground leading-relaxed italic">
+            International Phonetic Association. (1999). <em>Handbook of the International Phonetic Association: A guide to the use of the International Phonetic Alphabet</em>. Cambridge University Press.
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );

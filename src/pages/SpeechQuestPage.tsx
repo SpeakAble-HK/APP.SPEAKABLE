@@ -109,9 +109,16 @@ const SpeechQuestPage = () => {
 
   return (
     <div className="min-h-full bg-background">
-      {/* Points Bar */}
+      {/* Top Bar: Back + Points */}
       <div className="sticky top-14 z-20 bg-card/95 backdrop-blur border-b border-border px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
+          <Link to="/">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              {isEn ? 'Back to Home' : isTW ? '返回首頁' : '返回首页'}
+            </Button>
+          </Link>
+
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" aria-hidden="true" />
@@ -121,28 +128,22 @@ const SpeechQuestPage = () => {
               <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
               {completedCount}/{questNodesData.length}
             </div>
+            <div className="max-w-[120px]">
+              <Progress value={progressPct} className="h-2" />
+            </div>
+            <Button
+              onClick={() => setIpaOpen(true)}
+              size="sm"
+              className="gap-1.5 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 hover:shadow-lg transition-all duration-200"
+            >
+              <BookOpen className="h-4 w-4" />
+              {isEn ? 'IPA Library' : isTW ? 'IPA 音標庫' : 'IPA 音标库'}
+            </Button>
           </div>
-          <div className="flex-1 max-w-[200px] ml-4">
-            <Progress value={progressPct} className="h-2" />
-          </div>
-          <button
-            onClick={() => setIpaOpen(true)}
-            className="ml-3 flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-          >
-            <BookOpen className="h-4 w-4" />
-            {isEn ? 'IPA Library' : isTW ? 'IPA 音標庫' : 'IPA 音标库'}
-          </button>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* Back */}
-        <Link to="/">
-          <Button variant="ghost" className="mb-6 gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            {isEn ? 'Back to Home' : isTW ? '返回首頁' : '返回首页'}
-          </Button>
-        </Link>
 
         {/* Header */}
         <div className="text-center mb-10">
