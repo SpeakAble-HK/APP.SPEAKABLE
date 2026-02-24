@@ -71,10 +71,27 @@ serve(async (req) => {
     asrFormData.append('file', audioFile)
     asrFormData.append('language', language)
 
-    const asrResponse = await fetch(`${API_BASE_URL}/api/asr`, {
-      method: 'POST',
-      body: asrFormData,
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30000)
+
+    let asrResponse: Response
+    try {
+      asrResponse = await fetch(`${API_BASE_URL}/api/asr`, {
+        method: 'POST',
+        body: asrFormData,
+        signal: controller.signal,
+      })
+    } catch (e) {
+      clearTimeout(timeout)
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        return new Response(
+          JSON.stringify({ error: 'Request timed out. Please try again.' }),
+          { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      throw e
+    }
+    clearTimeout(timeout)
 
     if (!asrResponse.ok) {
       const errorText = await asrResponse.text()
