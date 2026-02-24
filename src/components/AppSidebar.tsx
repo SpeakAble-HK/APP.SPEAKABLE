@@ -45,9 +45,9 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" className="border-r border-border bg-background">
       <div className="flex items-center gap-2 p-4 border-b border-border">
-        <img src={logo} alt="SpeakRight Logo" className="h-8 w-8 object-contain flex-shrink-0" />
+        <img src={logo} alt="SpeakAble HK Logo" className="h-8 w-8 object-contain flex-shrink-0" />
         {!collapsed && (
-          <span className="text-lg font-bold text-primary whitespace-nowrap">SpeakRight</span>
+          <span className="text-lg font-bold text-primary whitespace-nowrap">SpeakAble HK</span>
         )}
       </div>
 

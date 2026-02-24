@@ -107,7 +107,6 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex flex-col hero-gradient p-4">
-      {/* Back Button */}
       <div className="container mx-auto">
         <Link to="/">
           <Button variant="ghost" className="mb-4 gap-2">
@@ -121,11 +120,11 @@ export default function AuthPage() {
         <Card className="w-full max-w-md card-shadow">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img src={logo} alt="SpeakRight Logo" className="h-12 w-12 object-contain" />
-            <span className="text-2xl font-bold text-primary">SpeakRight</span>
+            <img src={logo} alt="SpeakAble HK Logo" className="h-12 w-12 object-contain" />
+            <span className="text-2xl font-bold text-primary">SpeakAble HK</span>
           </div>
           <CardTitle className="text-2xl">Welcome</CardTitle>
-          <CardDescription>Sign in or create an account to continue</CardDescription>
+          <CardDescription>Sign in or create an account to save your records</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
@@ -138,24 +137,12 @@ export default function AuthPage() {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={loginForm.email}
-                    onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                  />
+                  <Input id="login-email" type="email" placeholder="you@example.com" value={loginForm.email} onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} />
                   {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Password</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                  />
+                  <Input id="login-password" type="password" placeholder="••••••••" value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} />
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -168,35 +155,17 @@ export default function AuthPage() {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Name</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Your name"
-                    value={signUpForm.displayName}
-                    onChange={(e) => setSignUpForm({ ...signUpForm, displayName: e.target.value })}
-                  />
+                  <Input id="signup-name" type="text" placeholder="Your name" value={signUpForm.displayName} onChange={(e) => setSignUpForm({ ...signUpForm, displayName: e.target.value })} />
                   {errors.displayName && <p className="text-sm text-destructive">{errors.displayName}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={signUpForm.email}
-                    onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })}
-                  />
+                  <Input id="signup-email" type="email" placeholder="you@example.com" value={signUpForm.email} onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })} />
                   {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={signUpForm.password}
-                    onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })}
-                  />
+                  <Input id="signup-password" type="password" placeholder="••••••••" value={signUpForm.password} onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} />
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
                 <Button type="submit" className="w-full" disabled={isSubmitting}>

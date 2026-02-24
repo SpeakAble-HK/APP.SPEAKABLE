@@ -10,12 +10,11 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// Translation dictionaries
 const translations: Record<Language, Record<string, string>> = {
   "en-GB": {
     // Navigation
-    "nav.dashboard": "Dashboard",
-    "nav.voiceLab": "Voice Lab",
+    "nav.dashboard": "Home",
+    "nav.voiceLab": "Echo Speech",
     "nav.practice": "Practice",
     "nav.learning": "Learning & Progress",
     "nav.results": "Results",
@@ -25,7 +24,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Dashboard
     "dashboard.hello": "Hello",
-    "dashboard.subtitle": "Your clinical-grade AI speech coach is ready.",
+    "dashboard.subtitle": "Your AI speech coach powered by the Golden Theory.",
     "dashboard.aiInsight": "AI Insight",
     "dashboard.aiInsightText": "Your \"Golden Self\" model detects a 12% improvement in your /th/ vs /f/ differentiation. Keep using the biofeedback!",
     "dashboard.dailyGoal": "Daily Goal",
@@ -36,17 +35,17 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.days": "days",
     "dashboard.best": "Best",
     "dashboard.startTraining": "Start Training",
-    "dashboard.voiceLabTitle": "Voice Lab",
-    "dashboard.voiceLabDesc": "Calibrate your \"Golden Self\" AI model to fix timbre mismatch.",
+    "dashboard.voiceLabTitle": "Echo Speech",
+    "dashboard.voiceLabDesc": "Calibrate your \"Golden Self\" AI model using the Golden Theory.",
     "dashboard.startNow": "Start now",
     "dashboard.learningProgress": "Learning & Progress",
     "dashboard.learningProgressDesc": "Learn IPA sounds and test your pronunciation progress.",
     "dashboard.viewLearning": "Start learning",
 
     // Guest Banner
-    "guest.banner": "You're using SpeakRight as a guest.",
+    "guest.banner": "You're using SpeakAble HK as a guest.",
     "guest.signUp": "Sign up",
-    "guest.saveProgress": "to save your progress!",
+    "guest.saveProgress": "to save your records!",
     "guest.signInToSave": "Sign in to save your language preference",
 
     // Learning Page
@@ -82,9 +81,9 @@ const translations: Record<Language, Record<string, string>> = {
     "phoneme.voicelessPostalv": "voiceless post-alv",
     "phoneme.voicedPostalv": "voiced post-alv",
 
-    // Voice Lab
-    "voiceLab.title": "Voice Lab",
-    "voiceLab.subtitle": "Practice your pronunciation with real-time feedback and corrections.",
+    // Voice Lab (now Echo Speech)
+    "voiceLab.title": "Echo Speech",
+    "voiceLab.subtitle": "Practice your pronunciation with real-time feedback using the Golden Theory.",
     "voiceLab.step1Title": "Enter Your Target Sentence",
     "voiceLab.step1Desc": "Type the sentence or word you want to practice pronouncing.",
     "voiceLab.step2Title": "Record or Upload Your Voice",
@@ -105,9 +104,9 @@ const translations: Record<Language, Record<string, string>> = {
     // Results Page
     "results.title": "Pronunciation Results",
     "results.noResultsTitle": "No Results Yet",
-    "results.noResultsAuth": "You haven't analyzed any pronunciations yet. Head to the Voice Lab to get started!",
+    "results.noResultsAuth": "You haven't analyzed any pronunciations yet. Use Echo Speech to get started!",
     "results.noResultsGuest": "Sign in to save and view your pronunciation history.",
-    "results.goToVoiceLab": "Go to Voice Lab",
+    "results.goToVoiceLab": "Go to Echo Speech",
     "results.history": "History",
     "results.signInToSave": "Sign in to save your results",
     "results.loading": "Loading...",
@@ -131,7 +130,7 @@ const translations: Record<Language, Record<string, string>> = {
     "results.expected": "Expected",
     "results.yours": "Yours",
     "results.toneLegend": "Tone Legend",
-    "results.backToDashboard": "Back to Dashboard",
+    "results.backToDashboard": "Back to Home",
 
     // Toast messages
     "toast.languageUpdated": "Language preference updated",
@@ -141,8 +140,8 @@ const translations: Record<Language, Record<string, string>> = {
   },
   "zh-TW": {
     // Navigation
-    "nav.dashboard": "儀表板",
-    "nav.voiceLab": "語音實驗室",
+    "nav.dashboard": "首頁",
+    "nav.voiceLab": "迴聲語音",
     "nav.practice": "練習",
     "nav.learning": "學習與進度",
     "nav.results": "分析結果",
@@ -152,7 +151,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Dashboard
     "dashboard.hello": "你好",
-    "dashboard.subtitle": "您的臨床級AI語音教練已準備就緒。",
+    "dashboard.subtitle": "基於黃金理論的AI語音教練已準備就緒。",
     "dashboard.aiInsight": "AI 洞察",
     "dashboard.aiInsightText": "您的「黃金自我」模型檢測到您的 /th/ 與 /f/ 區分度提高了 12%。繼續使用生物反饋！",
     "dashboard.dailyGoal": "每日目標",
@@ -163,17 +162,17 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.days": "天",
     "dashboard.best": "最佳",
     "dashboard.startTraining": "開始訓練",
-    "dashboard.voiceLabTitle": "語音實驗室",
-    "dashboard.voiceLabDesc": "校準您的「黃金自我」AI模型以修復音色不匹配。",
+    "dashboard.voiceLabTitle": "迴聲語音",
+    "dashboard.voiceLabDesc": "使用黃金理論校準您的AI模型。",
     "dashboard.startNow": "立即開始",
     "dashboard.learningProgress": "學習與進度",
     "dashboard.learningProgressDesc": "學習國際音標並測試您的發音進度。",
     "dashboard.viewLearning": "開始學習",
 
     // Guest Banner
-    "guest.banner": "您正在以訪客身份使用 SpeakRight。",
+    "guest.banner": "您正在以訪客身份使用 SpeakAble HK。",
     "guest.signUp": "註冊",
-    "guest.saveProgress": "以保存您的進度！",
+    "guest.saveProgress": "以保存您的記錄！",
     "guest.signInToSave": "登入以保存您的語言偏好",
 
     // Learning Page
@@ -209,9 +208,9 @@ const translations: Record<Language, Record<string, string>> = {
     "phoneme.voicelessPostalv": "清齦後音",
     "phoneme.voicedPostalv": "濁齦後音",
 
-    // Voice Lab
-    "voiceLab.title": "語音實驗室",
-    "voiceLab.subtitle": "通過即時反饋和糾正來練習您的發音。",
+    // Voice Lab (now Echo Speech)
+    "voiceLab.title": "迴聲語音",
+    "voiceLab.subtitle": "使用黃金理論通過即時反饋來練習您的發音。",
     "voiceLab.step1Title": "輸入目標句子",
     "voiceLab.step1Desc": "輸入您想練習發音的句子或詞語。",
     "voiceLab.step2Title": "錄製或上傳您的語音",
@@ -232,9 +231,9 @@ const translations: Record<Language, Record<string, string>> = {
     // Results Page
     "results.title": "發音結果",
     "results.noResultsTitle": "暫無結果",
-    "results.noResultsAuth": "您還沒有分析過任何發音。前往語音實驗室開始吧！",
+    "results.noResultsAuth": "您還沒有分析過任何發音。前往迴聲語音開始吧！",
     "results.noResultsGuest": "登入以保存和查看您的發音歷史。",
-    "results.goToVoiceLab": "前往語音實驗室",
+    "results.goToVoiceLab": "前往迴聲語音",
     "results.history": "歷史記錄",
     "results.signInToSave": "登入以保存您的結果",
     "results.loading": "載入中...",
@@ -258,7 +257,7 @@ const translations: Record<Language, Record<string, string>> = {
     "results.expected": "預期",
     "results.yours": "您的",
     "results.toneLegend": "聲調圖例",
-    "results.backToDashboard": "返回儀表板",
+    "results.backToDashboard": "返回首頁",
 
     // Toast messages
     "toast.languageUpdated": "語言偏好已更新",
@@ -268,8 +267,8 @@ const translations: Record<Language, Record<string, string>> = {
   },
   "zh-CN": {
     // Navigation
-    "nav.dashboard": "仪表板",
-    "nav.voiceLab": "语音实验室",
+    "nav.dashboard": "首页",
+    "nav.voiceLab": "回声语音",
     "nav.practice": "练习",
     "nav.learning": "学习与进度",
     "nav.results": "分析结果",
@@ -279,7 +278,7 @@ const translations: Record<Language, Record<string, string>> = {
 
     // Dashboard
     "dashboard.hello": "你好",
-    "dashboard.subtitle": "您的临床级AI语音教练已准备就绪。",
+    "dashboard.subtitle": "基于黄金理论的AI语音教练已准备就绪。",
     "dashboard.aiInsight": "AI 洞察",
     "dashboard.aiInsightText": "您的「黄金自我」模型检测到您的 /th/ 与 /f/ 区分度提高了 12%。继续使用生物反馈！",
     "dashboard.dailyGoal": "每日目标",
@@ -290,17 +289,17 @@ const translations: Record<Language, Record<string, string>> = {
     "dashboard.days": "天",
     "dashboard.best": "最佳",
     "dashboard.startTraining": "开始训练",
-    "dashboard.voiceLabTitle": "语音实验室",
-    "dashboard.voiceLabDesc": "校准您的「黄金自我」AI模型以修复音色不匹配。",
+    "dashboard.voiceLabTitle": "回声语音",
+    "dashboard.voiceLabDesc": "使用黄金理论校准您的AI模型。",
     "dashboard.startNow": "立即开始",
     "dashboard.learningProgress": "学习与进度",
     "dashboard.learningProgressDesc": "学习国际音标并测试您的发音进度。",
     "dashboard.viewLearning": "开始学习",
 
     // Guest Banner
-    "guest.banner": "您正在以访客身份使用 SpeakRight。",
+    "guest.banner": "您正在以访客身份使用 SpeakAble HK。",
     "guest.signUp": "注册",
-    "guest.saveProgress": "以保存您的进度！",
+    "guest.saveProgress": "以保存您的记录！",
     "guest.signInToSave": "登录以保存您的语言偏好",
 
     // Learning Page
@@ -336,9 +335,9 @@ const translations: Record<Language, Record<string, string>> = {
     "phoneme.voicelessPostalv": "清龈后音",
     "phoneme.voicedPostalv": "浊龈后音",
 
-    // Voice Lab
-    "voiceLab.title": "语音实验室",
-    "voiceLab.subtitle": "通过即时反馈和纠正来练习您的发音。",
+    // Voice Lab (now Echo Speech)
+    "voiceLab.title": "回声语音",
+    "voiceLab.subtitle": "使用黄金理论通过即时反馈来练习您的发音。",
     "voiceLab.step1Title": "输入目标句子",
     "voiceLab.step1Desc": "输入您想练习发音的句子或词语。",
     "voiceLab.step2Title": "录制或上传您的语音",
@@ -359,9 +358,9 @@ const translations: Record<Language, Record<string, string>> = {
     // Results Page
     "results.title": "发音结果",
     "results.noResultsTitle": "暂无结果",
-    "results.noResultsAuth": "您还没有分析过任何发音。前往语音实验室开始吧！",
+    "results.noResultsAuth": "您还没有分析过任何发音。前往回声语音开始吧！",
     "results.noResultsGuest": "登录以保存和查看您的发音历史。",
-    "results.goToVoiceLab": "前往语音实验室",
+    "results.goToVoiceLab": "前往回声语音",
     "results.history": "历史记录",
     "results.signInToSave": "登录以保存您的结果",
     "results.loading": "加载中...",
@@ -385,7 +384,7 @@ const translations: Record<Language, Record<string, string>> = {
     "results.expected": "预期",
     "results.yours": "您的",
     "results.toneLegend": "声调图例",
-    "results.backToDashboard": "返回仪表板",
+    "results.backToDashboard": "返回首页",
 
     // Toast messages
     "toast.languageUpdated": "语言偏好已更新",
@@ -402,7 +401,6 @@ interface LanguageProviderProps {
 
 export function LanguageProvider({ children, initialLanguage = "en-GB" }: LanguageProviderProps) {
   const [language, setLanguageState] = useState<Language>(() => {
-    // Try to get from localStorage first (for guests)
     const saved = localStorage.getItem("preferred_language") as Language;
     return saved || initialLanguage;
   });
@@ -412,7 +410,6 @@ export function LanguageProvider({ children, initialLanguage = "en-GB" }: Langua
     localStorage.setItem("preferred_language", lang);
   };
 
-  // Translation function
   const t = (key: string): string => {
     return translations[language][key] || translations["en-GB"][key] || key;
   };
