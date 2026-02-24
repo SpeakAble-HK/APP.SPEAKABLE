@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Mic, Square, Play, Sparkles, Loader2, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,6 +74,10 @@ const PronunciationPage = () => {
         const blob = new Blob(audioChunksRef.current, {
           type: 'audio/webm'
         });
+        // Revoke previous URL to prevent memory leaks
+        if (recordingUrl) {
+          URL.revokeObjectURL(recordingUrl);
+        }
         const url = URL.createObjectURL(blob);
         setRecordingUrl(url);
         setAudioBlob(blob);
@@ -169,31 +173,59 @@ const PronunciationPage = () => {
       toast.error('An unexpected error occurred. Please try again.');
     }
   };
-  const handlePlayRecording = () => {
-    if (!recordingUrl) return;
-    
-    if (isPlaying && audioElementRef.current) {
-      audioElementRef.current.pause();
-      setIsPlaying(false);
+  // Persistent audio element bound to recordingUrl
+  useEffect(() => {
+    if (!recordingUrl) {
+      audioElementRef.current = null;
       return;
     }
 
     const audio = new Audio(recordingUrl);
     audioElementRef.current = audio;
-    
-    audio.addEventListener('timeupdate', () => {
+
+    const onTimeUpdate = () => {
       if (audio.duration > 0) {
         setPlaybackProgress((audio.currentTime / audio.duration) * 100);
       }
-    });
-    
-    audio.addEventListener('ended', () => {
+    };
+    const onEnded = () => {
       setIsPlaying(false);
       setPlaybackProgress(0);
-    });
-    
-    audio.play();
-    setIsPlaying(true);
+    };
+
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('ended', onEnded);
+
+    return () => {
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('ended', onEnded);
+      audio.pause();
+    };
+  }, [recordingUrl]);
+
+  // Memory cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recordingUrl) {
+        URL.revokeObjectURL(recordingUrl);
+      }
+    };
+  }, []);
+
+  const handlePlayRecording = () => {
+    if (!audioElementRef.current) return;
+
+    if (isPlaying) {
+      audioElementRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioElementRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch((err) => {
+        console.error("Playback failed:", err);
+        toast.error("Playback failed. Try again.");
+      });
+    }
   };
   return <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
