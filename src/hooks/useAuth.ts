@@ -6,6 +6,10 @@ interface Profile {
   id: string;
   user_id: string;
   display_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  username: string | null;
+  date_of_birth: string | null;
   preferred_language: string | null;
 }
 

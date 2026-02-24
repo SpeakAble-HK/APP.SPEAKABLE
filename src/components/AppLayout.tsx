@@ -111,7 +111,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         role="navigation"
         aria-label="Main navigation"
       >
-        <AppSidebar user={user} onSignOut={handleSignOut} onClose={() => setDrawerOpen(false)} />
+        <AppSidebar user={user} profile={profile} onSignOut={handleSignOut} onClose={() => setDrawerOpen(false)} />
       </div>
 
       {/* Header */}

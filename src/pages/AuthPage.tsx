@@ -97,6 +97,8 @@ export default function AuthPage() {
     }
   };
 
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -121,8 +123,7 @@ export default function AuthPage() {
       if (error) {
         toast.error(error.message.includes('already registered') ? (isEn ? 'This email is already registered.' : '此電郵已被註冊。') : error.message);
       } else {
-        toast.success(isEn ? 'Account created successfully!' : '帳號創建成功！');
-        navigate('/');
+        setShowVerificationModal(true);
       }
     } catch (err) {
       setIsSubmitting(false);
@@ -321,6 +322,30 @@ export default function AuthPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Email Verification Modal */}
+      {showVerificationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <Card className="w-full max-w-sm mx-4 card-shadow">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-3">
+                <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+                  <ShieldCheck className="h-7 w-7 text-primary" />
+                </div>
+              </div>
+              <CardTitle className="text-lg">{isEn ? 'Pending Email Verification' : isTW ? '待電郵驗證' : '待邮箱验证'}</CardTitle>
+              <CardDescription>
+                {isEn ? 'Please check your inbox and click the verification link to activate your account.' : isTW ? '請檢查您的收件箱，點擊驗證連結以啟動您的帳號。' : '请检查您的收件箱，点击验证链接以激活您的账号。'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full" onClick={() => setShowVerificationModal(false)}>
+                {isEn ? 'OK' : '確定'}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
