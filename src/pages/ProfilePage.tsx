@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowLeft, User, Eye, EyeOff, Save } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Save, Camera } from 'lucide-react';
 import { CalendarIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -22,15 +22,22 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
   const [email, setEmail] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -38,11 +45,13 @@ export default function ProfilePage() {
     }
   }, [user, loading, navigate]);
 
+  // Hydrate form with existing profile data
   useEffect(() => {
     if (profile) {
       setFirstName(profile.first_name || '');
       setLastName(profile.last_name || '');
       setUsername(profile.username || '');
+      setAvatarUrl((profile as any).avatar_url || null);
       if (profile.date_of_birth) {
         setDateOfBirth(new Date(profile.date_of_birth + 'T00:00:00'));
       }
@@ -52,9 +61,73 @@ export default function ProfilePage() {
     }
   }, [profile, user]);
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error(isEn ? 'Please select an image file' : '請選擇圖片檔案');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(isEn ? 'Image must be under 5MB' : '圖片必須小於 5MB');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Append cache-buster
+      const freshUrl = `${publicUrl}?t=${Date.now()}`;
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: freshUrl } as any)
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(freshUrl);
+      toast.success(isEn ? 'Avatar updated!' : '頭像已更新！');
+    } catch (err: any) {
+      toast.error(err.message || (isEn ? 'Failed to upload avatar' : '上傳頭像失敗'));
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    // Password validation
+    if (newPassword.length > 0 || confirmPassword.length > 0) {
+      if (newPassword !== confirmPassword) {
+        toast.error(isEn ? 'New passwords do not match' : '新密碼不匹配');
+        return;
+      }
+      if (newPassword.length < 6) {
+        toast.error(isEn ? 'Password must be at least 6 characters' : '密碼必須至少6個字符');
+        return;
+      }
+      if (!currentPassword) {
+        toast.error(isEn ? 'Please enter your current password' : '請輸入目前密碼');
+        return;
+      }
+    }
+
     setSaving(true);
 
     try {
@@ -78,15 +151,23 @@ export default function ProfilePage() {
       }
 
       // Update password if provided
-      if (newPassword.length > 0) {
-        if (newPassword.length < 6) {
-          toast.error(isEn ? 'Password must be at least 6 characters' : '密碼必須至少6個字符');
+      if (newPassword.length > 0 && newPassword === confirmPassword) {
+        // Re-authenticate with current password first
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user.email!,
+          password: currentPassword,
+        });
+        if (signInError) {
+          toast.error(isEn ? 'Current password is incorrect' : '目前密碼不正確');
           setSaving(false);
           return;
         }
+
         const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
         if (pwError) throw pwError;
+        setCurrentPassword('');
         setNewPassword('');
+        setConfirmPassword('');
       }
 
       toast.success(isEn ? 'Profile updated!' : '個人資料已更新！');
@@ -98,6 +179,8 @@ export default function ProfilePage() {
   };
 
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'U';
+  const passwordsMatch = newPassword.length === 0 || newPassword === confirmPassword;
+  const canSubmitPassword = newPassword.length === 0 || (newPassword.length >= 6 && passwordsMatch && currentPassword.length > 0);
 
   if (loading) {
     return (
@@ -117,11 +200,29 @@ export default function ProfilePage() {
       <Card className="card-shadow">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <Avatar className="h-20 w-20">
-              <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              <Avatar className="h-20 w-20">
+                {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
+                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="h-6 w-6 text-white" />
+              </div>
+              {uploadingAvatar && (
+                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+            </div>
           </div>
           <CardTitle className="text-2xl">{isEn ? 'Profile Settings' : isTW ? '個人資料設定' : '个人资料设置'}</CardTitle>
           <CardDescription>{isEn ? 'Manage your account information' : isTW ? '管理您的帳號資料' : '管理您的账号资料'}</CardDescription>
@@ -179,24 +280,66 @@ export default function ProfilePage() {
               <Input id="profile-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
 
-            {/* New Password */}
-            <div className="space-y-2">
-              <Label htmlFor="profile-password">{isEn ? 'New Password' : '新密碼'}</Label>
-              <div className="relative">
-                <Input
-                  id="profile-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder={isEn ? 'Leave blank to keep current' : '留空則不更改'}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
+            {/* Password Section */}
+            <div className="space-y-3 pt-2 border-t border-border">
+              <p className="text-sm font-medium text-foreground pt-2">{isEn ? 'Change Password' : '更改密碼'}</p>
+
+              {/* Current Password */}
+              <div className="space-y-2">
+                <Label htmlFor="profile-current-password">{isEn ? 'Current Password' : '目前密碼'}</Label>
+                <div className="relative">
+                  <Input
+                    id="profile-current-password"
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder={isEn ? 'Enter current password' : '輸入目前密碼'}
+                  />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div className="space-y-2">
+                <Label htmlFor="profile-new-password">{isEn ? 'New Password' : '新密碼'}</Label>
+                <div className="relative">
+                  <Input
+                    id="profile-new-password"
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder={isEn ? 'Enter new password' : '輸入新密碼'}
+                  />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowNewPassword(!showNewPassword)}>
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Confirm New Password */}
+              <div className="space-y-2">
+                <Label htmlFor="profile-confirm-password">{isEn ? 'Confirm New Password' : '確認新密碼'}</Label>
+                <div className="relative">
+                  <Input
+                    id="profile-confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder={isEn ? 'Confirm new password' : '確認新密碼'}
+                  />
+                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                {confirmPassword.length > 0 && !passwordsMatch && (
+                  <p className="text-xs text-destructive">{isEn ? 'Passwords do not match' : '密碼不匹配'}</p>
+                )}
               </div>
             </div>
 
-            <Button type="submit" className="w-full gap-2" disabled={saving}>
+            <Button type="submit" className="w-full gap-2" disabled={saving || !canSubmitPassword}>
               <Save className="h-4 w-4" />
               {saving ? (isEn ? 'Saving...' : '儲存中...') : (isEn ? 'Save Changes' : isTW ? '儲存變更' : '保存更改')}
             </Button>

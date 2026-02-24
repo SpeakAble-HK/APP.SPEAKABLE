@@ -11,6 +11,7 @@ interface Profile {
   username: string | null;
   date_of_birth: string | null;
   preferred_language: string | null;
+  avatar_url: string | null;
 }
 
 export function useAuth() {

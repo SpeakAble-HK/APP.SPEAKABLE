@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Volume2, Play, CheckCircle, XCircle, History, Trash2, Mic2, Eye } from "lucide-react";
+import { ArrowLeft, Volume2, Play, Square, CheckCircle, XCircle, History, Trash2, Mic2, Eye } from "lucide-react";
 import TonguePositionModal from "@/components/TonguePositionModal";
 import { Button } from "@/components/ui/button";
 import { parsePhonemeResult, getToneDescription, ParsedPhoneme } from "@/utils/jyutpingParser";
@@ -37,6 +37,47 @@ const PronunciationResultsPage = () => {
   const [selectedResult, setSelectedResult] = useState<PronunciationResult | null>(null);
   const [hasSaved, setHasSaved] = useState(false);
   const [tongueModal, setTongueModal] = useState<{ open: boolean; character: string; spoken: string | null; intended: string | null }>({ open: false, character: '', spoken: null, intended: null });
+
+  // Audio playback state
+  const [recordingPlaying, setRecordingPlaying] = useState(false);
+  const [recordingProgress, setRecordingProgress] = useState(0);
+  const [generatedPlaying, setGeneratedPlaying] = useState(false);
+  const [generatedProgress, setGeneratedProgress] = useState(0);
+  const recordingAudioRef = useRef<HTMLAudioElement | null>(null);
+  const generatedAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Setup audio elements with event listeners
+  useEffect(() => {
+    if (!state?.recordingUrl) return;
+    const audio = new Audio(state.recordingUrl);
+    recordingAudioRef.current = audio;
+    const onTimeUpdate = () => {
+      if (audio.duration > 0) setRecordingProgress((audio.currentTime / audio.duration) * 100);
+    };
+    const onEnded = () => { setRecordingPlaying(false); setRecordingProgress(0); };
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('ended', onEnded);
+    return () => { audio.removeEventListener('timeupdate', onTimeUpdate); audio.removeEventListener('ended', onEnded); audio.pause(); };
+  }, [state?.recordingUrl]);
+
+  useEffect(() => {
+    if (!state?.generatedAudioUrl) return;
+    const audio = new Audio(state.generatedAudioUrl);
+    generatedAudioRef.current = audio;
+    const onTimeUpdate = () => {
+      if (audio.duration > 0) setGeneratedProgress((audio.currentTime / audio.duration) * 100);
+    };
+    const onEnded = () => { setGeneratedPlaying(false); setGeneratedProgress(0); };
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('ended', onEnded);
+    return () => { audio.removeEventListener('timeupdate', onTimeUpdate); audio.removeEventListener('ended', onEnded); audio.pause(); };
+  }, [state?.generatedAudioUrl]);
+
+  const toggleAudio = (ref: React.MutableRefObject<HTMLAudioElement | null>, playing: boolean, setPlaying: (v: boolean) => void) => {
+    if (!ref.current) return;
+    if (playing) { ref.current.pause(); setPlaying(false); }
+    else { ref.current.play().then(() => setPlaying(true)).catch(() => {}); }
+  };
 
   // Determine data source: from navigation state or selected history
   const displayData = selectedResult 
@@ -352,32 +393,38 @@ const PronunciationResultsPage = () => {
                   </div>
 
                   {/* Audio Playback Section - only for fresh results */}
-                  {state && !selectedResult && (
+                    {state && !selectedResult && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                       <div className="bg-card border border-border rounded-2xl p-6">
                         <h3 className="text-sm font-medium text-muted-foreground mb-3">{t("results.yourRecording")}</h3>
                         <Button 
-                          onClick={() => state.recordingUrl && new Audio(state.recordingUrl).play()} 
+                          onClick={() => toggleAudio(recordingAudioRef, recordingPlaying, setRecordingPlaying)} 
                           variant="outline" 
                           className="w-full gap-2"
                           disabled={!state.recordingUrl}
                         >
-                          <Play className="h-4 w-4" />
-                          {t("results.playYourRecording")}
+                          {recordingPlaying ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                          {recordingPlaying ? (t("results.stop") || 'Stop') : t("results.playYourRecording")}
                         </Button>
+                        <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-primary rounded-full transition-all duration-100" style={{ width: `${recordingProgress}%` }} />
+                        </div>
                       </div>
 
                       <div className="bg-card border border-border rounded-2xl p-6">
                         <h3 className="text-sm font-medium text-muted-foreground mb-3">{t("results.correctPronunciation")}</h3>
                         <Button 
-                          onClick={() => state.generatedAudioUrl && new Audio(state.generatedAudioUrl).play()} 
+                          onClick={() => toggleAudio(generatedAudioRef, generatedPlaying, setGeneratedPlaying)} 
                           variant="outline" 
                           className="w-full gap-2"
                           disabled={!state.generatedAudioUrl}
                         >
-                          <Volume2 className="h-4 w-4" />
-                          {t("results.playCorrectVersion")}
+                          {generatedPlaying ? <Square className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                          {generatedPlaying ? (t("results.stop") || 'Stop') : t("results.playCorrectVersion")}
                         </Button>
+                        <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-primary rounded-full transition-all duration-100" style={{ width: `${generatedProgress}%` }} />
+                        </div>
                       </div>
                     </div>
                   )}
