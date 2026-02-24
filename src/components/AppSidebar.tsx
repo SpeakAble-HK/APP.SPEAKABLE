@@ -58,7 +58,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
           <button
             key={item.url}
             onClick={() => handleNav(item.url)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 min-h-[48px] rounded-lg transition-colors text-sm font-medium ${
               isActive(item.url)
                 ? 'bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]'
                 : 'text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))]'

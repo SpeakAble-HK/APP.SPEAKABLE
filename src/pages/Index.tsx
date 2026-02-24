@@ -259,12 +259,12 @@ const Index = () => {
                   {isProcessing ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                      {t("voiceLab.processing")}
+                      {isEn ? 'Analysing Articulation...' : isTW ? '正在分析發音...' : '正在分析发音...'}
                     </>
                   ) : (
                     <>
                       <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                      {isEn ? 'Analyze' : isTW ? '分析' : '分析'}
+                      {isEn ? 'Analyse' : isTW ? '分析' : '分析'}
                     </>
                   )}
                 </Button>

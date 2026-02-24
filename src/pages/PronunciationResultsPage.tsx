@@ -234,20 +234,27 @@ const PronunciationResultsPage = () => {
             </Button>
           </Link>
 
-          <div className="max-w-2xl mx-auto text-center py-16">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-6">
-              <History className="h-10 w-10 text-muted-foreground" />
+          <div className="max-w-md mx-auto py-16">
+            <div className="bg-card border border-border rounded-2xl p-8 text-center shadow-[var(--shadow-card)]">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-6">
+                <History className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <h1 className="text-2xl font-bold text-foreground mb-3">{t("results.noResultsTitle")}</h1>
+              <p className="text-muted-foreground mb-2">
+                {user 
+                  ? "You haven't completed any exercises yet!"
+                  : t("results.noResultsGuest")}
+              </p>
+              <p className="text-sm text-muted-foreground mb-8">
+                {user
+                  ? "Head over to Speech Quest to start practising."
+                  : "Sign in and start practising to see your results here."}
+              </p>
+              <Button onClick={() => navigate('/speech-quest')} size="lg" className="gap-2 min-h-[48px]">
+                <Mic2 className="h-5 w-5" />
+                {user ? "Start Speech Quest" : t("results.goToVoiceLab")}
+              </Button>
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-4">{t("results.noResultsTitle")}</h1>
-            <p className="text-muted-foreground mb-8">
-              {user 
-                ? t("results.noResultsAuth")
-                : t("results.noResultsGuest")}
-            </p>
-            <Button onClick={() => navigate('/pronunciation')} size="lg" className="gap-2">
-              <Mic2 className="h-5 w-5" />
-              {t("results.goToVoiceLab")}
-            </Button>
           </div>
         </div>
       </div>

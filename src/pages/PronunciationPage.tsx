@@ -371,10 +371,10 @@ const PronunciationPage = () => {
               {t("voiceLab.step3Desc")}
             </p>
             <div className="flex items-center justify-center">
-              <Button onClick={handleProcessRecording} variant="default" size="lg" className="gap-2" disabled={!hasRecording || !spokenText.trim() || isProcessing}>
+              <Button onClick={handleProcessRecording} variant="default" size="lg" className="gap-2 min-h-[48px]" disabled={!hasRecording || !spokenText.trim() || isProcessing}>
                 {isProcessing ? <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    {t("voiceLab.processing")}
+                    Analysing Articulation...
                   </> : <>
                     <Sparkles className="h-4 w-4" />
                     {t("voiceLab.processGenerate")}
