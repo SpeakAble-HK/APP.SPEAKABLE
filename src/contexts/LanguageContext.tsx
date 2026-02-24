@@ -399,7 +399,7 @@ interface LanguageProviderProps {
   initialLanguage?: Language;
 }
 
-export function LanguageProvider({ children, initialLanguage = "en-GB" }: LanguageProviderProps) {
+export function LanguageProvider({ children, initialLanguage = "zh-TW" }: LanguageProviderProps) {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem("preferred_language") as Language;
     return saved || initialLanguage;
