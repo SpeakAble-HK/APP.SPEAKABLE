@@ -147,22 +147,26 @@ const PronunciationPage = () => {
       toast.error("Please provide audio and enter the text you're speaking");
       return;
     }
-    const result = await processRecording(audioBlob, spokenText);
-    if (result) {
-      toast.success("Processing complete!");
-      const contentType = result.clone.content_type || 'audio/wav';
-      const generatedAudioUrl = `data:${contentType};base64,${result.clone.audio_base64}`;
-      navigate('/pronunciation/results', {
-        state: {
-          spokenPhonemes: result.spoken,
-          intendedPhonemes: result.intended,
-          generatedAudioUrl: generatedAudioUrl,
-          recordingUrl: recordingUrl,
-          intendedText: spokenText.trim()
-        }
-      });
-    } else if (error) {
-      toast.error(error);
+    try {
+      const result = await processRecording(audioBlob, spokenText);
+      if (result) {
+        toast.success("Processing complete!");
+        const contentType = result.clone.content_type || 'audio/wav';
+        const generatedAudioUrl = `data:${contentType};base64,${result.clone.audio_base64}`;
+        navigate('/pronunciation/results', {
+          state: {
+            spokenPhonemes: result.spoken,
+            intendedPhonemes: result.intended,
+            generatedAudioUrl: generatedAudioUrl,
+            recordingUrl: recordingUrl,
+            intendedText: spokenText.trim()
+          }
+        });
+      }
+      // Error toast is already shown by the hook
+    } catch (err) {
+      // Unexpected error fallback
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
   const handlePlayRecording = () => {
