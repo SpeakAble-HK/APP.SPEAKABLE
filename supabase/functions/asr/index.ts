@@ -1,12 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
 const API_BASE_URL = "http://comp.naozumi.me"
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024
 const ALLOWED_AUDIO_TYPES = ['audio/webm', 'audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/m4a', 'audio/x-m4a']
 
 serve(async (req) => {
@@ -15,11 +16,34 @@ serve(async (req) => {
   }
 
   try {
+    // Auth check
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    )
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data, error: authError } = await supabaseClient.auth.getClaims(token)
+    if (authError || !data?.claims) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const formData = await req.formData()
     const audioFile = formData.get('audio') as File
     const language = formData.get('language') as string || 'yue'
     
-    // Input validation
     if (!audioFile) {
       return new Response(
         JSON.stringify({ error: 'No audio file provided' }),
@@ -34,7 +58,6 @@ serve(async (req) => {
       )
     }
 
-    // Check content type (allow empty/unknown types for browser-recorded audio)
     if (audioFile.type && !ALLOWED_AUDIO_TYPES.includes(audioFile.type)) {
       return new Response(
         JSON.stringify({ error: 'Invalid audio format. Supported formats: webm, wav, mp3, ogg, m4a.' }),
@@ -42,9 +65,8 @@ serve(async (req) => {
       )
     }
 
-    console.log('Received audio file:', audioFile.name, 'Size:', audioFile.size, 'Language:', language)
+    console.log('Received audio file:', audioFile.name, 'Size:', audioFile.size, 'Language:', language, 'User:', data.claims.sub)
 
-    // Forward to the ASR API
     const asrFormData = new FormData()
     asrFormData.append('file', audioFile)
     asrFormData.append('language', language)
@@ -58,15 +80,10 @@ serve(async (req) => {
       const errorText = await asrResponse.text()
       console.error('ASR API error:', asrResponse.status, errorText)
       
-      // Return generic error to client
       let clientMessage = 'Failed to process audio. Please try again.'
-      if (asrResponse.status === 413) {
-        clientMessage = 'Audio file is too large.'
-      } else if (asrResponse.status === 400) {
-        clientMessage = 'Invalid audio format or corrupted file.'
-      } else if (asrResponse.status === 503) {
-        clientMessage = 'Speech recognition service is temporarily unavailable.'
-      }
+      if (asrResponse.status === 413) clientMessage = 'Audio file is too large.'
+      else if (asrResponse.status === 400) clientMessage = 'Invalid audio format or corrupted file.'
+      else if (asrResponse.status === 503) clientMessage = 'Speech recognition service is temporarily unavailable.'
       
       return new Response(
         JSON.stringify({ error: clientMessage }),
@@ -78,10 +95,7 @@ serve(async (req) => {
     console.log('ASR Result:', asrResult)
 
     return new Response(
-      JSON.stringify({ 
-        success: true,
-        result: asrResult.result // Array of [character, jyutping] pairs
-      }),
+      JSON.stringify({ success: true, result: asrResult.result }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
