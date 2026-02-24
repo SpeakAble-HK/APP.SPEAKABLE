@@ -1,14 +1,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
 const API_BASE_URL = "http://comp.naozumi.me"
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024
 const MAX_TEXT_LENGTH = 5000
 const ALLOWED_AUDIO_TYPES = ['audio/webm', 'audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/m4a', 'audio/x-m4a']
+
+function sanitizeText(text: string): string {
+  return text.replace(/[<>"'\\]/g, '').trim()
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -16,12 +21,35 @@ serve(async (req) => {
   }
 
   try {
+    // Auth check
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    )
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data, error: authError } = await supabaseClient.auth.getClaims(token)
+    if (authError || !data?.claims) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const formData = await req.formData()
     const promptAudio = formData.get('prompt_audio') as File
-    const text = formData.get('text') as string
-    const promptText = formData.get('prompt_text') as string
+    const rawText = formData.get('text') as string
+    const rawPromptText = formData.get('prompt_text') as string
 
-    // Input validation
     if (!promptAudio) {
       return new Response(
         JSON.stringify({ error: 'No prompt audio provided' }),
@@ -36,7 +64,6 @@ serve(async (req) => {
       )
     }
 
-    // Check content type (allow empty/unknown types for browser-recorded audio)
     if (promptAudio.type && !ALLOWED_AUDIO_TYPES.includes(promptAudio.type)) {
       return new Response(
         JSON.stringify({ error: 'Invalid audio format. Supported formats: webm, wav, mp3, ogg, m4a.' }),
@@ -44,40 +71,38 @@ serve(async (req) => {
       )
     }
 
-    if (!text) {
+    if (!rawText) {
       return new Response(
         JSON.stringify({ error: 'No text provided' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (text.length > MAX_TEXT_LENGTH) {
+    const text = sanitizeText(rawText)
+    if (text.length > MAX_TEXT_LENGTH || text.length === 0) {
       return new Response(
-        JSON.stringify({ error: `Text too long. Maximum length is ${MAX_TEXT_LENGTH} characters.` }),
+        JSON.stringify({ error: `Text must be between 1 and ${MAX_TEXT_LENGTH} characters.` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!promptText) {
+    if (!rawPromptText) {
       return new Response(
         JSON.stringify({ error: 'No prompt text provided' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (promptText.length > MAX_TEXT_LENGTH) {
+    const promptText = sanitizeText(rawPromptText)
+    if (promptText.length > MAX_TEXT_LENGTH || promptText.length === 0) {
       return new Response(
-        JSON.stringify({ error: `Prompt text too long. Maximum length is ${MAX_TEXT_LENGTH} characters.` }),
+        JSON.stringify({ error: `Prompt text must be between 1 and ${MAX_TEXT_LENGTH} characters.` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log('TTS Request:')
-    console.log('- Text to speak:', text.substring(0, 100))
-    console.log('- Prompt text (ASR result):', promptText.substring(0, 100))
-    console.log('- Prompt audio size:', promptAudio.size)
+    console.log('TTS Request - Text length:', text.length, 'Audio size:', promptAudio.size, 'User:', data.claims.sub)
 
-    // Forward to the TTS API
     const ttsFormData = new FormData()
     ttsFormData.append('text', text)
     ttsFormData.append('prompt_text', promptText)
@@ -92,15 +117,10 @@ serve(async (req) => {
       const errorText = await ttsResponse.text()
       console.error('TTS API error:', ttsResponse.status, errorText)
       
-      // Return generic error to client
       let clientMessage = 'Failed to generate voice. Please try again.'
-      if (ttsResponse.status === 413) {
-        clientMessage = 'Audio file is too large.'
-      } else if (ttsResponse.status === 400) {
-        clientMessage = 'Invalid input. Please check your audio and text.'
-      } else if (ttsResponse.status === 503) {
-        clientMessage = 'Voice synthesis service is temporarily unavailable.'
-      }
+      if (ttsResponse.status === 413) clientMessage = 'Audio file is too large.'
+      else if (ttsResponse.status === 400) clientMessage = 'Invalid input. Please check your audio and text.'
+      else if (ttsResponse.status === 503) clientMessage = 'Voice synthesis service is temporarily unavailable.'
       
       return new Response(
         JSON.stringify({ error: clientMessage }),
@@ -108,11 +128,9 @@ serve(async (req) => {
       )
     }
 
-    // Get the audio as ArrayBuffer and convert to base64
     const audioBuffer = await ttsResponse.arrayBuffer()
     const audioBytes = new Uint8Array(audioBuffer)
     
-    // Convert to base64
     let binary = ''
     for (let i = 0; i < audioBytes.byteLength; i++) {
       binary += String.fromCharCode(audioBytes[i])
@@ -123,12 +141,7 @@ serve(async (req) => {
     console.log('TTS audio received, size:', audioBuffer.byteLength, 'type:', contentType)
 
     return new Response(
-      JSON.stringify({ 
-        success: true,
-        audio_base64: audioBase64,
-        content_type: contentType,
-        size: audioBuffer.byteLength
-      }),
+      JSON.stringify({ success: true, audio_base64: audioBase64, content_type: contentType, size: audioBuffer.byteLength }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
