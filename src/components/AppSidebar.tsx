@@ -1,4 +1,4 @@
-import { Home, Mic2, BookOpen, LogIn, LogOut, BarChart3, Info, Swords, X } from "lucide-react";
+import { Home, LogIn, LogOut, BarChart3, Info, Swords, X, Languages, Stethoscope } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -22,6 +22,8 @@ export function AppSidebar({ user, onSignOut, onClose }: AppSidebarProps) {
     { title: t("nav.dashboard"), url: "/", icon: Home },
     { title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", url: "/speech-quest", icon: Swords },
     { title: t("nav.results"), url: "/pronunciation/results", icon: BarChart3 },
+    { title: isEn ? "IPA Transcription" : isTW ? "IPA 轉寫" : "IPA 转写", url: "/ipa-transcription", icon: Languages },
+    { title: isEn ? "Diagnose Symptoms" : isTW ? "症狀診斷" : "症状诊断", url: "/diagnose-symptoms", icon: Stethoscope },
     { title: isEn ? "About SpeakAble HK" : isTW ? "關於 SpeakAble HK" : "关于 SpeakAble HK", url: "/about", icon: Info },
   ];
 

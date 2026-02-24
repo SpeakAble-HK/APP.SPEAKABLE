@@ -14,6 +14,7 @@ import AboutPage from "./pages/AboutPage";
 import IPALibraryPage from "./pages/IPALibraryPage";
 import VisualizationPage from "./pages/VisualizationPage";
 import NotFound from "./pages/NotFound";
+import ComingSoonPage from "./pages/ComingSoonPage";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,8 @@ const App = () => (
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/learning/library" element={<IPALibraryPage />} />
                 <Route path="/learning/progress" element={<VisualizationPage />} />
+                <Route path="/ipa-transcription" element={<ComingSoonPage />} />
+                <Route path="/diagnose-symptoms" element={<ComingSoonPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

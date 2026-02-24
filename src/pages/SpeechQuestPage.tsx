@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mic, Layers, Lock, CheckCircle, Star, Trophy, ArrowLeft } from "lucide-react";
+import { Mic, Layers, Lock, CheckCircle, Star, Trophy, ArrowLeft, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -8,6 +8,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserStats } from "@/hooks/useUserStats";
 import logo from "@/assets/logo.png";
+import { IPALibraryModal } from "@/components/IPALibraryModal";
+import { RewardsShop } from "@/components/RewardsShop";
 
 interface QuestNode {
   id: number;
@@ -38,6 +40,8 @@ const SpeechQuestPage = () => {
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
 
+  const [ipaOpen, setIpaOpen] = useState(false);
+
   const totalPoints = questNodes.filter(n => n.completed).reduce((s, n) => s + n.points, 0);
   const completedCount = questNodes.filter(n => n.completed).length;
   const progress = (completedCount / questNodes.length) * 100;
@@ -62,6 +66,13 @@ const SpeechQuestPage = () => {
           <div className="flex-1 max-w-[200px] ml-4">
             <Progress value={progress} className="h-2" />
           </div>
+          <button
+            onClick={() => setIpaOpen(true)}
+            className="ml-3 flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            <BookOpen className="h-4 w-4" />
+            {isEn ? 'IPA Library' : isTW ? 'IPA 音標庫' : 'IPA 音标库'}
+          </button>
         </div>
       </div>
 
@@ -165,7 +176,13 @@ const SpeechQuestPage = () => {
             {isEn ? 'Locked' : isTW ? '已鎖定' : '已锁定'}
           </div>
         </div>
+
+        {/* Rewards Shop */}
+        <RewardsShop totalPoints={totalPoints} />
       </div>
+
+      {/* IPA Library Modal */}
+      <IPALibraryModal open={ipaOpen} onOpenChange={setIpaOpen} />
     </div>
   );
 };
