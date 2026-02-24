@@ -109,17 +109,17 @@ const SpeechQuestPage = () => {
 
   return (
     <div className="min-h-full bg-background">
-      {/* Top Bar: Back + Points */}
+      {/* Top Bar: Back + Score + IPA */}
       <div className="sticky top-14 z-20 bg-card/95 backdrop-blur border-b border-border px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
+        <div className="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button variant="ghost" size="sm" className="gap-2 min-h-[48px] min-w-[48px]">
               <ArrowLeft className="h-4 w-4" />
-              {isEn ? 'Back to Home' : isTW ? '返回首頁' : '返回首页'}
+              <span className="hidden sm:inline">{isEn ? 'Back to Home' : isTW ? '返回首頁' : '返回首页'}</span>
             </Button>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" aria-hidden="true" />
               {availablePoints} {isEn ? 'pts' : '分'}
@@ -128,13 +128,13 @@ const SpeechQuestPage = () => {
               <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
               {completedCount}/{questNodesData.length}
             </div>
-            <div className="max-w-[120px]">
+            <div className="w-16 sm:w-[120px]">
               <Progress value={progressPct} className="h-2" />
             </div>
             <Button
               onClick={() => setIpaOpen(true)}
               size="sm"
-              className="gap-1.5 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 hover:shadow-lg transition-all duration-200"
+              className="gap-1.5 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 hover:shadow-lg transition-all duration-200 min-h-[48px]"
             >
               <BookOpen className="h-4 w-4" />
               {isEn ? 'IPA Library' : isTW ? 'IPA 音標庫' : 'IPA 音标库'}
@@ -156,7 +156,7 @@ const SpeechQuestPage = () => {
         </div>
 
         {/* Progression Path */}
-        <div className="relative">
+        <div className="relative w-[90%] max-w-md mx-auto">
           <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
 
           <div className="space-y-6 relative">
@@ -168,11 +168,11 @@ const SpeechQuestPage = () => {
               const hasConfetti = showConfetti === node.id;
 
               return (
-                <div key={node.id} className={`flex items-center gap-4 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
+                <div key={node.id} className={`flex items-center gap-3 sm:gap-4 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
                   {/* Card */}
                   <div className={`flex-1 ${isLeft ? 'text-right' : 'text-left'}`}>
                     <Card
-                      className={`speech-quest-node inline-block max-w-[280px] w-full transition-all duration-300 ${
+                      className={`speech-quest-node inline-block w-full max-w-[280px] transition-all duration-300 ${
                         isAnimating
                           ? 'scale-105 border-primary ring-2 ring-primary/40 shadow-lg'
                           : nodeLocked
@@ -210,9 +210,9 @@ const SpeechQuestPage = () => {
                     </Card>
                   </div>
 
-                  {/* Center Node */}
+                  {/* Center Node — min 48px touch target */}
                   <div className="relative">
-                    <div className={`speech-quest-circle relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-500 ${
+                    <div className={`speech-quest-circle relative z-10 flex items-center justify-center w-12 h-12 min-w-[48px] min-h-[48px] rounded-full border-2 transition-all duration-500 ${
                       isAnimating
                         ? 'bg-yellow-400 border-yellow-400 scale-125'
                         : nodeLocked
@@ -259,7 +259,7 @@ const SpeechQuestPage = () => {
         </div>
 
         {/* Legend */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <Mic className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
             {isEn ? 'Read Aloud Articulation' : isTW ? '朗讀發音' : '朗读发音'}
