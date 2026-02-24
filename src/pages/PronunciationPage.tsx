@@ -337,7 +337,7 @@ const PronunciationPage = () => {
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-primary rounded-full transition-all duration-100" 
-                        style={{ width: `${isPlaying ? playbackProgress : 100}%` }}
+                        style={{ width: `${playbackProgress}%` }}
                       />
                     </div>
                     <div className="flex items-center justify-between mt-1">

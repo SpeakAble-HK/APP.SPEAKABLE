@@ -60,7 +60,8 @@ export function IPALibraryModal({ open, onOpenChange }: IPALibraryModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <div className={open ? "fixed inset-0 z-[55] bg-black/50" : "hidden"} />
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto z-[60]">
         <DialogHeader>
           <DialogTitle>{t("ipa.title")}</DialogTitle>
           <DialogDescription>{t("ipa.subtitle")}</DialogDescription>

@@ -205,4 +205,17 @@
     0% { transform: scaleY(0.3); }
     100% { transform: scaleY(1); }
   }
+
+  /* High contrast: ensure Speech Quest nodes and buttons have strong borders/outlines */
+  .high-contrast .speech-quest-node {
+    border-width: 3px !important;
+    border-color: hsl(var(--foreground)) !important;
+  }
+  .high-contrast .speech-quest-node:not([disabled]):hover {
+    outline: 3px solid hsl(var(--foreground));
+    outline-offset: 2px;
+  }
+  .high-contrast .speech-quest-circle {
+    border-width: 3px !important;
+  }
 }

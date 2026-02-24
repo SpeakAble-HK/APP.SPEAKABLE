@@ -171,7 +171,7 @@ const SpeechQuestPage = () => {
                   {/* Card */}
                   <div className={`flex-1 ${isLeft ? 'text-right' : 'text-left'}`}>
                     <Card
-                      className={`inline-block max-w-[280px] w-full transition-all duration-300 ${
+                      className={`speech-quest-node inline-block max-w-[280px] w-full transition-all duration-300 ${
                         isAnimating
                           ? 'scale-105 border-primary ring-2 ring-primary/40 shadow-lg'
                           : nodeLocked
@@ -211,7 +211,7 @@ const SpeechQuestPage = () => {
 
                   {/* Center Node */}
                   <div className="relative">
-                    <div className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-500 ${
+                    <div className={`speech-quest-circle relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-500 ${
                       isAnimating
                         ? 'bg-yellow-400 border-yellow-400 scale-125'
                         : nodeLocked
