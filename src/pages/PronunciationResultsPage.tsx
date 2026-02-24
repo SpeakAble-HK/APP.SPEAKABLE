@@ -130,7 +130,7 @@ const PronunciationResultsPage = () => {
     };
   };
 
-  // Save new result if from Voice Lab and user is logged in
+  // Save new result if from Echo Speech and user is logged in
   const handleSaveResult = async () => {
     if (!state || !user || hasSaved) return;
 

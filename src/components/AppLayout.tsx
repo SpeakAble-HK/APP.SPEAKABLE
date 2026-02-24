@@ -46,10 +46,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
 
   const handleLanguageChange = async (newLanguage: string) => {
-    // Always update the local state for immediate UI change
     setLanguage(newLanguage as Language);
 
-    // If user is logged in, also save to database
     if (user) {
       const { error } = await updateLanguage(newLanguage);
       if (error) {
@@ -60,7 +58,6 @@ export function AppLayout({ children }: AppLayoutProps) {
     }
   };
 
-  // Show loading spinner only briefly
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center hero-gradient">
@@ -105,8 +102,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           </main>
 
           {/* Copyright Footer */}
-          <footer className="bg-white border-t border-border py-4 text-center text-sm text-muted-foreground">
-            © 2026 SpeakRight. All rights reserved.
+          <footer className="bg-background border-t border-border py-4 text-center text-sm text-muted-foreground">
+            © 2026 SpeakAble HK. All rights reserved.
           </footer>
         </div>
       </div>
