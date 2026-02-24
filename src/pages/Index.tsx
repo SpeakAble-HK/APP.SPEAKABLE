@@ -314,11 +314,11 @@ const Index = () => {
 
         {/* Quick Links */}
         <nav className="grid grid-cols-3 gap-3 mt-6 w-full" aria-label={isEn ? "Quick links" : "快速連結"}>
-          <Link to="/practice" className="group">
+          <Link to="/speech-quest" className="group">
             <div className="bg-card/60 backdrop-blur border border-border rounded-xl p-3 text-center transition-all hover:border-primary/30 hover:bg-card">
               <BookOpen className="h-4 w-4 text-primary mx-auto mb-1.5" aria-hidden="true" />
               <p className="text-xs font-medium text-foreground">
-                {isEn ? 'Practice' : isTW ? '練習' : '练习'}
+                {isEn ? 'Speech Quest' : isTW ? '語音冒險' : '语音冒险'}
               </p>
             </div>
           </Link>
@@ -330,11 +330,11 @@ const Index = () => {
               </p>
             </div>
           </Link>
-          <Link to="/features" className="group">
+          <Link to="/about" className="group">
             <div className="bg-card/60 backdrop-blur border border-border rounded-xl p-3 text-center transition-all hover:border-primary/30 hover:bg-card">
               <ArrowRight className="h-4 w-4 text-primary mx-auto mb-1.5" aria-hidden="true" />
               <p className="text-xs font-medium text-foreground">
-                {isEn ? 'Features' : isTW ? '功能' : '功能'}
+                {isEn ? 'About' : isTW ? '關於' : '关于'}
               </p>
             </div>
           </Link>

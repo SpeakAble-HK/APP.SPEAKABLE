@@ -1,18 +1,5 @@
-import { Home, Mic2, BookOpen, GraduationCap, LogIn, LogOut, BarChart3 } from "lucide-react";
-import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
-import { Link } from "react-router-dom";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { Home, Mic2, BookOpen, LogIn, LogOut, BarChart3, Info, Swords, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import logo from "@/assets/logo.png";
@@ -20,21 +7,22 @@ import logo from "@/assets/logo.png";
 interface AppSidebarProps {
   user: any;
   onSignOut: () => void;
+  onClose?: () => void;
 }
 
-export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
+export function AppSidebar({ user, onSignOut, onClose }: AppSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const currentPath = location.pathname;
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isEn = language === 'en-GB';
+  const isTW = language === 'zh-TW';
 
   const menuItems = [
     { title: t("nav.dashboard"), url: "/", icon: Home },
-    { title: t("nav.voiceLab"), url: "/pronunciation", icon: Mic2 },
+    { title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", url: "/speech-quest", icon: Swords },
     { title: t("nav.results"), url: "/pronunciation/results", icon: BarChart3 },
-    { title: t("nav.practice"), url: "/practice", icon: BookOpen },
-    { title: t("nav.learning"), url: "/learning", icon: GraduationCap },
+    { title: isEn ? "About SpeakAble HK" : isTW ? "關於 SpeakAble HK" : "关于 SpeakAble HK", url: "/about", icon: Info },
   ];
 
   const isActive = (path: string) => {
@@ -42,70 +30,67 @@ export function AppSidebar({ user, onSignOut }: AppSidebarProps) {
     return currentPath.startsWith(path);
   };
 
+  const handleNav = (url: string) => {
+    navigate(url);
+    onClose?.();
+  };
+
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar" aria-label="Main navigation">
-      <Link to="/" className="flex items-center gap-2 p-4 border-b border-sidebar-border hover:bg-sidebar-accent/50 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" aria-label="SpeakAble HK — Go to home page">
-        <img src={logo} alt="" className="h-8 w-8 object-contain flex-shrink-0" />
-        {!collapsed && (
-          <span className="text-lg font-bold text-sidebar-foreground whitespace-nowrap">SpeakAble HK</span>
-        )}
-      </Link>
+    <div className="w-72 h-full bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] flex flex-col shadow-2xl">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-[hsl(var(--sidebar-border))]">
+        <button onClick={() => handleNav("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-ring rounded" aria-label="SpeakAble HK — Go to home page">
+          <img src={logo} alt="" className="h-8 w-8 object-contain" />
+          <span className="text-lg font-bold whitespace-nowrap">SpeakAble HK</span>
+        </button>
+        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[hsl(var(--sidebar-accent))] transition-colors" aria-label={isEn ? "Close menu" : "關閉選單"}>
+          <X className="h-4 w-4" />
+        </button>
+      </div>
 
-      <SidebarContent className="py-4">
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sidebar-foreground hover:bg-sidebar-accent"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary-foreground font-semibold"
-                      aria-current={isActive(item.url) ? "page" : undefined}
-                    >
-                      <item.icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+      {/* Nav Items */}
+      <nav className="flex-1 py-4 px-3 space-y-1" aria-label="Main navigation">
+        {menuItems.map((item) => (
+          <button
+            key={item.url}
+            onClick={() => handleNav(item.url)}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium ${
+              isActive(item.url)
+                ? 'bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]'
+                : 'text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))]'
+            }`}
+            aria-current={isActive(item.url) ? "page" : undefined}
+          >
+            <item.icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+            <span>{item.title}</span>
+          </button>
+        ))}
+      </nav>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border">
+      {/* Footer */}
+      <div className="p-4 border-t border-[hsl(var(--sidebar-border))]">
         {user ? (
           <Button
             variant="ghost"
-            size={collapsed ? "icon" : "default"}
-            onClick={onSignOut}
-            className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            onClick={() => { onSignOut(); onClose?.(); }}
+            className="w-full justify-start gap-3 text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))]"
             aria-label={t("nav.signOut")}
           >
             <LogOut className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-            {!collapsed && <span>{t("nav.signOut")}</span>}
+            <span>{t("nav.signOut")}</span>
           </Button>
         ) : (
-          <Link to="/auth" className="w-full">
-            <Button
-              variant="ghost"
-              size={collapsed ? "icon" : "default"}
-              className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              aria-label={t("nav.signIn")}
-            >
-              <LogIn className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-              {!collapsed && <span>{t("nav.signIn")}</span>}
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            onClick={() => handleNav("/auth")}
+            className="w-full justify-start gap-3 text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))]"
+            aria-label={t("nav.signIn")}
+          >
+            <LogIn className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+            <span>{t("nav.signIn")}</span>
+          </Button>
         )}
-      </SidebarFooter>
-    </Sidebar>
+      </div>
+    </div>
   );
 }
