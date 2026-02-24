@@ -6,6 +6,8 @@ export type ContrastMode = "default" | "high-contrast";
 interface AccessibilityContextType {
   textSize: TextSize;
   contrastMode: ContrastMode;
+  setTextSize: (size: TextSize) => void;
+  setContrastMode: (mode: ContrastMode) => void;
   cycleTextSize: () => void;
   toggleContrast: () => void;
 }
@@ -48,7 +50,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AccessibilityContext.Provider value={{ textSize, contrastMode, cycleTextSize, toggleContrast }}>
+    <AccessibilityContext.Provider value={{ textSize, contrastMode, setTextSize, setContrastMode, cycleTextSize, toggleContrast }}>
       {children}
     </AccessibilityContext.Provider>
   );

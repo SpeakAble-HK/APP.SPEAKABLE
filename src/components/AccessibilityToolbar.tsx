@@ -1,60 +1,92 @@
-import { ALargeSmall, Contrast } from "lucide-react";
+import { ALargeSmall, Contrast, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { useAccessibility, TextSize, ContrastMode } from "@/contexts/AccessibilityContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
-const textSizeLabels = {
-  normal: { "en-GB": "Text: Normal", "zh-TW": "文字：正常", "zh-CN": "文字：正常" },
-  large: { "en-GB": "Text: Large", "zh-TW": "文字：大", "zh-CN": "文字：大" },
-  "extra-large": { "en-GB": "Text: Extra Large", "zh-TW": "文字：特大", "zh-CN": "文字：特大" },
-};
+const textSizeOptions: { value: TextSize; labels: Record<string, string> }[] = [
+  { value: "normal", labels: { "en-GB": "Normal", "zh-TW": "正常", "zh-CN": "正常" } },
+  { value: "large", labels: { "en-GB": "Large", "zh-TW": "大", "zh-CN": "大" } },
+  { value: "extra-large", labels: { "en-GB": "Extra Large", "zh-TW": "特大", "zh-CN": "特大" } },
+];
+
+const contrastOptions: { value: ContrastMode; labels: Record<string, string> }[] = [
+  { value: "default", labels: { "en-GB": "Default", "zh-TW": "預設", "zh-CN": "默认" } },
+  { value: "high-contrast", labels: { "en-GB": "High Contrast", "zh-TW": "高對比", "zh-CN": "高对比" } },
+];
 
 export function AccessibilityToolbar() {
-  const { textSize, contrastMode, cycleTextSize, toggleContrast } = useAccessibility();
+  const { textSize, contrastMode, setTextSize, setContrastMode } = useAccessibility();
   const { language } = useLanguage();
-  const lang = language as "en-GB" | "zh-TW" | "zh-CN";
+  const lang = (language as "en-GB" | "zh-TW" | "zh-CN") || "en-GB";
 
-  const sizeLabel = textSizeLabels[textSize][lang] || textSizeLabels[textSize]["en-GB"];
-  const contrastLabel = contrastMode === "high-contrast"
-    ? (lang === "en-GB" ? "High Contrast: On" : "高對比：開")
-    : (lang === "en-GB" ? "High Contrast: Off" : "高對比：關");
+  const textSizeLabel = lang === "en-GB" ? "Text Size" : "文字大小";
+  const contrastLabel = lang === "en-GB" ? "Contrast" : "對比度";
 
   return (
     <div className="flex items-center gap-1" role="toolbar" aria-label="Accessibility options">
-      <Tooltip>
-        <TooltipTrigger asChild>
+      {/* Text Size Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
-            onClick={cycleTextSize}
-            aria-label={sizeLabel}
+            aria-label={textSizeLabel}
             className="h-9 w-9 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <ALargeSmall className="h-5 w-5" />
           </Button>
-        </TooltipTrigger>
-        <TooltipContent>{sizeLabel}</TooltipContent>
-      </Tooltip>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[140px] bg-popover border-border z-50">
+          <DropdownMenuLabel className="text-xs text-muted-foreground">{textSizeLabel}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {textSizeOptions.map((opt) => (
+            <DropdownMenuItem
+              key={opt.value}
+              onClick={() => setTextSize(opt.value)}
+              className="flex items-center justify-between gap-2 cursor-pointer"
+            >
+              <span>{opt.labels[lang] || opt.labels["en-GB"]}</span>
+              {textSize === opt.value && <Check className="h-4 w-4 text-primary" aria-hidden="true" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-      <Tooltip>
-        <TooltipTrigger asChild>
+      {/* Contrast Dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <Button
             variant={contrastMode === "high-contrast" ? "secondary" : "ghost"}
             size="icon"
-            onClick={toggleContrast}
             aria-label={contrastLabel}
             className="h-9 w-9 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <Contrast className="h-5 w-5" />
           </Button>
-        </TooltipTrigger>
-        <TooltipContent>{contrastLabel}</TooltipContent>
-      </Tooltip>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[140px] bg-popover border-border z-50">
+          <DropdownMenuLabel className="text-xs text-muted-foreground">{contrastLabel}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {contrastOptions.map((opt) => (
+            <DropdownMenuItem
+              key={opt.value}
+              onClick={() => setContrastMode(opt.value)}
+              className="flex items-center justify-between gap-2 cursor-pointer"
+            >
+              <span>{opt.labels[lang] || opt.labels["en-GB"]}</span>
+              {contrastMode === opt.value && <Check className="h-4 w-4 text-primary" aria-hidden="true" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
