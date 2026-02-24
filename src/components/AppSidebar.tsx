@@ -1,5 +1,5 @@
 import { Home, LogIn, LogOut, BarChart3, Info, Swords, X, Languages, Stethoscope, User } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -7,7 +7,7 @@ import logo from "@/assets/logo.png";
 
 interface AppSidebarProps {
   user: any;
-  profile?: { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null;
+  profile?: { display_name?: string | null; first_name?: string | null; last_name?: string | null; avatar_url?: string | null } | null;
   onSignOut: () => void;
   onClose?: () => void;
 }
@@ -81,6 +81,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
               aria-label={isEn ? 'Profile settings' : '個人資料設定'}
             >
               <Avatar className="h-8 w-8">
+                {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="Avatar" />}
                 <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                   {`${profile?.first_name?.[0] || ''}${profile?.last_name?.[0] || ''}`.toUpperCase() || 'U'}
                 </AvatarFallback>
