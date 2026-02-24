@@ -196,8 +196,8 @@ const Index = () => {
         <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
           <Textarea 
             placeholder={language === 'en-GB' 
-              ? "Type the sentence you want to practice... e.g. 你好" 
-              : "輸入您想練習的句子... 例如 你好"}
+              ? "Type the sentence you want to practice... e.g. 你今日食咗飯未啊" 
+              : "輸入您想練習的句子... 例如 你今日食咗飯未啊"}
             value={spokenText} 
             onChange={e => setSpokenText(e.target.value)} 
             className="min-h-[80px] resize-none border-0 shadow-none focus-visible:ring-0 text-base"
