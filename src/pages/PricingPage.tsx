@@ -1,15 +1,24 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, ArrowLeft, Mail } from "lucide-react";
+import { Check, ArrowLeft, Mail, GraduationCap, Stethoscope, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCurrency, type Currency } from "@/hooks/useCurrency";
 
 const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const { language } = useLanguage();
+  const { currency, setCurrency, convert } = useCurrency();
   const isEn = language === "en-GB";
   const isTW = language === "zh-TW";
 
@@ -19,11 +28,7 @@ const PricingPage = () => {
   const tiers = [
     {
       name: "Free",
-      description: t(
-        "Get started with basic speech tools",
-        "使用基本語音工具開始",
-        "使用基本语音工具开始"
-      ),
+      description: t("Get started with basic speech tools", "使用基本語音工具開始", "使用基本语音工具开始"),
       price: 0,
       annualPrice: 0,
       label: t("Free forever", "永久免費", "永久免费"),
@@ -39,11 +44,7 @@ const PricingPage = () => {
     },
     {
       name: "Plus",
-      description: t(
-        "For dedicated learners who practise daily",
-        "適合每天練習的學習者",
-        "适合每天练习的学习者"
-      ),
+      description: t("For dedicated learners who practise daily", "適合每天練習的學習者", "适合每天练习的学习者"),
       price: 15,
       annualPrice: 12,
       label: "",
@@ -59,11 +60,7 @@ const PricingPage = () => {
     },
     {
       name: "Pro",
-      description: t(
-        "Unlimited practice, zero distractions",
-        "無限練習，零干擾",
-        "无限练习，零干扰"
-      ),
+      description: t("Unlimited practice, zero distractions", "無限練習，零干擾", "无限练习，零干扰"),
       price: 99,
       annualPrice: 79,
       label: "",
@@ -83,13 +80,26 @@ const PricingPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-        {/* Back */}
-        <Link to="/">
-          <Button variant="ghost" size="sm" className="gap-1.5 min-h-[48px]">
-            <ArrowLeft className="h-4 w-4" />
-            {t("Back to Home", "返回主頁", "返回主页")}
-          </Button>
-        </Link>
+        {/* Top bar: Back + Currency */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link to="/">
+            <Button variant="ghost" size="sm" className="gap-1.5 min-h-[48px]">
+              <ArrowLeft className="h-4 w-4" />
+              {t("Back to Home", "返回主頁", "返回主页")}
+            </Button>
+          </Link>
+          <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
+            <SelectTrigger className="w-[110px] min-h-[48px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="USD">USD ($)</SelectItem>
+              <SelectItem value="HKD">HKD (HK$)</SelectItem>
+              <SelectItem value="RMB">RMB (¥)</SelectItem>
+              <SelectItem value="GBP">GBP (£)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Header */}
         <div className="text-center space-y-3">
@@ -148,14 +158,14 @@ const PricingPage = () => {
                 <CardContent className="flex-1 space-y-5">
                   <div>
                     <span className="text-4xl font-extrabold text-foreground">
-                      ${displayPrice}
+                      {convert(displayPrice)}
                     </span>
                     <span className="text-muted-foreground text-sm ml-1">
                       / {t("month", "月", "月")}
                     </span>
                     {isAnnual && tier.price > 0 && (
                       <p className="text-xs text-muted-foreground mt-1 line-through">
-                        ${tier.price} / {t("month", "月", "月")}
+                        {convert(tier.price)} / {t("month", "月", "月")}
                       </p>
                     )}
                   </div>
@@ -188,8 +198,46 @@ const PricingPage = () => {
           })}
         </div>
 
+        {/* Student / Professional discount */}
+        <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
+          <CardContent className="py-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+              <div className="flex gap-2">
+                <div className="p-2.5 rounded-full bg-primary/10">
+                  <GraduationCap className="h-6 w-6 text-primary" />
+                </div>
+                <div className="p-2.5 rounded-full bg-primary/10">
+                  <Stethoscope className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+              <div className="flex-1 space-y-1">
+                <h3 className="font-semibold text-foreground">
+                  {t(
+                    "Students & Professionals Discount",
+                    "學生與專業人士折扣",
+                    "学生与专业人士折扣"
+                  )}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "Students with valid IDs and certified educators, therapists, or doctors can apply for special pricing.",
+                    "持有效學生證的學生及認證教育工作者、治療師或醫生可申請特別定價。",
+                    "持有效学生证的学生及认证教育工作者、治疗师或医生可申请特别定价。"
+                  )}
+                </p>
+              </div>
+              <a href="mailto:contact@speakablehk.com?subject=Discount%20Application">
+                <Button variant="outline" className="min-h-[48px] border-primary text-primary hover:bg-primary/10 font-semibold gap-2">
+                  <Mail className="h-4 w-4" />
+                  {t("Apply for Discount", "申請折扣", "申请折扣")}
+                </Button>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Institution note */}
-        <div className="text-center space-y-2 pb-8">
+        <div className="text-center space-y-3 pb-8">
           <p className="text-sm text-muted-foreground">
             {t(
               "Are you an institution or school? We offer flexible custom plans.",
@@ -197,10 +245,18 @@ const PricingPage = () => {
               "您是机构或学校吗？我们提供灵活的定制方案。"
             )}
           </p>
-          <a href="mailto:contact@speakablehk.com" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
-            <Mail className="h-4 w-4" />
-            {t("Contact us via email", "透過電子郵件聯繫我們", "通过电子邮件联系我们")}
-          </a>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <a href="mailto:contact@speakablehk.com" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+              <Mail className="h-4 w-4" />
+              {t("Contact us via email", "透過電子郵件聯繫我們", "通过电子邮件联系我们")}
+            </a>
+            <Link to="/pricing/institutions">
+              <Button variant="default" className="min-h-[48px] font-semibold gap-2">
+                <ChevronDown className="h-4 w-4" />
+                {t("View Institution Plans", "查看機構方案", "查看机构方案")}
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
