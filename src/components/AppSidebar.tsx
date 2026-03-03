@@ -1,4 +1,4 @@
-import { Home, LogIn, LogOut, BarChart3, Info, Swords, X, Languages, Stethoscope, User } from "lucide-react";
+import { Home, LogIn, LogOut, BarChart3, Info, Swords, X, Languages, Stethoscope, User, CreditCard } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -70,6 +70,22 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
           </button>
         ))}
       </nav>
+
+      {/* Pricing CTA */}
+      <div className="px-3 pb-2">
+        <button
+          onClick={() => handleNav("/pricing")}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 min-h-[48px] rounded-lg transition-colors text-sm font-bold ${
+            isActive("/pricing")
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-primary/10 text-primary hover:bg-primary/20'
+          }`}
+          aria-current={isActive("/pricing") ? "page" : undefined}
+        >
+          <CreditCard className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+          <span>{isEn ? "Pricing" : isTW ? "定價方案" : "定价方案"}</span>
+        </button>
+      </div>
 
       {/* Footer */}
       <div className="p-4 border-t border-[hsl(var(--sidebar-border))] space-y-2">
