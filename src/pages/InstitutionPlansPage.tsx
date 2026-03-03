@@ -3,10 +3,26 @@ import { ArrowLeft, Check, Building2, GraduationCap, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useCurrency, type Currency } from "@/hooks/useCurrency";
+
+// Base prices in USD
+const BASE_PRICES_USD = {
+  basic: 450,
+  professional: 785,
+  enterprise: 1600,
+};
 
 const InstitutionPlansPage = () => {
   const { language } = useLanguage();
+  const { currency, setCurrency, convert } = useCurrency();
   const isEn = language === "en-GB";
   const isTW = language === "zh-TW";
 
@@ -16,8 +32,7 @@ const InstitutionPlansPage = () => {
   const plans = [
     {
       name: t("Basic Plan", "基本方案", "基本方案"),
-      price: "¥3,500",
-      period: t("/year", "/年", "/年"),
+      priceUSD: BASE_PRICES_USD.basic,
       target: t(
         "Small centres / NGOs / Schools with fewer than 300 students",
         "小型中心 / 非政府組織 / 學生少於 300 人的學校",
@@ -32,8 +47,7 @@ const InstitutionPlansPage = () => {
     },
     {
       name: t("Professional Plan", "專業方案", "专业方案"),
-      price: "¥6,100",
-      period: t("/year", "/年", "/年"),
+      priceUSD: BASE_PRICES_USD.professional,
       target: t(
         "Mid-size centres / NGOs / Schools with 300–1,000 users",
         "中型中心 / 非政府組織 / 300–1,000 用戶的學校",
@@ -50,8 +64,7 @@ const InstitutionPlansPage = () => {
     },
     {
       name: t("Enterprise Plan", "企業方案", "企业方案"),
-      price: "£12,500",
-      period: t("/year", "/年", "/年"),
+      priceUSD: BASE_PRICES_USD.enterprise,
       target: t(
         "Large networks with over 1,000 users",
         "超過 1,000 用戶的大型網絡",
@@ -70,12 +83,25 @@ const InstitutionPlansPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-        <Link to="/pricing">
-          <Button variant="ghost" size="sm" className="gap-1.5 min-h-[48px]">
-            <ArrowLeft className="h-4 w-4" />
-            {t("Back to Pricing", "返回定價", "返回定价")}
-          </Button>
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link to="/pricing">
+            <Button variant="ghost" size="sm" className="gap-1.5 min-h-[48px]">
+              <ArrowLeft className="h-4 w-4" />
+              {t("Back to Pricing", "返回定價", "返回定价")}
+            </Button>
+          </Link>
+          <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
+            <SelectTrigger className="w-[110px] min-h-[48px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="USD">USD ($)</SelectItem>
+              <SelectItem value="HKD">HKD (HK$)</SelectItem>
+              <SelectItem value="RMB">RMB (¥)</SelectItem>
+              <SelectItem value="GBP">GBP (£)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="text-center space-y-3">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">
@@ -121,10 +147,10 @@ const InstitutionPlansPage = () => {
                 <CardContent className="flex-1 space-y-5">
                   <div>
                     <span className="text-4xl font-extrabold text-foreground">
-                      {plan.price}
+                      {convert(plan.priceUSD)}
                     </span>
                     <span className="text-muted-foreground text-sm ml-1">
-                      {plan.period}
+                      / {t("year", "年", "年")}
                     </span>
                   </div>
                   <ul className="space-y-2.5">

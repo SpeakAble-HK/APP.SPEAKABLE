@@ -27,7 +27,7 @@ function detectCurrencyFromTimezone(): Currency {
 }
 
 export function useCurrency() {
-  const [currency, setCurrency] = useState<Currency>(detectCurrencyFromTimezone);
+  const [currency, setCurrency] = useState<Currency>("USD");
   const [detected, setDetected] = useState(false);
 
   useEffect(() => {

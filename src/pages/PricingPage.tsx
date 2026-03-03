@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, ArrowLeft, Mail, GraduationCap, Stethoscope, ChevronDown } from "lucide-react";
+import { Check, X, ArrowLeft, Mail, GraduationCap, Stethoscope, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -71,6 +71,8 @@ const PricingPage = () => {
         t("999 tokens", "999 代幣", "999 代币"),
         t("No ads", "無廣告", "无广告"),
         t("24/7 customer support", "全天候客戶支援", "全天候客户支持"),
+        t("Unlimited IPA Transcription", "無限 IPA 轉錄", "无限 IPA 转录"),
+        t("Diagnosing symptoms", "症狀診斷", "症状诊断"),
         t("Limited parrot appearance", "限定鸚鵡造型", "限定鹦鹉造型"),
       ],
       highlighted: false,
@@ -196,6 +198,97 @@ const PricingPage = () => {
               </Card>
             );
           })}
+        </div>
+
+        {/* Comparison table */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-foreground text-center">
+            {t("Compare Plans", "方案比較", "方案比较")}
+          </h2>
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/30">
+                  <th className="text-left p-4 font-medium text-muted-foreground min-w-[140px]"></th>
+                  <th className="p-4 font-bold text-foreground text-center">Free</th>
+                  <th className="p-4 font-bold text-center bg-primary/10 text-primary">Plus</th>
+                  <th className="p-4 font-bold text-foreground text-center">Pro</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    label: t("Price / month", "每月價格", "每月价格"),
+                    free: convert(0),
+                    plus: convert(isAnnual ? 12 : 15),
+                    pro: convert(isAnnual ? 79 : 99),
+                  },
+                  {
+                    label: t("Tokens", "代幣", "代币"),
+                    free: t("5/day", "5/天", "5/天"),
+                    plus: "100",
+                    pro: "999",
+                  },
+                  {
+                    label: t("Speech Quest", "語音冒險", "语音冒险"),
+                    free: "limited",
+                    plus: true,
+                    pro: true,
+                  },
+                  {
+                    label: t("Ad-free", "無廣告", "无广告"),
+                    free: false,
+                    plus: false,
+                    pro: true,
+                  },
+                  {
+                    label: t("IPA Transcription", "IPA 轉錄", "IPA 转录"),
+                    free: "limited",
+                    plus: "limited",
+                    pro: true,
+                  },
+                  {
+                    label: t("Diagnosing Symptoms", "症狀診斷", "症状诊断"),
+                    free: false,
+                    plus: false,
+                    pro: true,
+                  },
+                  {
+                    label: t("Customer Support", "客戶支援", "客户支持"),
+                    free: false,
+                    plus: false,
+                    pro: t("24/7", "全天候", "全天候"),
+                  },
+                  {
+                    label: t("Bonus", "額外獎勵", "额外奖励"),
+                    free: "—",
+                    plus: t("5 ads/day", "5 廣告/天", "5 广告/天"),
+                    pro: t("Limited parrot", "限定鸚鵡", "限定鹦鹉"),
+                  },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-border last:border-0">
+                    <td className="p-4 font-medium text-muted-foreground">{row.label}</td>
+                    {[row.free, row.plus, row.pro].map((val, j) => (
+                      <td
+                        key={j}
+                        className={`p-4 text-center font-semibold ${
+                          j === 1 ? "bg-primary/5" : ""
+                        }`}
+                      >
+                        {val === true ? (
+                          <Check className="h-5 w-5 text-primary mx-auto" />
+                        ) : val === false ? (
+                          <X className="h-5 w-5 text-destructive mx-auto" />
+                        ) : (
+                          <span className="text-foreground">{val}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Student / Professional discount */}
