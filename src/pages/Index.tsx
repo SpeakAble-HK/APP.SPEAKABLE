@@ -207,6 +207,18 @@ const Index = () => {
           </p>
         </div>
 
+        {/* Pricing banner */}
+        <Link to="/pricing" className="w-full">
+          <div className="w-full bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 hover:bg-primary/10 transition-colors mb-6 cursor-pointer">
+            <p className="text-sm text-foreground">
+              {isEn ? "Need more credits? View our subscription plans." : isTW ? "需要更多額度？查看我們的訂閱方案。" : "需要更多额度？查看我们的订阅方案。"}
+            </p>
+            <span className="text-sm font-semibold text-primary whitespace-nowrap flex items-center gap-1">
+              {isEn ? "See Pricing" : isTW ? "查看定價" : "查看定价"} <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        </Link>
+
         {/* Unified Input Card — ChatGPT-style */}
         <div className="w-full bg-card border border-border rounded-2xl shadow-[var(--shadow-card)] overflow-hidden">
           {/* Text Input */}
