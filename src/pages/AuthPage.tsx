@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import { ShieldCheck, Eye, EyeOff, Mail, KeyRound, Wand2, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, Mail, KeyRound, Wand2, ArrowLeft, Home } from 'lucide-react';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { lovable } from '@/integrations/lovable/index';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -22,6 +23,9 @@ import logo from '@/assets/logo.png';
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{};:'",.<>?/\\|`~]).{6,}$/;
 const PASSWORD_HELPER_EN = 'Min 6 chars: uppercase, lowercase, number, special character.';
 const PASSWORD_HELPER_ZH = '至少6個字符：大寫、小寫、數字和特殊字符。';
+
+// Cloudflare Turnstile test key — replace with your production site key
+const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -37,27 +41,7 @@ const signUpSchema = authSchema.extend({
 
 type AuthView = 'login' | 'signup' | 'forgot' | 'magic-link' | 'verify-email' | 'reset-sent' | 'magic-sent';
 
-function MockRecaptcha({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <div
-      className="flex items-center gap-3 p-3 border border-border/60 rounded-xl bg-muted/20 cursor-pointer select-none transition-colors hover:bg-muted/40"
-      onClick={() => onChange(!checked)}
-      role="checkbox"
-      aria-checked={checked}
-      aria-label="reCAPTCHA verification"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onChange(!checked); } }}
-    >
-      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${checked ? 'bg-primary border-primary' : 'border-muted-foreground/40'}`}>
-        {checked && <ShieldCheck className="h-3.5 w-3.5 text-primary-foreground" />}
-      </div>
-      <span className="text-sm text-foreground">I'm not a robot</span>
-      <div className="ml-auto flex flex-col items-end">
-        <span className="text-[9px] text-muted-foreground italic">reCAPTCHA</span>
-      </div>
-    </div>
-  );
-}
+const RequiredMark = () => <span className="text-destructive ml-0.5">*</span>;
 
 export default function AuthPage() {
   const { user, loading, signIn, signUp } = useAuth();
@@ -74,7 +58,7 @@ export default function AuthPage() {
   const [magicEmail, setMagicEmail] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [agreedTerms, setAgreedTerms] = useState(false);
-  const [captchaChecked, setCaptchaChecked] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
 
@@ -85,6 +69,7 @@ export default function AuthPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    if (!turnstileToken) { toast.error(isEn ? 'Please complete the verification' : '請完成驗證'); return; }
     const result = authSchema.safeParse(loginForm);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -106,6 +91,7 @@ export default function AuthPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    if (!turnstileToken) { toast.error(isEn ? 'Please complete the verification' : '請完成驗證'); return; }
     const result = signUpSchema.safeParse(signUpForm);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -181,6 +167,14 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 p-4">
+      {/* Back to Home */}
+      <div className="w-full max-w-[420px] mb-4">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Home className="h-3.5 w-3.5" />
+          {isEn ? 'Back to Home' : '返回首頁'}
+        </Link>
+      </div>
+
       {/* Logo */}
       <div className="flex items-center gap-2.5 mb-8">
         <img src={logo} alt="SpeakAble HK" className="h-10 w-10 object-contain" />
@@ -223,24 +217,27 @@ export default function AuthPage() {
 
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="login-email" className="text-xs font-medium">{isEn ? 'Email address' : '電郵地址'}</Label>
-                  <Input id="login-email" type="email" placeholder="you@example.com" value={loginForm.email} onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} className="h-11 rounded-xl" />
+                  <Label htmlFor="login-email" className="text-xs font-medium">{isEn ? 'Email address' : '電郵地址'}<RequiredMark /></Label>
+                  <Input id="login-email" type="email" placeholder="you@example.com" value={loginForm.email} onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} className="h-11 rounded-xl" required />
                   {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="login-password" className="text-xs font-medium">{isEn ? 'Password' : '密碼'}</Label>
+                    <Label htmlFor="login-password" className="text-xs font-medium">{isEn ? 'Password' : '密碼'}<RequiredMark /></Label>
                     <button type="button" onClick={() => setView('forgot')} className="text-xs text-primary hover:underline">{isEn ? 'Forgot password?' : '忘記密碼？'}</button>
                   </div>
                   <div className="relative">
-                    <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="••••••••" value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} className="h-11 rounded-xl pr-10" />
+                    <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="••••••••" value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} className="h-11 rounded-xl pr-10" required />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowLoginPassword(!showLoginPassword)}>
                       {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
                   </div>
                   {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                 </div>
-                <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-base" disabled={isSubmitting}>
+
+                <Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} onError={() => setTurnstileToken(null)} onExpire={() => setTurnstileToken(null)} />
+
+                <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-base" disabled={isSubmitting || !turnstileToken}>
                   {isSubmitting ? (isEn ? 'Signing in...' : '登入中...') : (isEn ? 'Sign in' : isTW ? '登入' : '登录')}
                 </Button>
               </form>
@@ -252,7 +249,7 @@ export default function AuthPage() {
 
               <p className="text-center text-sm text-muted-foreground mt-6">
                 {isEn ? "Don't have an account?" : '還沒有帳號？'}{' '}
-                <button onClick={() => setView('signup')} className="text-primary font-medium hover:underline">{isEn ? 'Sign up' : isTW ? '註冊' : '注册'}</button>
+                <button onClick={() => { setView('signup'); setTurnstileToken(null); }} className="text-primary font-medium hover:underline">{isEn ? 'Sign up' : isTW ? '註冊' : '注册'}</button>
               </p>
             </>
           )}
@@ -269,23 +266,23 @@ export default function AuthPage() {
               <form onSubmit={handleSignUp} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-firstname" className="text-xs font-medium">{isEn ? 'First Name' : '名'}</Label>
-                    <Input id="signup-firstname" type="text" placeholder={isEn ? 'First name' : '名'} value={signUpForm.firstName} onChange={(e) => setSignUpForm({ ...signUpForm, firstName: e.target.value })} className="h-11 rounded-xl" />
+                    <Label htmlFor="signup-firstname" className="text-xs font-medium">{isEn ? 'First Name' : '名'}<RequiredMark /></Label>
+                    <Input id="signup-firstname" type="text" placeholder={isEn ? 'First name' : '名'} value={signUpForm.firstName} onChange={(e) => setSignUpForm({ ...signUpForm, firstName: e.target.value })} className="h-11 rounded-xl" required />
                     {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="signup-lastname" className="text-xs font-medium">{isEn ? 'Last Name' : '姓'}</Label>
-                    <Input id="signup-lastname" type="text" placeholder={isEn ? 'Last name' : '姓'} value={signUpForm.lastName} onChange={(e) => setSignUpForm({ ...signUpForm, lastName: e.target.value })} className="h-11 rounded-xl" />
+                    <Label htmlFor="signup-lastname" className="text-xs font-medium">{isEn ? 'Last Name' : '姓'}<RequiredMark /></Label>
+                    <Input id="signup-lastname" type="text" placeholder={isEn ? 'Last name' : '姓'} value={signUpForm.lastName} onChange={(e) => setSignUpForm({ ...signUpForm, lastName: e.target.value })} className="h-11 rounded-xl" required />
                     {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="signup-username" className="text-xs font-medium">{isEn ? 'Username' : '用戶名'}</Label>
-                  <Input id="signup-username" type="text" placeholder={isEn ? 'username' : '用戶名'} value={signUpForm.username} onChange={(e) => setSignUpForm({ ...signUpForm, username: e.target.value })} className="h-11 rounded-xl" />
+                  <Label htmlFor="signup-username" className="text-xs font-medium">{isEn ? 'Username' : '用戶名'}<RequiredMark /></Label>
+                  <Input id="signup-username" type="text" placeholder={isEn ? 'username' : '用戶名'} value={signUpForm.username} onChange={(e) => setSignUpForm({ ...signUpForm, username: e.target.value })} className="h-11 rounded-xl" required />
                   {errors.username && <p className="text-xs text-destructive">{errors.username}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">{isEn ? 'Date of Birth' : '出生日期'}</Label>
+                  <Label className="text-xs font-medium">{isEn ? 'Date of Birth' : '出生日期'}<RequiredMark /></Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-11 rounded-xl", !signUpForm.dateOfBirth && "text-muted-foreground")}>
@@ -300,14 +297,14 @@ export default function AuthPage() {
                   {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="signup-email" className="text-xs font-medium">{isEn ? 'Email' : '電郵'}</Label>
-                  <Input id="signup-email" type="email" placeholder="you@example.com" value={signUpForm.email} onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })} className="h-11 rounded-xl" />
+                  <Label htmlFor="signup-email" className="text-xs font-medium">{isEn ? 'Email' : '電郵'}<RequiredMark /></Label>
+                  <Input id="signup-email" type="email" placeholder="you@example.com" value={signUpForm.email} onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })} className="h-11 rounded-xl" required />
                   {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="signup-password" className="text-xs font-medium">{isEn ? 'Password' : '密碼'}</Label>
+                  <Label htmlFor="signup-password" className="text-xs font-medium">{isEn ? 'Password' : '密碼'}<RequiredMark /></Label>
                   <div className="relative">
-                    <Input id="signup-password" type={showSignUpPassword ? "text" : "password"} placeholder="••••••••" value={signUpForm.password} onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} className="h-11 rounded-xl pr-10" />
+                    <Input id="signup-password" type={showSignUpPassword ? "text" : "password"} placeholder="••••••••" value={signUpForm.password} onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} className="h-11 rounded-xl pr-10" required />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowSignUpPassword(!showSignUpPassword)}>
                       {showSignUpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
@@ -316,19 +313,31 @@ export default function AuthPage() {
                   <p className="text-[11px] text-muted-foreground">{isEn ? PASSWORD_HELPER_EN : PASSWORD_HELPER_ZH}</p>
                 </div>
 
-                <MockRecaptcha checked={captchaChecked} onChange={setCaptchaChecked} />
+                <Turnstile siteKey={TURNSTILE_SITE_KEY} onSuccess={setTurnstileToken} onError={() => setTurnstileToken(null)} onExpire={() => setTurnstileToken(null)} />
 
                 <div className="flex items-start gap-2">
                   <Checkbox id="terms" checked={agreedTerms} onCheckedChange={(v) => setAgreedTerms(v === true)} className="mt-0.5" />
                   <Label htmlFor="terms" className="text-[11px] text-muted-foreground leading-relaxed cursor-pointer">
-                    {isEn ? 'I agree to the Terms and Conditions and Privacy Policy.' : isTW ? '我同意條款與條件及私隱政策。' : '我同意条款与条件及隐私政策。'}
+                    {isEn ? (
+                      <>I agree to the <Link to="/terms" className="text-primary hover:underline">Terms and Conditions</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.</>
+                    ) : isTW ? (
+                      <>我同意<Link to="/terms" className="text-primary hover:underline">條款與條件</Link>及<Link to="/privacy" className="text-primary hover:underline">私隱政策</Link>。</>
+                    ) : (
+                      <>我同意<Link to="/terms" className="text-primary hover:underline">条款与条件</Link>及<Link to="/privacy" className="text-primary hover:underline">隐私政策</Link>。</>
+                    )}
                   </Label>
                 </div>
 
-                <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-base" disabled={isSubmitting || !agreedTerms || !captchaChecked || !PASSWORD_REGEX.test(signUpForm.password)}>
+                <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-base" disabled={isSubmitting || !agreedTerms || !turnstileToken || !PASSWORD_REGEX.test(signUpForm.password)}>
                   {isSubmitting ? (isEn ? 'Creating account...' : '創建帳號中...') : (isEn ? 'Create account' : isTW ? '創建帳號' : '创建账号')}
                 </Button>
               </form>
+
+              <div className="flex items-center justify-center gap-4 mt-4 text-xs">
+                <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">{isEn ? 'Terms and Conditions' : '條款與條件'}</Link>
+                <span className="text-border">|</span>
+                <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">{isEn ? 'Privacy Policy' : '私隱政策'}</Link>
+              </div>
             </>
           )}
 
@@ -345,8 +354,8 @@ export default function AuthPage() {
               </div>
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="forgot-email" className="text-xs font-medium">{isEn ? 'Email address' : '電郵地址'}</Label>
-                  <Input id="forgot-email" type="email" placeholder="you@example.com" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} className="h-11 rounded-xl" />
+                  <Label htmlFor="forgot-email" className="text-xs font-medium">{isEn ? 'Email address' : '電郵地址'}<RequiredMark /></Label>
+                  <Input id="forgot-email" type="email" placeholder="you@example.com" value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} className="h-11 rounded-xl" required />
                 </div>
                 <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-base" disabled={isSubmitting || !forgotEmail.trim()}>
                   {isSubmitting ? (isEn ? 'Sending...' : '發送中...') : (isEn ? 'Send reset link' : '發送重設連結')}
@@ -368,8 +377,8 @@ export default function AuthPage() {
               </div>
               <form onSubmit={handleMagicLink} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="magic-email" className="text-xs font-medium">{isEn ? 'Email address' : '電郵地址'}</Label>
-                  <Input id="magic-email" type="email" placeholder="you@example.com" value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} className="h-11 rounded-xl" />
+                  <Label htmlFor="magic-email" className="text-xs font-medium">{isEn ? 'Email address' : '電郵地址'}<RequiredMark /></Label>
+                  <Input id="magic-email" type="email" placeholder="you@example.com" value={magicEmail} onChange={(e) => setMagicEmail(e.target.value)} className="h-11 rounded-xl" required />
                 </div>
                 <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-base" disabled={isSubmitting || !magicEmail.trim()}>
                   {isSubmitting ? (isEn ? 'Sending...' : '發送中...') : (isEn ? 'Send magic link' : '發送魔法連結')}
