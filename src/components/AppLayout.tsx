@@ -1,7 +1,6 @@
 import { ReactNode, useEffect, useState, useRef, useCallback } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { AccessibilityToolbar } from "@/components/AccessibilityToolbar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
@@ -190,7 +189,6 @@ export function AppLayout({ children }: AppLayoutProps) {
             </Link>
           </div>
           <div className="flex items-center gap-2 md:gap-3">
-            <AccessibilityToolbar />
             <LanguageSwitcher value={language} onChange={handleLanguageChange} />
           </div>
         </header>

@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SecurityStatus } from "@/components/SecurityStatus";
+import { SettingsModal } from "@/components/SettingsModal";
 import logo from "@/assets/logo.png";
 
 interface AppSidebarProps {
@@ -26,7 +27,6 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
     { title: isEn ? "Practice" : isTW ? "練習" : "练习", url: "/speech-quest", icon: Swords },
     { title: isEn ? "Golden Speaker" : "金色揚聲器", url: "/#golden-speaker", icon: AudioLines },
     { title: isEn ? "History" : isTW ? "記錄" : "记录", url: "/pronunciation/results", icon: BarChart3 },
-    { title: isEn ? "Settings" : isTW ? "設定" : "设置", url: "/profile", icon: Settings },
   ];
 
   const secondaryItems = [
@@ -126,6 +126,21 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
 
       {/* Footer */}
       <div className="p-4 border-t border-[hsl(var(--sidebar-border))] space-y-2">
+        {/* Settings — always visible */}
+        <SettingsModal
+          trigger={
+            <button
+              className="w-full flex items-center gap-3 px-3 py-2.5 min-h-[48px] rounded-2xl transition-all text-sm font-medium text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] border border-transparent"
+              aria-label={isEn ? "Settings" : "設定"}
+            >
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[hsl(var(--sidebar-accent))]">
+                <Settings className="h-4.5 w-4.5 flex-shrink-0" aria-hidden="true" />
+              </div>
+              <span>{isEn ? "Settings" : isTW ? "設定" : "设置"}</span>
+            </button>
+          }
+        />
+
         {user ? (
           <>
             <button

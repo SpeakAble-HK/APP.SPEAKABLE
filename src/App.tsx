@@ -21,6 +21,8 @@ import InstitutionPlansPage from "./pages/InstitutionPlansPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ConfirmSignupPage from "./pages/ConfirmSignupPage";
 import InvitePage from "./pages/InvitePage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +52,8 @@ const App = () => (
                 <Route path="/diagnose-symptoms" element={<ComingSoonPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/pricing/institutions" element={<InstitutionPlansPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
