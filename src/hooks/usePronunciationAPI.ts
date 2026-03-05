@@ -196,20 +196,25 @@ export const usePronunciationAPI = () => {
       setSpokenPhonemes(spoken);
       console.log('Final Spoken Phonemes:', spoken);
 
-      // Step 4: Generate voice clone with correct pronunciation
+      // Step 4: Generate voice clone with correct pronunciation (only if ASR returned results)
       const transcribedText = spoken.map(p => p.character).join('');
       
-      const ttsFormData = new FormData();
-      ttsFormData.append('text', intendedText);
-      ttsFormData.append('prompt_text', transcribedText);
-      ttsFormData.append('prompt_audio', audioBlob, 'recording.webm');
+      let clone: VoiceCloneResult | null = null;
+      if (transcribedText.trim().length > 0) {
+        const ttsFormData = new FormData();
+        ttsFormData.append('text', intendedText);
+        ttsFormData.append('prompt_text', transcribedText);
+        ttsFormData.append('prompt_audio', audioBlob, 'recording.webm');
 
-      const cloneData = await invokeFunction('voice-clone', ttsFormData);
-      if (!cloneData.success) throw new Error(cloneData.error || 'Voice clone failed');
-      
-      const clone = cloneData as VoiceCloneResult;
-      setVoiceCloneResult(clone);
-      console.log('Voice Clone Result:', clone);
+        const cloneData = await invokeFunction('voice-clone', ttsFormData);
+        if (!cloneData.success) throw new Error(cloneData.error || 'Voice clone failed');
+        
+        clone = cloneData as VoiceCloneResult;
+        setVoiceCloneResult(clone);
+        console.log('Voice Clone Result:', clone);
+      } else {
+        console.warn('Skipping voice clone: ASR returned no transcription');
+      }
 
       return { spoken, intended, clone };
     } catch (err) {
