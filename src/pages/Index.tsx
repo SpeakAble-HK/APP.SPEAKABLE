@@ -281,7 +281,7 @@ const Index = () => {
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
                     <span className="text-sm font-semibold text-primary uppercase tracking-wider">
-                      {isEn ? "Golden Speaker" : "金色揚聲器"}
+                      {isEn ? "Echo Speech" : "迴聲語音"}
                     </span>
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">

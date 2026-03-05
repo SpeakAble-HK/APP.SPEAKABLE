@@ -13,6 +13,7 @@ import PronunciationResultsPage from "./pages/PronunciationResultsPage";
 import SpeechQuestPage from "./pages/SpeechQuestPage";
 import AboutPage from "./pages/AboutPage";
 import IPALibraryPage from "./pages/IPALibraryPage";
+import IPAPage from "./pages/IPAPage";
 import VisualizationPage from "./pages/VisualizationPage";
 import NotFound from "./pages/NotFound";
 import ComingSoonPage from "./pages/ComingSoonPage";
@@ -46,10 +47,10 @@ const App = () => (
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                 <Route path="/speech-quest" element={<SpeechQuestPage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/ipa" element={<IPAPage />} />
                 <Route path="/learning/library" element={<IPALibraryPage />} />
                 <Route path="/learning/progress" element={<VisualizationPage />} />
                 <Route path="/ipa-transcription" element={<ComingSoonPage />} />
-                <Route path="/diagnose-symptoms" element={<ComingSoonPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/pricing/institutions" element={<InstitutionPlansPage />} />
                 <Route path="/terms" element={<TermsPage />} />
