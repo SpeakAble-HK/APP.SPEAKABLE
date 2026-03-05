@@ -1,4 +1,4 @@
-import { ALargeSmall, Contrast, Check } from "lucide-react";
+import { ALargeSmall, Contrast, Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAccessibility, TextSize, ContrastMode } from "@/contexts/AccessibilityContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -23,12 +23,13 @@ const contrastOptions: { value: ContrastMode; labels: Record<string, string> }[]
 ];
 
 export function AccessibilityToolbar() {
-  const { textSize, contrastMode, setTextSize, setContrastMode } = useAccessibility();
+  const { textSize, contrastMode, animationsEnabled, setTextSize, setContrastMode, toggleAnimations } = useAccessibility();
   const { language } = useLanguage();
   const lang = (language as "en-GB" | "zh-TW" | "zh-CN") || "en-GB";
 
   const textSizeLabel = lang === "en-GB" ? "Text Size" : "文字大小";
   const contrastLabel = lang === "en-GB" ? "Contrast" : "對比度";
+  const animLabel = lang === "en-GB" ? (animationsEnabled ? "Disable Animations" : "Enable Animations") : (animationsEnabled ? "關閉動畫" : "開啟動畫");
 
   return (
     <div className="flex items-center gap-1" role="toolbar" aria-label="Accessibility options">
@@ -39,7 +40,6 @@ export function AccessibilityToolbar() {
             variant="ghost"
             size="icon"
             aria-label={textSizeLabel}
-            className="h-9 w-9 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <ALargeSmall className="h-5 w-5" />
           </Button>
@@ -67,7 +67,6 @@ export function AccessibilityToolbar() {
             variant={contrastMode === "high-contrast" ? "secondary" : "ghost"}
             size="icon"
             aria-label={contrastLabel}
-            className="h-9 w-9 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <Contrast className="h-5 w-5" />
           </Button>
@@ -87,6 +86,17 @@ export function AccessibilityToolbar() {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Animation Toggle */}
+      <Button
+        variant={animationsEnabled ? "ghost" : "secondary"}
+        size="icon"
+        aria-label={animLabel}
+        onClick={toggleAnimations}
+        title={animLabel}
+      >
+        <Zap className={`h-5 w-5 ${!animationsEnabled ? "opacity-50" : ""}`} />
+      </Button>
     </div>
   );
 }
