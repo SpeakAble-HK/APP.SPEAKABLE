@@ -1,13 +1,13 @@
 project_id = "shuhmvmdkjspgawygqyf"
 
-[functions.asr]
-verify_jwt = false
-
-[functions.asrphone]
-verify_jwt = false
-
-[functions.jyutping]
-verify_jwt = false
-
-[functions.voice-clone]
-verify_jwt = false
+[functions]
+  [functions.asr]
+    verify_jwt = false
+  [functions.asrphone]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.jyutping]
+    verify_jwt = false
+  [functions.voice-clone]
+    verify_jwt = false
