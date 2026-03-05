@@ -1,4 +1,4 @@
-import { Home, LogIn, LogOut, BarChart3, Info, Swords, X, Languages, Stethoscope, User, CreditCard } from "lucide-react";
+import { Home, Mic, AudioLines, BarChart3, Settings, Info, Swords, X, Languages, Stethoscope, User, CreditCard, LogIn, LogOut, BookOpen, Target } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,69 +21,100 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
 
-  const menuItems = [
-    { title: t("nav.dashboard"), url: "/", icon: Home },
-    { title: t("nav.results"), url: "/pronunciation/results", icon: BarChart3 },
-    { title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", url: "/speech-quest", icon: Swords },
+  const mainItems = [
+    { title: isEn ? "Dashboard" : isTW ? "儀表板" : "仪表板", url: "/", icon: Home },
+    { title: isEn ? "Practice" : isTW ? "練習" : "练习", url: "/speech-quest", icon: Swords },
+    { title: isEn ? "Golden Speaker" : "金色揚聲器", url: "/#golden-speaker", icon: AudioLines },
+    { title: isEn ? "History" : isTW ? "記錄" : "记录", url: "/pronunciation/results", icon: BarChart3 },
+    { title: isEn ? "Settings" : isTW ? "設定" : "设置", url: "/profile", icon: Settings },
+  ];
+
+  const secondaryItems = [
+    { title: isEn ? "IPA Library" : isTW ? "IPA 資料庫" : "IPA 资料库", url: "/learning/library", icon: BookOpen },
+    { title: isEn ? "Progress" : isTW ? "進度" : "进度", url: "/learning/progress", icon: Target },
     { title: isEn ? "IPA Transcription" : isTW ? "IPA 轉寫" : "IPA 转写", url: "/ipa-transcription", icon: Languages },
-    { title: isEn ? "Diagnose Symptoms" : isTW ? "症狀診斷" : "症状诊断", url: "/diagnose-symptoms", icon: Stethoscope },
-    { title: isEn ? "About SpeakAble HK" : isTW ? "關於 SpeakAble HK" : "关于 SpeakAble HK", url: "/about", icon: Info },
+    { title: isEn ? "Diagnose" : isTW ? "診斷" : "诊断", url: "/diagnose-symptoms", icon: Stethoscope },
+    { title: isEn ? "About" : isTW ? "關於" : "关于", url: "/about", icon: Info },
   ];
 
   const isActive = (path: string) => {
     if (path === "/") return currentPath === "/";
+    if (path.includes("#")) return false;
     return currentPath.startsWith(path);
   };
 
   const handleNav = (url: string) => {
-    navigate(url);
+    if (url.includes("#")) {
+      navigate("/");
+      setTimeout(() => {
+        const el = document.getElementById(url.split("#")[1]);
+        el?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } else {
+      navigate(url);
+    }
     onClose?.();
   };
 
+  const NavButton = ({ item }: { item: typeof mainItems[0] }) => (
+    <button
+      onClick={() => handleNav(item.url)}
+      className={`w-full flex items-center gap-3 px-3 py-2.5 min-h-[48px] rounded-2xl transition-all text-sm font-medium group ${
+        isActive(item.url)
+          ? 'bg-primary/10 text-primary border border-primary/20'
+          : 'text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] border border-transparent'
+      }`}
+      aria-current={isActive(item.url) ? "page" : undefined}
+    >
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
+        isActive(item.url) ? 'bg-primary/15' : 'bg-[hsl(var(--sidebar-accent))] group-hover:bg-[hsl(var(--sidebar-accent))]'
+      }`}>
+        <item.icon className={`h-4.5 w-4.5 flex-shrink-0 ${isActive(item.url) ? 'text-primary' : ''}`} aria-hidden="true" />
+      </div>
+      <span>{item.title}</span>
+    </button>
+  );
+
   return (
-    <div className="w-72 h-full bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] flex flex-col shadow-2xl">
+    <div className="w-72 h-full bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] flex flex-col shadow-2xl border-r border-[hsl(var(--sidebar-border))]">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-[hsl(var(--sidebar-border))]">
-        <button onClick={() => handleNav("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-ring rounded" aria-label="SpeakAble HK — Go to home page">
+        <button onClick={() => handleNav("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-ring rounded" aria-label="SpeakAble HK — Go to home page">
           <img src={logo} alt="" className="h-8 w-8 object-contain" />
           <span className="text-lg font-bold whitespace-nowrap">SpeakAble HK</span>
         </button>
-        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[hsl(var(--sidebar-accent))] transition-colors" aria-label={isEn ? "Close menu" : "關閉選單"}>
+        <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-[hsl(var(--sidebar-accent))] transition-colors" aria-label={isEn ? "Close menu" : "關閉選單"}>
           <X className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Nav Items */}
-      <nav className="flex-1 py-4 px-3 space-y-1" aria-label="Main navigation">
-        {menuItems.map((item) => (
-          <button
-            key={item.url}
-            onClick={() => handleNav(item.url)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 min-h-[48px] rounded-lg transition-colors text-sm font-medium ${
-              isActive(item.url)
-                ? 'bg-[hsl(var(--sidebar-accent))] text-[hsl(var(--sidebar-accent-foreground))]'
-                : 'text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))]'
-            }`}
-            aria-current={isActive(item.url) ? "page" : undefined}
-          >
-            <item.icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
-            <span>{item.title}</span>
-          </button>
-        ))}
+      {/* Main Nav */}
+      <nav className="flex-1 py-4 px-3 space-y-5 overflow-y-auto" aria-label="Main navigation">
+        <div className="space-y-1">
+          <p className="px-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">{isEn ? "Main" : "主要"}</p>
+          {mainItems.map((item) => <NavButton key={item.url} item={item} />)}
+        </div>
+
+        <div className="space-y-1">
+          <p className="px-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">{isEn ? "Learn" : "學習"}</p>
+          {secondaryItems.map((item) => <NavButton key={item.url} item={item} />)}
+        </div>
       </nav>
 
       {/* Pricing CTA */}
       <div className="px-3 pb-2">
         <button
           onClick={() => handleNav("/pricing")}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 min-h-[48px] rounded-lg transition-colors text-sm font-bold ${
+          className={`w-full flex items-center gap-3 px-3 py-2.5 min-h-[48px] rounded-2xl transition-all text-sm font-bold ${
             isActive("/pricing")
               ? 'bg-primary text-primary-foreground'
-              : 'bg-primary/10 text-primary hover:bg-primary/20'
+              : 'bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20'
           }`}
           aria-current={isActive("/pricing") ? "page" : undefined}
         >
-          <CreditCard className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/15">
+            <CreditCard className="h-4.5 w-4.5 flex-shrink-0" aria-hidden="true" />
+          </div>
           <span>{isEn ? "Pricing" : isTW ? "定價方案" : "定价方案"}</span>
         </button>
       </div>
@@ -99,7 +130,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
           <>
             <button
               onClick={() => handleNav("/profile")}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-[hsl(var(--sidebar-accent))] text-sm"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-colors hover:bg-[hsl(var(--sidebar-accent))] text-sm"
               aria-label={isEn ? 'Profile settings' : '個人資料設定'}
             >
               <Avatar className="h-8 w-8">
@@ -113,7 +144,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
             <Button
               variant="ghost"
               onClick={() => { onSignOut(); onClose?.(); }}
-              className="w-full justify-start gap-3 text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))]"
+              className="w-full justify-start gap-3 text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))] rounded-2xl"
               aria-label={t("nav.signOut")}
             >
               <LogOut className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
@@ -124,7 +155,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
           <Button
             variant="ghost"
             onClick={() => handleNav("/auth")}
-            className="w-full justify-start gap-3 text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))]"
+            className="w-full justify-start gap-3 text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-foreground))] rounded-2xl"
             aria-label={t("nav.signIn")}
           >
             <LogIn className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
