@@ -21,27 +21,39 @@ import { toast } from 'sonner';
 import logo from '@/assets/logo.png';
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{};:'",.<>?/\\|`~]).{6,}$/;
+const NAME_REGEX = /^[a-zA-Z\u4e00-\u9fff\u3400-\u4dbf]+$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const PASSWORD_HELPER_EN = 'Min 6 chars: uppercase, lowercase, number, special character.';
 const PASSWORD_HELPER_ZH = '至少6個字符：大寫、小寫、數字和特殊字符。';
 
-// Cloudflare Turnstile test key — replace with your production site key
 const TURNSTILE_SITE_KEY = '1x00000000000000000000AA';
 
 const authSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
+  email: z.string().min(1, 'Email is required').regex(EMAIL_REGEX, 'Must contain @ and a domain (e.g. you@example.com)'),
   password: z.string().min(6, 'Password must be at least 6 characters').regex(PASSWORD_REGEX, 'Password does not meet requirements'),
 });
 
-const signUpSchema = authSchema.extend({
-  firstName: z.string().min(1, 'Please enter your first name'),
-  lastName: z.string().min(1, 'Please enter your last name'),
-  username: z.string().min(3, 'Username must be at least 3 characters').regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+const signUpSchema = z.object({
+  firstName: z.string().min(1, 'First name is required').regex(NAME_REGEX, 'Only alphabetic characters allowed'),
+  lastName: z.string().min(1, 'Last name is required').regex(NAME_REGEX, 'Only alphabetic characters allowed'),
+  username: z.string().min(3, 'Username must be at least 3 characters').regex(USERNAME_REGEX, 'Only letters and numbers allowed — no special characters'),
+  email: z.string().min(1, 'Email is required').regex(EMAIL_REGEX, 'Must contain @ and a domain (e.g. you@example.com)'),
+  password: z.string().min(6, 'Password must be at least 6 characters').regex(PASSWORD_REGEX, 'Password does not meet requirements'),
   dateOfBirth: z.date({ required_error: 'Please select your date of birth' }),
 });
 
 type AuthView = 'login' | 'signup' | 'forgot' | 'magic-link' | 'verify-email' | 'reset-sent' | 'magic-sent';
 
 const RequiredMark = () => <span className="text-destructive ml-0.5">*</span>;
+
+// Real-time field validation helper
+function validateField(schema: z.ZodTypeAny, value: unknown): string | null {
+  const result = schema.safeParse(value);
+  if (result.success) return null;
+  return result.error.errors[0]?.message || null;
+}
 
 export default function AuthPage() {
   const { user, loading, signIn, signUp } = useAuth();
@@ -61,6 +73,48 @@ export default function AuthPage() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+
+  // Real-time validation for signup fields
+  const validateSignUpField = (field: string, value: string) => {
+    let error: string | null = null;
+    if (!value) return; // Don't validate empty on blur, only on submit
+    switch (field) {
+      case 'firstName':
+      case 'lastName':
+        if (!NAME_REGEX.test(value)) error = isEn ? 'Only alphabetic characters allowed' : '只允許字母字符';
+        break;
+      case 'username':
+        if (value.length < 3) error = isEn ? 'At least 3 characters' : '至少3個字符';
+        else if (!USERNAME_REGEX.test(value)) error = isEn ? 'Only letters and numbers — no special characters' : '只允許字母和數字';
+        break;
+      case 'email':
+        if (!EMAIL_REGEX.test(value)) error = isEn ? 'Must include @ and a domain' : '必須包含 @ 和域名';
+        break;
+      case 'password':
+        if (value.length < 6) error = isEn ? 'At least 6 characters' : '至少6個字符';
+        else if (!PASSWORD_REGEX.test(value)) error = isEn ? PASSWORD_HELPER_EN : PASSWORD_HELPER_ZH;
+        break;
+    }
+    setErrors(prev => {
+      const next = { ...prev };
+      if (error) next[field] = error;
+      else delete next[field];
+      return next;
+    });
+  };
+
+  const validateLoginField = (field: string, value: string) => {
+    if (!value) return;
+    let error: string | null = null;
+    if (field === 'email' && !EMAIL_REGEX.test(value)) error = isEn ? 'Must include @ and a domain' : '必須包含 @ 和域名';
+    if (field === 'password' && value.length < 6) error = isEn ? 'At least 6 characters' : '至少6個字符';
+    setErrors(prev => {
+      const next = { ...prev };
+      if (error) next[field] = error;
+      else delete next[field];
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!loading && user) navigate('/');
@@ -127,11 +181,7 @@ export default function AuthPage() {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     });
     setIsSubmitting(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      setView('reset-sent');
-    }
+    if (error) { toast.error(error.message); } else { setView('reset-sent'); }
   };
 
   const handleMagicLink = async (e: React.FormEvent) => {
@@ -143,16 +193,12 @@ export default function AuthPage() {
       options: { emailRedirectTo: window.location.origin },
     });
     setIsSubmitting(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      setView('magic-sent');
-    }
+    if (error) { toast.error(error.message); } else { setView('magic-sent'); }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
@@ -166,7 +212,7 @@ export default function AuthPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       {/* Back to Home */}
       <div className="w-full max-w-[420px] mb-4">
         <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -218,7 +264,9 @@ export default function AuthPage() {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-1.5">
                   <Label htmlFor="login-email" className="text-xs font-medium">{isEn ? 'Email address' : '電郵地址'}<RequiredMark /></Label>
-                  <Input id="login-email" type="email" placeholder="you@example.com" value={loginForm.email} onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} className="h-11 rounded-xl" required />
+                  <Input id="login-email" type="email" placeholder="you@example.com" value={loginForm.email}
+                    onChange={(e) => { setLoginForm({ ...loginForm, email: e.target.value }); validateLoginField('email', e.target.value); }}
+                    className="h-11 rounded-xl" required />
                   {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
@@ -227,7 +275,9 @@ export default function AuthPage() {
                     <button type="button" onClick={() => setView('forgot')} className="text-xs text-primary hover:underline">{isEn ? 'Forgot password?' : '忘記密碼？'}</button>
                   </div>
                   <div className="relative">
-                    <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="••••••••" value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} className="h-11 rounded-xl pr-10" required />
+                    <Input id="login-password" type={showLoginPassword ? "text" : "password"} placeholder="••••••••" value={loginForm.password}
+                      onChange={(e) => { setLoginForm({ ...loginForm, password: e.target.value }); validateLoginField('password', e.target.value); }}
+                      className="h-11 rounded-xl pr-10" required />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowLoginPassword(!showLoginPassword)}>
                       {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>
@@ -249,7 +299,7 @@ export default function AuthPage() {
 
               <p className="text-center text-sm text-muted-foreground mt-6">
                 {isEn ? "Don't have an account?" : '還沒有帳號？'}{' '}
-                <button onClick={() => { setView('signup'); setTurnstileToken(null); }} className="text-primary font-medium hover:underline">{isEn ? 'Sign up' : isTW ? '註冊' : '注册'}</button>
+                <button onClick={() => { setView('signup'); setTurnstileToken(null); setErrors({}); }} className="text-primary font-medium hover:underline">{isEn ? 'Sign up' : isTW ? '註冊' : '注册'}</button>
               </p>
             </>
           )}
@@ -267,18 +317,24 @@ export default function AuthPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="signup-firstname" className="text-xs font-medium">{isEn ? 'First Name' : '名'}<RequiredMark /></Label>
-                    <Input id="signup-firstname" type="text" placeholder={isEn ? 'First name' : '名'} value={signUpForm.firstName} onChange={(e) => setSignUpForm({ ...signUpForm, firstName: e.target.value })} className="h-11 rounded-xl" required />
+                    <Input id="signup-firstname" type="text" placeholder={isEn ? 'First name' : '名'} value={signUpForm.firstName}
+                      onChange={(e) => { setSignUpForm({ ...signUpForm, firstName: e.target.value }); validateSignUpField('firstName', e.target.value); }}
+                      className="h-11 rounded-xl" required />
                     {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="signup-lastname" className="text-xs font-medium">{isEn ? 'Last Name' : '姓'}<RequiredMark /></Label>
-                    <Input id="signup-lastname" type="text" placeholder={isEn ? 'Last name' : '姓'} value={signUpForm.lastName} onChange={(e) => setSignUpForm({ ...signUpForm, lastName: e.target.value })} className="h-11 rounded-xl" required />
+                    <Input id="signup-lastname" type="text" placeholder={isEn ? 'Last name' : '姓'} value={signUpForm.lastName}
+                      onChange={(e) => { setSignUpForm({ ...signUpForm, lastName: e.target.value }); validateSignUpField('lastName', e.target.value); }}
+                      className="h-11 rounded-xl" required />
                     {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="signup-username" className="text-xs font-medium">{isEn ? 'Username' : '用戶名'}<RequiredMark /></Label>
-                  <Input id="signup-username" type="text" placeholder={isEn ? 'username' : '用戶名'} value={signUpForm.username} onChange={(e) => setSignUpForm({ ...signUpForm, username: e.target.value })} className="h-11 rounded-xl" required />
+                  <Input id="signup-username" type="text" placeholder={isEn ? 'username' : '用戶名'} value={signUpForm.username}
+                    onChange={(e) => { setSignUpForm({ ...signUpForm, username: e.target.value }); validateSignUpField('username', e.target.value); }}
+                    className="h-11 rounded-xl" required />
                   {errors.username && <p className="text-xs text-destructive">{errors.username}</p>}
                 </div>
                 <div className="space-y-1.5">
@@ -298,13 +354,17 @@ export default function AuthPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="signup-email" className="text-xs font-medium">{isEn ? 'Email' : '電郵'}<RequiredMark /></Label>
-                  <Input id="signup-email" type="email" placeholder="you@example.com" value={signUpForm.email} onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })} className="h-11 rounded-xl" required />
+                  <Input id="signup-email" type="email" placeholder="you@example.com" value={signUpForm.email}
+                    onChange={(e) => { setSignUpForm({ ...signUpForm, email: e.target.value }); validateSignUpField('email', e.target.value); }}
+                    className="h-11 rounded-xl" required />
                   {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="signup-password" className="text-xs font-medium">{isEn ? 'Password' : '密碼'}<RequiredMark /></Label>
                   <div className="relative">
-                    <Input id="signup-password" type={showSignUpPassword ? "text" : "password"} placeholder="••••••••" value={signUpForm.password} onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} className="h-11 rounded-xl pr-10" required />
+                    <Input id="signup-password" type={showSignUpPassword ? "text" : "password"} placeholder="••••••••" value={signUpForm.password}
+                      onChange={(e) => { setSignUpForm({ ...signUpForm, password: e.target.value }); validateSignUpField('password', e.target.value); }}
+                      className="h-11 rounded-xl pr-10" required />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowSignUpPassword(!showSignUpPassword)}>
                       {showSignUpPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </Button>

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+import { Home } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function TermsPage() {
@@ -6,6 +8,10 @@ export default function TermsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
+      <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
+        <Home className="h-3.5 w-3.5" />
+        {isEn ? "Back to Home" : "返回首頁"}
+      </Link>
       <h1 className="text-3xl font-bold mb-6">{isEn ? "Terms and Conditions" : "條款與條件"}</h1>
       <div className="prose prose-sm text-muted-foreground space-y-4">
         <p>{isEn ? "Last updated: March 2026" : "最後更新：2026年3月"}</p>
@@ -14,8 +20,8 @@ export default function TermsPage() {
           : "使用 SpeakAble HK 即表示您同意受這些條款與條件的約束。如果您不同意，請勿使用此服務。"}</p>
         <h2 className="text-xl font-semibold text-foreground">{isEn ? "1. Use of Service" : "1. 服務使用"}</h2>
         <p>{isEn
-          ? "SpeakAble HK provides speech therapy and pronunciation tools for educational purposes. The service is not a substitute for professional medical advice."
-          : "SpeakAble HK 提供言語治療和發音工具，僅供教育用途。本服務並非專業醫療建議的替代品。"}</p>
+          ? "SpeakAble HK provides AI-powered Cantonese pronunciation tools for educational purposes."
+          : "SpeakAble HK 提供 AI 驅動的廣東話發音工具，僅供教育用途。"}</p>
         <h2 className="text-xl font-semibold text-foreground">{isEn ? "2. User Accounts" : "2. 用戶帳號"}</h2>
         <p>{isEn
           ? "You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account."

@@ -1,6 +1,6 @@
-import { Home, Mic, AudioLines, BarChart3, Settings, Info, Swords, X, Languages, Stethoscope, User, CreditCard, LogIn, LogOut, BookOpen, Target } from "lucide-react";
+import { Home, AudioLines, Swords, BookOpen, Info, X, User, CreditCard, LogIn, LogOut, Settings } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SecurityStatus } from "@/components/SecurityStatus";
@@ -22,18 +22,11 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
 
-  const mainItems = [
+  const navItems = [
     { title: isEn ? "Dashboard" : isTW ? "儀表板" : "仪表板", url: "/", icon: Home },
-    { title: isEn ? "Practice" : isTW ? "練習" : "练习", url: "/speech-quest", icon: Swords },
-    { title: isEn ? "Golden Speaker" : "金色揚聲器", url: "/#golden-speaker", icon: AudioLines },
-    { title: isEn ? "History" : isTW ? "記錄" : "记录", url: "/pronunciation/results", icon: BarChart3 },
-  ];
-
-  const secondaryItems = [
-    { title: isEn ? "IPA Library" : isTW ? "IPA 資料庫" : "IPA 资料库", url: "/learning/library", icon: BookOpen },
-    { title: isEn ? "Progress" : isTW ? "進度" : "进度", url: "/learning/progress", icon: Target },
-    { title: isEn ? "IPA Transcription" : isTW ? "IPA 轉寫" : "IPA 转写", url: "/ipa-transcription", icon: Languages },
-    { title: isEn ? "Diagnose" : isTW ? "診斷" : "诊断", url: "/diagnose-symptoms", icon: Stethoscope },
+    { title: isEn ? "Echo Speech" : "迴聲語音", url: "/#golden-speaker", icon: AudioLines },
+    { title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", url: "/speech-quest", icon: Swords },
+    { title: "IPA", url: "/ipa", icon: BookOpen },
     { title: isEn ? "About" : isTW ? "關於" : "关于", url: "/about", icon: Info },
   ];
 
@@ -56,7 +49,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
     onClose?.();
   };
 
-  const NavButton = ({ item }: { item: typeof mainItems[0] }) => (
+  const NavButton = ({ item }: { item: typeof navItems[0] }) => (
     <button
       onClick={() => handleNav(item.url)}
       className={`w-full flex items-center gap-3 px-3 py-2.5 min-h-[48px] rounded-2xl transition-all text-sm font-medium group ${
@@ -88,17 +81,9 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
         </button>
       </div>
 
-      {/* Main Nav */}
-      <nav className="flex-1 py-4 px-3 space-y-5 overflow-y-auto" aria-label="Main navigation">
-        <div className="space-y-1">
-          <p className="px-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">{isEn ? "Main" : "主要"}</p>
-          {mainItems.map((item) => <NavButton key={item.url} item={item} />)}
-        </div>
-
-        <div className="space-y-1">
-          <p className="px-3 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">{isEn ? "Learn" : "學習"}</p>
-          {secondaryItems.map((item) => <NavButton key={item.url} item={item} />)}
-        </div>
+      {/* Main Nav — fixed, no scroll */}
+      <nav className="flex-1 py-4 px-3 space-y-1" aria-label="Main navigation">
+        {navItems.map((item) => <NavButton key={item.url} item={item} />)}
       </nav>
 
       {/* Pricing CTA */}

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+import { Home } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function PrivacyPage() {
@@ -6,6 +8,10 @@ export default function PrivacyPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
+      <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
+        <Home className="h-3.5 w-3.5" />
+        {isEn ? "Back to Home" : "返回首頁"}
+      </Link>
       <h1 className="text-3xl font-bold mb-6">{isEn ? "Privacy Policy" : "私隱政策"}</h1>
       <div className="prose prose-sm text-muted-foreground space-y-4">
         <p>{isEn ? "Last updated: March 2026" : "最後更新：2026年3月"}</p>
