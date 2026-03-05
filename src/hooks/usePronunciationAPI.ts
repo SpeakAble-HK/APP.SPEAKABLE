@@ -77,14 +77,17 @@ export const usePronunciationAPI = () => {
 
     if (!response.ok) {
       let errorMsg = `Request failed (${response.status})`;
+      let trialExhausted = false;
       try {
         const errorData = await response.json();
         if (errorData?.error) errorMsg = errorData.error;
+        if (errorData?.trial_exhausted) trialExhausted = true;
       } catch {
-        // response wasn't JSON, use status text
         errorMsg = response.statusText || errorMsg;
       }
-      throw new Error(errorMsg);
+      const err = new Error(errorMsg);
+      (err as any).trialExhausted = trialExhausted;
+      throw err;
     }
 
     return response.json();
@@ -211,10 +214,13 @@ export const usePronunciationAPI = () => {
       return { spoken, intended, clone };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      const trialExhausted = (err as any)?.trialExhausted === true;
       setError(errorMessage);
       console.error('Processing error:', err);
-      toast.error(errorMessage);
-      return null;
+      if (!trialExhausted) {
+        toast.error(errorMessage);
+      }
+      return trialExhausted ? { trialExhausted: true } : null;
     } finally {
       setIsProcessing(false);
     }
