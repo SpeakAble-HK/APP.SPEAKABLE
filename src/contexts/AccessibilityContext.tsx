@@ -6,10 +6,12 @@ export type ContrastMode = "default" | "high-contrast";
 interface AccessibilityContextType {
   textSize: TextSize;
   contrastMode: ContrastMode;
+  animationsEnabled: boolean;
   setTextSize: (size: TextSize) => void;
   setContrastMode: (mode: ContrastMode) => void;
   cycleTextSize: () => void;
   toggleContrast: () => void;
+  toggleAnimations: () => void;
 }
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
@@ -27,15 +29,21 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
   const [contrastMode, setContrastMode] = useState<ContrastMode>(() => {
     return (localStorage.getItem("a11y_contrast") as ContrastMode) || "default";
   });
+  const [animationsEnabled, setAnimationsEnabled] = useState<boolean>(() => {
+    const stored = localStorage.getItem("a11y_animations");
+    return stored !== "false";
+  });
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("text-size-large", "text-size-xl", "high-contrast");
+    root.classList.remove("text-size-large", "text-size-xl", "high-contrast", "reduce-motion");
     if (TEXT_SIZE_CLASSES[textSize]) root.classList.add(TEXT_SIZE_CLASSES[textSize]);
     if (contrastMode === "high-contrast") root.classList.add("high-contrast");
+    if (!animationsEnabled) root.classList.add("reduce-motion");
     localStorage.setItem("a11y_text_size", textSize);
     localStorage.setItem("a11y_contrast", contrastMode);
-  }, [textSize, contrastMode]);
+    localStorage.setItem("a11y_animations", String(animationsEnabled));
+  }, [textSize, contrastMode, animationsEnabled]);
 
   const cycleTextSize = () => {
     setTextSize(prev => {
@@ -49,8 +57,12 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     setContrastMode(prev => prev === "default" ? "high-contrast" : "default");
   };
 
+  const toggleAnimations = () => {
+    setAnimationsEnabled(prev => !prev);
+  };
+
   return (
-    <AccessibilityContext.Provider value={{ textSize, contrastMode, setTextSize, setContrastMode, cycleTextSize, toggleContrast }}>
+    <AccessibilityContext.Provider value={{ textSize, contrastMode, animationsEnabled, setTextSize, setContrastMode, cycleTextSize, toggleContrast, toggleAnimations }}>
       {children}
     </AccessibilityContext.Provider>
   );

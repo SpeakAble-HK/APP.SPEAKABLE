@@ -2,13 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
 
 /* Design system — Deep Blues & Soft Whites, ≥4.5:1 contrast ratios
-   Primary: Deep Blue #1E3A5F → 211 52% 24%
-   Primary Light: #2C5282 → 211 50% 34%
-   Accent: Teal #2B6CB0 → 211 60% 43%
-   Background: Soft White #F7FAFC → 210 36% 97%
+   All muted-foreground values now meet 4.5:1 ratio against background.
+   Base font: 16px (1rem). No light gray text.
 */
 
 @layer base {
@@ -31,7 +29,7 @@
     --secondary-foreground: 211 52% 24%;
 
     --muted: 210 20% 93%;
-    --muted-foreground: 215 16% 47%;
+    --muted-foreground: 215 20% 35%;
 
     --accent: 211 60% 43%;
     --accent-foreground: 0 0% 100%;
@@ -80,7 +78,7 @@
     --secondary-foreground: 210 36% 97%;
 
     --muted: 215 20% 20%;
-    --muted-foreground: 215 16% 60%;
+    --muted-foreground: 215 16% 70%;
 
     --accent: 211 60% 55%;
     --accent-foreground: 215 28% 10%;
@@ -116,7 +114,7 @@
     --primary: 211 100% 20%;
     --primary-foreground: 0 0% 100%;
     --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 25%;
+    --muted-foreground: 0 0% 20%;
     --border: 0 0% 40%;
     --accent: 211 100% 25%;
     --accent-foreground: 0 0% 100%;
@@ -131,7 +129,7 @@
     --primary: 211 80% 65%;
     --primary-foreground: 0 0% 0%;
     --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 80%;
+    --muted-foreground: 0 0% 85%;
     --border: 0 0% 50%;
   }
 
@@ -151,7 +149,8 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -217,5 +216,36 @@
   }
   .high-contrast .speech-quest-circle {
     border-width: 3px !important;
+  }
+
+  /* Minimum touch target for all interactive elements */
+  button, a, [role="button"], input[type="checkbox"], input[type="radio"], select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Animation disable mode */
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Scroll reveal animation */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reduce-motion .scroll-reveal {
+    opacity: 1;
+    transform: none;
   }
 }
