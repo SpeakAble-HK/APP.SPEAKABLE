@@ -1,12 +1,14 @@
 import { AudioLines, Headphones, BookOpen, BarChart3, Sparkles, ArrowRight, Swords, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import logo from "@/assets/logo.png";
 
 const AboutPage = () => {
   const { language } = useLanguage();
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
+  const scrollRef = useScrollReveal();
 
   const features = [
     {
@@ -42,19 +44,20 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="min-h-full flex flex-col bg-background">
+    <div className="min-h-full flex flex-col bg-background" ref={scrollRef}>
       {/* Hero */}
-      <section className="py-16 md:py-24 px-4 text-center" aria-labelledby="about-heading">
-        <div className="max-w-3xl mx-auto space-y-4">
-          <img src={logo} alt="SpeakAble HK Logo" className="h-16 w-16 mx-auto object-contain mb-4" />
+      <section className="relative py-16 md:py-24 px-4 text-center overflow-hidden" aria-labelledby="about-heading">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[radial-gradient(ellipse,hsl(185_100%_50%/0.06)_0%,transparent_70%)] pointer-events-none" aria-hidden="true" />
+        <div className="relative max-w-3xl mx-auto space-y-4 scroll-reveal">
+          <img src={logo} alt="SpeakAble HK Logo" className="h-16 w-16 mx-auto object-contain mb-4 drop-shadow-[0_0_20px_hsl(185_100%_50%/0.3)]" />
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card text-xs font-medium text-muted-foreground">
             <Sparkles className="h-3 w-3 text-primary" aria-hidden="true" />
             {isEn ? "About Us" : isTW ? "關於我們" : "关于我们"}
           </div>
-          <h1 id="about-heading" className="text-3xl md:text-5xl font-bold text-foreground leading-tight">
+          <h1 id="about-heading" className="text-4xl md:text-[56px] font-bold text-foreground leading-tight glow-text">
             {isEn ? "About SpeakAble HK" : isTW ? "關於 SpeakAble HK" : "关于 SpeakAble HK"}
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
+          <p className="text-muted-foreground text-lg md:text-xl max-w-xl mx-auto">
             {isEn
               ? "AI-Powered Cantonese Speech Articulation Application. Everyone has the right to speak."
               : isTW ? "AI 驅動的廣東話語音發音應用程式。每個人都有權利說話。"
@@ -63,15 +66,15 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Features Grid — Bento */}
       <section className="pb-16 md:pb-24 px-4">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 px-2 sm:px-0">
+        <div className="max-w-5xl mx-auto bento-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feat, i) => (
-            <article key={i} className="group relative bg-card border border-border rounded-2xl p-8 transition-all duration-300 hover:border-primary/30 hover:shadow-[var(--shadow-card-hover)]">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
+            <article key={i} className="scroll-reveal bento-card group">
+              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-5">
                 <feat.icon className="h-6 w-6 text-primary" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">{feat.title}</h3>
+              <h3 className="text-lg font-bold text-foreground mb-2">{feat.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{feat.desc}</p>
             </article>
           ))}
@@ -79,10 +82,10 @@ const AboutPage = () => {
       </section>
 
       {/* CTA */}
-      <section className="pb-20 px-4 text-center">
+      <section className="pb-20 px-4 text-center scroll-reveal">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3 rounded-2xl font-semibold hover:bg-primary/90 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shadow-[0_0_20px_hsl(185_100%_50%/0.2)]"
         >
           {isEn ? "Try Echo Speech Now" : isTW ? "立即試用迴聲語音" : "立即试用回声语音"}
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
