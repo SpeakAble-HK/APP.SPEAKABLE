@@ -24,7 +24,7 @@ const Index = () => {
   const { t, language } = useLanguage();
   const { user } = useAuth();
   const isAuthenticated = !!user && !user.is_anonymous;
-  const { ensureGuestSession } = useGuestTrial(isAuthenticated);
+  const { ensureGuestSession, showTrialModal, setShowTrialModal, markTrialUsed, isLocked } = useGuestTrial(isAuthenticated);
   const scrollRef = useScrollReveal();
 
   const [isRecording, setIsRecording] = useState(false);
@@ -145,11 +145,19 @@ const Index = () => {
       toast.error(isEn ? "Please provide audio and enter the text you're speaking" : "請提供音頻並輸入您正在說的文字");
       return;
     }
+    if (isLocked) {
+      setShowTrialModal(true);
+      return;
+    }
     if (!isAuthenticated) {
       await ensureGuestSession();
     }
     const result = await processRecording(audioBlob, spokenText);
-    if (result) {
+    if (result && 'trialExhausted' in result && result.trialExhausted) {
+      markTrialUsed();
+      return;
+    }
+    if (result && 'spoken' in result) {
       toast.success(isEn ? "Processing complete!" : "處理完成！");
       const contentType = result.clone.content_type || 'audio/wav';
       const generatedAudioUrl = `data:${contentType};base64,${result.clone.audio_base64}`;
@@ -465,6 +473,7 @@ const Index = () => {
           )}
         </div>
       </section>
+      <TrialLimitModal open={showTrialModal} onOpenChange={setShowTrialModal} />
     </div>
   );
 };
