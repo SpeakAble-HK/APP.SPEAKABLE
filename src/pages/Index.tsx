@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WaveformVisualizer } from "@/components/WaveformVisualizer";
+import { ToneContourVisualizer } from "@/components/ToneContourVisualizer";
+import { PrecisionPractice } from "@/components/PrecisionPractice";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
@@ -418,13 +420,27 @@ const Index = () => {
             </Link>
           </div>
 
+          {/* Tone Analysis + Precision Practice */}
+          <div className="bento-grid grid-cols-1 lg:grid-cols-2">
+            <div className="scroll-reveal">
+              <div className="bento-card">
+                <ToneContourVisualizer isRecording={isRecording} audioStream={audioStream} />
+              </div>
+            </div>
+            <div className="scroll-reveal">
+              <div className="bento-card">
+                <PrecisionPractice audioUrl={recordingUrl} />
+              </div>
+            </div>
+          </div>
+
           {/* Feature Bento Grid */}
           <div className="bento-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feat, i) => (
               <Link key={i} to={feat.link} className="scroll-reveal group">
                 <div className={`bento-card h-full ${feat.featured ? 'glass-card glow-accent' : ''}`}>
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${feat.featured ? 'bg-primary/20' : 'bg-muted'}`}>
-                    <feat.icon className={`h-6 w-6 ${feat.featured ? 'text-primary drop-shadow-[0_0_8px_hsl(185_100%_50%/0.5)]' : 'text-primary'}`} aria-hidden="true" />
+                    <feat.icon className="h-6 w-6 text-primary" aria-hidden="true" />
                   </div>
                   <h3 className="text-lg font-bold text-foreground mb-2">{feat.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{feat.desc}</p>

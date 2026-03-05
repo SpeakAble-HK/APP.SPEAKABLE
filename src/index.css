@@ -4,61 +4,107 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
 
-/* Premium Dark Theme — #000 base, vibrant cyan accent, WCAG AA compliant */
+/* Dual Theme — Dark default, Light switchable */
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 95%;
+    /* Dark Mode (Default) — #0D0D0D base, blue accent #3B82F6 */
+    --background: 0 0% 5%;
+    --foreground: 0 0% 88%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 88%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 88%;
 
-    /* Vibrant Cyan Accent */
-    --primary: 185 100% 50%;
-    --primary-foreground: 0 0% 0%;
-    --primary-dark: 185 90% 40%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-dark: 217 91% 50%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 88%;
 
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 70%;
 
-    --accent: 185 100% 50%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 185 100% 50%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 217 91% 60%;
 
     --radius: 1.5rem;
 
     /* Sidebar tokens */
-    --sidebar-background: 0 0% 5%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 185 100% 50%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 185 100% 50%;
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 88%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 217 91% 60%;
 
     /* Custom tokens */
-    --gradient-hero: linear-gradient(135deg, hsl(185 100% 50% / 0.05) 0%, hsl(185 80% 40% / 0.08) 100%);
-    --gradient-card-hover: linear-gradient(135deg, hsl(185 100% 50% / 0.06) 0%, hsl(185 80% 40% / 0.06) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60% / 0.05) 0%, hsl(217 80% 50% / 0.08) 100%);
+    --gradient-card-hover: linear-gradient(135deg, hsl(217 91% 60% / 0.06) 0%, hsl(217 80% 50% / 0.06) 100%);
     --shadow-card: 0 4px 24px -4px hsl(0 0% 0% / 0.5);
-    --shadow-card-hover: 0 12px 40px -8px hsl(185 100% 50% / 0.15);
+    --shadow-card-hover: 0 12px 40px -8px hsl(217 91% 60% / 0.15);
 
     /* Bento grid */
     --bento-gap: 20px;
     --bento-radius: 24px;
+  }
+
+  /* Light Mode */
+  .light {
+    --background: 210 20% 98%;
+    --foreground: 224 71% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+
+    --primary: 217 91% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-dark: 217 91% 45%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 71% 4%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 217 91% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 53%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 224 71% 4%;
+    --sidebar-primary: 217 91% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 224 71% 4%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 91% 53%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 53% / 0.04) 0%, hsl(217 80% 45% / 0.06) 100%);
+    --gradient-card-hover: linear-gradient(135deg, hsl(217 91% 53% / 0.04) 0%, hsl(217 80% 45% / 0.04) 100%);
+    --shadow-card: 0 4px 24px -4px hsl(0 0% 0% / 0.08);
+    --shadow-card-hover: 0 12px 40px -8px hsl(217 91% 53% / 0.1);
   }
 
   /* High Contrast Mode — WCAG AAA */
@@ -67,12 +113,12 @@
     --foreground: 0 0% 100%;
     --card: 0 0% 5%;
     --card-foreground: 0 0% 100%;
-    --primary: 185 100% 60%;
+    --primary: 217 91% 65%;
     --primary-foreground: 0 0% 0%;
     --muted: 0 0% 10%;
     --muted-foreground: 0 0% 85%;
     --border: 0 0% 40%;
-    --accent: 185 100% 60%;
+    --accent: 217 91% 65%;
     --accent-foreground: 0 0% 0%;
   }
 
@@ -150,9 +196,14 @@
 
   /* Glass texture for Golden Speaker */
   .glass-card {
-    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(0 0% 10%) 100%);
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.8) 100%);
     backdrop-filter: blur(20px);
     border: 1px solid hsl(var(--primary) / 0.2);
+  }
+
+  .light .glass-card {
+    background: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
+    border: 1px solid hsl(var(--primary) / 0.15);
   }
 
   .glass-card::before {
@@ -170,8 +221,26 @@
                 0 0 60px hsl(var(--primary) / 0.05);
   }
 
+  .light .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.08),
+                0 0 40px hsl(var(--primary) / 0.03);
+  }
+
   .glow-text {
     text-shadow: 0 0 40px hsl(var(--primary) / 0.3);
+  }
+
+  .light .glow-text {
+    text-shadow: none;
+  }
+
+  /* Security pulse animation */
+  @keyframes security-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+  }
+  .security-pulse {
+    animation: security-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   /* Skip to content link */
@@ -251,16 +320,22 @@
 
   /* Neon waveform */
   .waveform-line-user {
-    stroke: hsl(185 100% 50%);
-    filter: drop-shadow(0 0 6px hsl(185 100% 50% / 0.6));
+    stroke: hsl(var(--primary));
+    filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.6));
     stroke-width: 2;
     fill: none;
+  }
+  .light .waveform-line-user {
+    filter: none;
   }
   .waveform-line-reference {
     stroke: hsl(0 0% 40%);
     stroke-width: 1.5;
     fill: none;
     stroke-dasharray: 6 4;
+  }
+  .light .waveform-line-reference {
+    stroke: hsl(0 0% 70%);
   }
 
   /* Accuracy indicators */

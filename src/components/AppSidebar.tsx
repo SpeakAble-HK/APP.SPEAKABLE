@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SecurityStatus } from "@/components/SecurityStatus";
 import logo from "@/assets/logo.png";
 
 interface AppSidebarProps {
@@ -85,6 +86,11 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
           <CreditCard className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
           <span>{isEn ? "Pricing" : isTW ? "定價方案" : "定价方案"}</span>
         </button>
+      </div>
+
+      {/* Security Status */}
+      <div className="px-3 pb-2">
+        <SecurityStatus isProcessing={false} />
       </div>
 
       {/* Footer */}

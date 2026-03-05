@@ -5,6 +5,7 @@ import { AccessibilityToolbar } from "@/components/AccessibilityToolbar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 
@@ -15,6 +16,7 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const { user, profile, loading, signOut, updateLanguage } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const { focusMode } = useAccessibility();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
   const hoverZoneRef = useRef<HTMLDivElement>(null);
@@ -87,15 +89,17 @@ export function AppLayout({ children }: AppLayoutProps) {
       </a>
 
       {/* Hover zone — invisible strip on left edge */}
-      <div
-        ref={hoverZoneRef}
-        className="fixed left-0 top-0 w-2 h-full z-50"
-        onMouseEnter={() => setDrawerOpen(true)}
-        aria-hidden="true"
-      />
+      {!focusMode && (
+        <div
+          ref={hoverZoneRef}
+          className="fixed left-0 top-0 w-2 h-full z-50"
+          onMouseEnter={() => setDrawerOpen(true)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Drawer overlay */}
-      {drawerOpen && (
+      {!focusMode && drawerOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setDrawerOpen(false)}
@@ -104,41 +108,45 @@ export function AppLayout({ children }: AppLayoutProps) {
       )}
 
       {/* Sidebar drawer */}
-      <div
-        ref={drawerRef}
-        className={`fixed left-0 top-0 h-full z-50 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
-        onMouseLeave={() => setDrawerOpen(false)}
-        role="navigation"
-        aria-label="Main navigation"
-      >
-        <AppSidebar user={user} profile={profile} onSignOut={handleSignOut} onClose={() => setDrawerOpen(false)} />
-      </div>
+      {!focusMode && (
+        <div
+          ref={drawerRef}
+          className={`fixed left-0 top-0 h-full z-50 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          onMouseLeave={() => setDrawerOpen(false)}
+          role="navigation"
+          aria-label="Main navigation"
+        >
+          <AppSidebar user={user} profile={profile} onSignOut={handleSignOut} onClose={() => setDrawerOpen(false)} />
+        </div>
+      )}
 
-      {/* Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 md:px-6 border-b border-border bg-card/80 backdrop-blur-xl">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="p-2 rounded-lg hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label={language === 'en-GB' ? 'Open navigation menu' : '打開導航選單'}
-          >
-            <svg className="h-5 w-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
-            <img src={logo} alt="" className="h-7 w-7 object-contain" />
-            <span className="text-sm font-bold text-foreground hidden sm:inline">SpeakAble HK</span>
-          </Link>
-        </div>
-        <div className="flex items-center gap-2 md:gap-3">
-          <AccessibilityToolbar />
-          <LanguageSwitcher value={language} onChange={handleLanguageChange} />
-        </div>
-      </header>
+      {/* Header — hidden in focus mode */}
+      {!focusMode && (
+        <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 md:px-6 border-b border-border bg-card/80 backdrop-blur-xl">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="p-2 rounded-lg hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={language === 'en-GB' ? 'Open navigation menu' : '打開導航選單'}
+            >
+              <svg className="h-5 w-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
+              <img src={logo} alt="" className="h-7 w-7 object-contain" />
+              <span className="text-sm font-bold text-foreground hidden sm:inline">SpeakAble HK</span>
+            </Link>
+          </div>
+          <div className="flex items-center gap-2 md:gap-3">
+            <AccessibilityToolbar />
+            <LanguageSwitcher value={language} onChange={handleLanguageChange} />
+          </div>
+        </header>
+      )}
 
       {/* Guest Banner */}
-      {!user && (
+      {!focusMode && !user && (
         <div className="bg-primary/10 border-b border-primary/20 px-4 py-2 text-center text-sm" role="alert">
           <span className="text-foreground">
             {t("guest.banner")}
@@ -155,19 +163,21 @@ export function AppLayout({ children }: AppLayoutProps) {
         {children || <Outlet />}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-muted/30 border-t border-border py-6 text-center" role="contentinfo">
-        <div className="max-w-4xl mx-auto px-4 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            © 2026 SpeakAble HK. All rights reserved.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {language === 'en-GB'
-              ? 'We are committed to digital accessibility. This website is designed to meet WCAG 2.1 Level AA standards.'
-              : '我們致力於數位無障礙。本網站按照 WCAG 2.1 AA 級標準設計。'}
-          </p>
-        </div>
-      </footer>
+      {/* Footer — hidden in focus mode */}
+      {!focusMode && (
+        <footer className="bg-muted/30 border-t border-border py-6 text-center" role="contentinfo">
+          <div className="max-w-4xl mx-auto px-4 space-y-2">
+            <p className="text-sm text-muted-foreground">
+              © 2026 SpeakAble HK. All rights reserved.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {language === 'en-GB'
+                ? 'We are committed to digital accessibility. This website is designed to meet WCAG 2.1 Level AA standards.'
+                : '我們致力於數位無障礙。本網站按照 WCAG 2.1 AA 級標準設計。'}
+            </p>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
