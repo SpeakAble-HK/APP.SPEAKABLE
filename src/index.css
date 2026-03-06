@@ -1,1 +1,4 @@
-.skip-to-content { font-size: 1rem; line-height: 1.5; font-weight: 600; font-semibold; } /* Other styles */
+.skip-to-content {
+  /* other styles */
+  font-weight: 600; /* Assuming font-semibold means font-weight 600 */
+}
