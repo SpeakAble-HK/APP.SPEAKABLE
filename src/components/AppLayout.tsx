@@ -76,15 +76,15 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   // Bottom tab items for mobile
   const tabs = [
-    { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/" },
-    { id: "echo", icon: AudioLines, label: isEn ? "Echo" : "迴聲", path: "/" },
+    { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/home" },
+    { id: "echo", icon: AudioLines, label: isEn ? "Echo" : "迴聲", path: "/home" },
     { id: "quest", icon: Swords, label: isEn ? "Quest" : "冒險", path: "/speech-quest" },
     { id: "ipa", icon: BookOpen, label: "IPA", path: "/ipa" },
   ];
 
   const isTabActive = (path: string, id: string) => {
-    if (id === "echo") return false; // Echo is always on home
-    if (path === "/") return location.pathname === "/";
+    if (id === "echo") return false;
+    if (path === "/home") return location.pathname === "/home";
     return location.pathname.startsWith(path);
   };
 
