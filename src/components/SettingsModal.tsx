@@ -21,8 +21,8 @@ const languages = [
 ];
 
 export function SettingsModal({ trigger, open, onOpenChange }: SettingsModalProps) {
-  const { theme, textSize, focusMode, contrastMode, toggleTheme, setTextSize, toggleFocusMode, toggleContrast } = useAccessibility();
-  const { language, setLanguage, t } = useLanguage();
+  const { theme, textSize, toggleTheme, setTextSize } = useAccessibility();
+  const { language, setLanguage } = useLanguage();
   const { user, updateLanguage } = useAuth();
   const isEn = language === "en-GB";
 
@@ -35,45 +35,7 @@ export function SettingsModal({ trigger, open, onOpenChange }: SettingsModalProp
     }
   };
 
-  const settings = [
-    {
-      id: "dark-mode",
-      num: 1,
-      label: isEn ? "Dark Mode" : "深色模式",
-      desc: isEn ? "Switch between light and dark themes" : "切換淺色和深色主題",
-      checked: theme === "dark",
-      onChange: toggleTheme,
-    },
-    {
-      id: "font-size",
-      num: 2,
-      label: isEn ? "Font Size" : "字體大小",
-      desc: isEn ? "Enlarge text for better readability" : "放大文字以提高可讀性",
-      checked: textSize !== "normal",
-      onChange: () => setTextSize(textSize === "normal" ? "large" : "normal"),
-    },
-    {
-      id: "sen-focus",
-      num: 3,
-      label: isEn ? "SEN Focus Mode" : "SEN 專注模式",
-      desc: isEn ? "Hide non-essential UI elements" : "隱藏非必要的介面元素",
-      checked: focusMode,
-      onChange: toggleFocusMode,
-    },
-    {
-      id: "high-contrast",
-      num: 4,
-      label: isEn ? "High Contrast" : "高對比",
-      desc: isEn ? "Increase contrast for accessibility" : "提高對比度以改善可及性",
-      checked: contrastMode === "high-contrast",
-      onChange: toggleContrast,
-    },
-  ];
-
-  // Support both controlled (open/onOpenChange) and uncontrolled (trigger) modes
-  const dialogProps = open !== undefined
-    ? { open, onOpenChange }
-    : {};
+  const dialogProps = open !== undefined ? { open, onOpenChange } : {};
 
   return (
     <Dialog {...dialogProps}>
@@ -90,27 +52,38 @@ export function SettingsModal({ trigger, open, onOpenChange }: SettingsModalProp
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-1 mt-2">
-          {settings.map((s) => (
-            <div key={s.id} className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">
-              <div className="flex items-start gap-3">
-                <span className="text-xs font-bold text-muted-foreground mt-0.5 w-5 text-right">{s.num}.</span>
-                <div>
-                  <Label htmlFor={s.id} className="text-sm font-medium cursor-pointer">{s.label}</Label>
-                  <p className="text-xs text-muted-foreground mt-0.5">{s.desc}</p>
-                </div>
-              </div>
-              <Switch id={s.id} checked={s.checked} onCheckedChange={s.onChange} />
-            </div>
-          ))}
-
-          {/* Language Preference */}
+          {/* Dark Mode */}
           <div className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">
-            <div className="flex items-start gap-3">
-              <span className="text-xs font-bold text-muted-foreground mt-0.5 w-5 text-right">5.</span>
-              <div>
-                <Label className="text-sm font-medium">{isEn ? "Language" : "語言"}</Label>
-                <p className="text-xs text-muted-foreground mt-0.5">{isEn ? "Choose your preferred language" : "選擇您的偏好語言"}</p>
-              </div>
+            <div>
+              <Label className="text-sm font-medium cursor-pointer">{isEn ? "Dark Mode" : "深色模式"}</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">{isEn ? "Switch between light and dark themes" : "切換淺色和深色主題"}</p>
+            </div>
+            <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
+          </div>
+
+          {/* Text Size */}
+          <div className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">
+            <div>
+              <Label className="text-sm font-medium">{isEn ? "Text Size" : "文字大小"}</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">{isEn ? "Adjust text size for readability" : "調整文字大小以提高可讀性"}</p>
+            </div>
+            <Select value={textSize} onValueChange={(v) => setTextSize(v as any)}>
+              <SelectTrigger className="w-[130px] h-9 bg-background border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border z-[60]">
+                <SelectItem value="normal">{isEn ? "Regular" : "標準"}</SelectItem>
+                <SelectItem value="large">{isEn ? "Large" : "大"}</SelectItem>
+                <SelectItem value="extra-large">{isEn ? "Super Large" : "超大"}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Language */}
+          <div className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors">
+            <div>
+              <Label className="text-sm font-medium">{isEn ? "Language" : "語言"}</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">{isEn ? "Choose your preferred language" : "選擇您的偏好語言"}</p>
             </div>
             <Select value={language} onValueChange={handleLanguageChange}>
               <SelectTrigger className="w-[140px] h-9 bg-background border-border">
