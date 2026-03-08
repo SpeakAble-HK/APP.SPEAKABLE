@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState, useRef, useCallback } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, AudioLines, Swords, BookOpen, Menu, X, Settings } from "lucide-react";
+import { Home, Swords, BookOpen, Menu, X, Settings, BarChart3, User } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsModal } from "@/components/SettingsModal";
 import { useAuth } from "@/hooks/useAuth";
