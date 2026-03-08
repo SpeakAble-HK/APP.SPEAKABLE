@@ -81,7 +81,7 @@ export function RewardsShop({ totalPoints, onSpendPoints }: RewardsShopProps) {
     });
   }, [totalPoints, ownedItems, onSpendPoints, isEn, isTW]);
 
-  const items = activeTab === 'outfits' ? parrotOutfits : homeDecorations;
+  const items = activeTab === 'outfits' ? parrotOutfits : activeTab === 'mics' ? micSkins : homeDecorations;
   const getName = (item: ShopItem) => isEn ? item.nameEn : isTW ? item.nameTW : item.nameCN;
 
   return (
