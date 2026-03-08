@@ -76,7 +76,6 @@ export function AppLayout({ children }: AppLayoutProps) {
   ];
 
   const isTabActive = (path: string, id: string) => {
-    if (id === "echo" || id === "settings") return false;
     if (id === "home") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
