@@ -18,6 +18,7 @@ import SpeechTherapyInfoPage from "./pages/SpeechTherapyInfoPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import IPALibraryPage from "./pages/IPALibraryPage";
 import IPAPage from "./pages/IPAPage";
+import ResourcesPage from "./pages/ResourcesPage";
 import VisualizationPage from "./pages/VisualizationPage";
 import NotFound from "./pages/NotFound";
 import ComingSoonPage from "./pages/ComingSoonPage";
