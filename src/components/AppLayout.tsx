@@ -192,20 +192,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    if (tab.path.includes('#')) {
-                      if (location.pathname !== '/') {
-                        navigate('/');
-                        setTimeout(() => {
-                          document.getElementById(tab.path.split('#')[1])?.scrollIntoView({ behavior: 'smooth' });
-                        }, 100);
-                      } else {
-                        document.getElementById(tab.path.split('#')[1])?.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    } else {
-                      navigate(tab.path);
-                    }
-                  }}
+                  onClick={() => navigate(tab.path)}
                   className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
                     isHome && active
                       ? 'text-primary'
