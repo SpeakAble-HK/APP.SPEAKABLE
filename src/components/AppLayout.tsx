@@ -125,46 +125,35 @@ export function AppLayout({ children }: AppLayoutProps) {
         {children || <Outlet />}
       </main>
 
-      {/* Mobile Bottom Tab Bar */}
-      {isMobile && (
-        <nav className="bottom-tab-bar" aria-label="Quick navigation">
-          <div className="flex items-center justify-around h-16">
-            {tabs.map((tab) => {
-              const active = isTabActive(tab.path, tab.id);
-              const isHome = tab.id === "home";
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => navigate(tab.path)}
-                  className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
-                    active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  aria-current={active ? "page" : undefined}
-                >
-                  {isHome ? (
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center -mt-3 shadow-md ${active ? 'bg-primary' : 'bg-muted'}`}>
-                      <tab.icon className={`h-6 w-6 ${active ? 'text-primary-foreground' : 'text-foreground'}`} />
-                    </div>
-                  ) : (
-                    <tab.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
-                  )}
-                  <span className={`text-[10px] font-bold ${active ? 'text-primary' : ''}`}>{tab.label}</span>
-                  {active && !isHome && <div className="w-5 h-0.5 rounded-full bg-primary mt-0.5" />}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-      )}
-
-      {/* Footer — hidden on mobile */}
-      {!isMobile && (
-        <footer className="bg-muted/30 border-t-2 border-border py-4 text-center" role="contentinfo">
-          <p className="text-xs text-muted-foreground">
-            © 2026 SpeakAble HK. All rights reserved.
-          </p>
-        </footer>
-      )}
+      {/* Bottom Tab Bar */}
+      <nav className="bottom-tab-bar" aria-label="Quick navigation">
+        <div className="flex items-center justify-around h-16">
+          {tabs.map((tab) => {
+            const active = isTabActive(tab.path, tab.id);
+            const isHome = tab.id === "home";
+            return (
+              <button
+                key={tab.id}
+                onClick={() => navigate(tab.path)}
+                className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
+                  active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-current={active ? "page" : undefined}
+              >
+                {isHome ? (
+                  <div className={`w-11 h-11 rounded-full flex items-center justify-center -mt-3 shadow-md ${active ? 'bg-primary' : 'bg-muted'}`}>
+                    <tab.icon className={`h-6 w-6 ${active ? 'text-primary-foreground' : 'text-foreground'}`} />
+                  </div>
+                ) : (
+                  <tab.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
+                )}
+                <span className={`text-[10px] font-bold ${active ? 'text-primary' : ''}`}>{tab.label}</span>
+                {active && !isHome && <div className="w-5 h-0.5 rounded-full bg-primary mt-0.5" />}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }
