@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Swords, BookOpen, User, AudioLines } from "lucide-react";
+import { Home, Swords, BookOpen, User, AudioLines, Library } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
@@ -49,7 +49,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   // Bottom tab items for mobile — 5 tabs
   const tabs = [
-    { id: "ipa", icon: BookOpen, label: "IPA", path: "/ipa" },
+    { id: "resources", icon: Library, label: isEn ? "Resources" : isTW ? "資源" : "资源", path: "/resources" },
     { id: "echo", icon: AudioLines, label: isEn ? "Echo Speech" : "迴聲語音", path: "/echo-speech" },
     { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/" },
     { id: "quest", icon: Swords, label: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", path: "/speech-quest" },
@@ -58,6 +58,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const isTabActive = (path: string, id: string) => {
     if (id === "home") return location.pathname === "/";
+    if (id === "resources") return location.pathname.startsWith("/resources") || location.pathname.startsWith("/ipa");
     return location.pathname.startsWith(path);
   };
 
