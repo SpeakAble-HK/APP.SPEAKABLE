@@ -68,11 +68,11 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   // Bottom tab items for mobile — 5 tabs
   const tabs = [
-    { id: "ipa", icon: BookOpen, label: "IPA", path: "/ipa" },
-    { id: "echo", icon: AudioLines, label: isEn ? "Echo" : "迴聲", path: "/" },
     { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/" },
-    { id: "quest", icon: Swords, label: isEn ? "Quest" : "冒險", path: "/speech-quest" },
-    { id: "settings", icon: Settings, label: isEn ? "Settings" : "設定", path: "" },
+    { id: "quest", icon: Swords, label: isEn ? "Practice" : "練習", path: "/speech-quest" },
+    { id: "progress", icon: BarChart3, label: isEn ? "Progress" : "進度", path: "/learning/progress" },
+    { id: "learn", icon: BookOpen, label: isEn ? "Learn" : "學習", path: "/ipa" },
+    { id: "profile", icon: User, label: isEn ? "Profile" : "個人", path: "/profile" },
   ];
 
   const isTabActive = (path: string, id: string) => {
