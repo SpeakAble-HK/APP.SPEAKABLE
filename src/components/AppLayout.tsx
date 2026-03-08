@@ -1,10 +1,9 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Swords, BookOpen, Menu, User, AudioLines } from "lucide-react";
+import { Home, Swords, BookOpen, User, AudioLines } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import { useIsMobile } from "@/hooks/use-mobile";
 import mascot from "@/assets/mascot.png";
 import { toast } from "sonner";
 
@@ -15,7 +14,6 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const { user, profile, loading, signOut, updateLanguage } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -100,18 +98,9 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 border-b-2 border-border bg-card">
         <div className="flex items-center gap-2">
-          {!isMobile && (
-            <button
-              onClick={() => setDrawerOpen(true)}
-              className="p-2 rounded-xl hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label={isEn ? 'Open navigation menu' : '打開導航選單'}
-            >
-              <Menu className="h-5 w-5 text-foreground" />
-            </button>
-          )}
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
             <img src={mascot} alt="" className="h-8 w-8 object-contain" />
-            <span className="text-base font-extrabold text-foreground hidden sm:inline">SpeakAble HK</span>
+            <span className="text-base font-extrabold text-foreground">SpeakAble HK</span>
           </Link>
         </div>
       </header>
@@ -130,50 +119,39 @@ export function AppLayout({ children }: AppLayoutProps) {
       )}
 
       {/* Main Content */}
-      <main id="main-content" className={`flex-1 overflow-auto ${isMobile ? 'pb-20' : ''}`} role="main">
+      <main id="main-content" className="flex-1 overflow-auto pb-20" role="main">
         {children || <Outlet />}
       </main>
 
-      {/* Mobile Bottom Tab Bar */}
-      {isMobile && (
-        <nav className="bottom-tab-bar" aria-label="Quick navigation">
-          <div className="flex items-center justify-around h-16">
-            {tabs.map((tab) => {
-              const active = isTabActive(tab.path, tab.id);
-              const isHome = tab.id === "home";
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => navigate(tab.path)}
-                  className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
-                    active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                  aria-current={active ? "page" : undefined}
-                >
-                  {isHome ? (
-                    <div className={`w-11 h-11 rounded-full flex items-center justify-center -mt-3 shadow-md ${active ? 'bg-primary' : 'bg-muted'}`}>
-                      <tab.icon className={`h-6 w-6 ${active ? 'text-primary-foreground' : 'text-foreground'}`} />
-                    </div>
-                  ) : (
-                    <tab.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
-                  )}
-                  <span className={`text-[10px] font-bold ${active ? 'text-primary' : ''}`}>{tab.label}</span>
-                  {active && !isHome && <div className="w-5 h-0.5 rounded-full bg-primary mt-0.5" />}
-                </button>
-              );
-            })}
-          </div>
-        </nav>
-      )}
-
-      {/* Footer — hidden on mobile */}
-      {!isMobile && (
-        <footer className="bg-muted/30 border-t-2 border-border py-4 text-center" role="contentinfo">
-          <p className="text-xs text-muted-foreground">
-            © 2026 SpeakAble HK. All rights reserved.
-          </p>
-        </footer>
-      )}
+      {/* Bottom Tab Bar */}
+      <nav className="bottom-tab-bar" aria-label="Quick navigation">
+        <div className="flex items-center justify-around h-16">
+          {tabs.map((tab) => {
+            const active = isTabActive(tab.path, tab.id);
+            const isHome = tab.id === "home";
+            return (
+              <button
+                key={tab.id}
+                onClick={() => navigate(tab.path)}
+                className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
+                  active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-current={active ? "page" : undefined}
+              >
+                {isHome ? (
+                  <div className={`w-11 h-11 rounded-full flex items-center justify-center -mt-3 shadow-md ${active ? 'bg-primary' : 'bg-muted'}`}>
+                    <tab.icon className={`h-6 w-6 ${active ? 'text-primary-foreground' : 'text-foreground'}`} />
+                  </div>
+                ) : (
+                  <tab.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
+                )}
+                <span className={`text-[10px] font-bold ${active ? 'text-primary' : ''}`}>{tab.label}</span>
+                {active && !isHome && <div className="w-5 h-0.5 rounded-full bg-primary mt-0.5" />}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

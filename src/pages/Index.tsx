@@ -25,17 +25,17 @@ const Index = () => {
   return (
     <div className="min-h-full bg-background" ref={scrollRef}>
       {/* Hero — mascot greeting + mode selection */}
-      <section className="relative overflow-hidden px-4 pt-8 pb-6 md:pt-12 md:pb-8">
-        <div className="max-w-3xl mx-auto">
+      <section className="relative overflow-hidden px-4 pt-8 pb-6">
+        <div className="max-w-2xl mx-auto">
           <div className="scroll-reveal flex flex-col items-center text-center gap-4 mb-8">
-            <img src={mascot} alt="SpeakAble mascot" className="h-24 w-24 md:h-28 md:w-28 object-contain mascot-bounce" />
+            <img src={mascot} alt="SpeakAble mascot" className="h-24 w-24 object-contain mascot-bounce" />
             <div>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
+              <h1 className="text-3xl font-extrabold text-foreground leading-tight">
                 {isEn ? "Welcome to" : isTW ? "歡迎來到" : "欢迎来到"}
                 {" "}
                 <span className="text-primary">SpeakAble HK</span>
               </h1>
-              <p className="text-muted-foreground mt-2 text-base md:text-lg max-w-md mx-auto">
+              <p className="text-muted-foreground mt-2 text-base max-w-md mx-auto">
                 {isEn
                   ? "Let's practise Cantonese together."
                   : isTW ? "一起練習廣東話吧。"
@@ -45,7 +45,7 @@ const Index = () => {
           </div>
 
           {/* Two Mode Buttons — side by side */}
-          <div className="scroll-reveal grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="scroll-reveal grid grid-cols-1 gap-4">
             {/* Speech Quest */}
             <button
               onClick={() => {
@@ -173,12 +173,12 @@ const Index = () => {
               },
             ].map((action, i) => (
               <Link key={i} to={action.link} className="scroll-reveal group">
-                <div className={`bg-card border-2 ${action.color} rounded-2xl p-3 md:p-4 text-center hover:shadow-md transition-all hover:-translate-y-1`}>
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${action.iconBg} flex items-center justify-center mx-auto mb-2`}>
-                    <action.icon className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
+                <div className={`bg-card border-2 ${action.color} rounded-2xl p-3 text-center hover:shadow-md transition-all hover:-translate-y-1`}>
+                  <div className={`w-10 h-10 rounded-xl ${action.iconBg} flex items-center justify-center mx-auto mb-2`}>
+                    <action.icon className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <p className="text-xs md:text-sm font-extrabold text-foreground leading-tight">{action.title}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 hidden md:block">{action.desc}</p>
+                  <p className="text-xs font-extrabold text-foreground leading-tight">{action.title}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{action.desc}</p>
                 </div>
               </Link>
             ))}
