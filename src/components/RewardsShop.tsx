@@ -51,7 +51,7 @@ export function RewardsShop({ totalPoints, onSpendPoints }: RewardsShopProps) {
   const { language } = useLanguage();
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
-  const [activeTab, setActiveTab] = useState<'outfits' | 'decorations'>('outfits');
+  const [activeTab, setActiveTab] = useState<'outfits' | 'decorations' | 'mics'>('outfits');
   const [ownedItems, setOwnedItems] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
