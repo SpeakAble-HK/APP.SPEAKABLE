@@ -33,6 +33,13 @@ const homeDecorations: ShopItem[] = [
   { id: "trophy", nameEn: "Gold Trophy", nameTW: "金獎盃", nameCN: "金奖杯", cost: 500, emoji: "🏆" },
 ];
 
+const micSkins: ShopItem[] = [
+  { id: "mic-gold", nameEn: "Gold Mic", nameTW: "金色麥克風", nameCN: "金色麦克风", cost: 150, emoji: "🎤" },
+  { id: "mic-neon", nameEn: "Neon Mic", nameTW: "霓虹麥克風", nameCN: "霓虹麦克风", cost: 200, emoji: "💜" },
+  { id: "mic-crystal", nameEn: "Crystal Mic", nameTW: "水晶麥克風", nameCN: "水晶麦克风", cost: 300, emoji: "💎" },
+  { id: "mic-retro", nameEn: "Retro Mic", nameTW: "復古麥克風", nameCN: "复古麦克风", cost: 175, emoji: "📻" },
+];
+
 const STORAGE_KEY = "speakable-rewards-shop";
 
 interface RewardsShopProps {
