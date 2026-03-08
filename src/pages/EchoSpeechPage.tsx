@@ -20,8 +20,6 @@ export default function EchoSpeechPage() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const { user } = useAuth();
-  const isAuthenticated = !!user && !user.is_anonymous;
-  const { ensureGuestSession, showTrialModal, setShowTrialModal, markTrialUsed, isLocked } = useGuestTrial(isAuthenticated);
   const { results, isLoading: historyLoading } = usePronunciationResults();
 
   const [isRecording, setIsRecording] = useState(false);
