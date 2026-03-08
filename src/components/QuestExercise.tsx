@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePronunciationAPI, PhonemeResult } from "@/hooks/usePronunciationAPI";
 import { useAuth } from "@/hooks/useAuth";
-import { useGuestTrial } from "@/hooks/useGuestTrial";
 import { QuestFeedback } from "./QuestFeedback";
 import { QuestLesson } from "@/data/questWorlds";
 import { PracticeWord } from "@/data/practiceTopics";
