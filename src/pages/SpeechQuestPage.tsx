@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Lock, CheckCircle, Star, Trophy, ArrowLeft, BookOpen, Sparkles, ChevronRight } from "lucide-react";
+import { Lock, CheckCircle, Star, Trophy, BookOpen, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
