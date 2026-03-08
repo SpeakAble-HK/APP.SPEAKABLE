@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState, useRef, useCallback } from "react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { Home, AudioLines, Swords, BookOpen, Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,8 +8,7 @@ import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import logo from "@/assets/logo.png";
+import mascot from "@/assets/mascot.png";
 import { toast } from "sonner";
 
 interface AppLayoutProps {
@@ -21,10 +21,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { focusMode, toggleFocusMode } = useAccessibility();
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const hoverZoneRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const isEn = language === 'en-GB';
+  const isTW = language === 'zh-TW';
 
   // Sync language from profile when user logs in
   useEffect(() => {
@@ -46,23 +47,9 @@ export function AppLayout({ children }: AppLayoutProps) {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [user]);
 
-  // Desktop: hover zone to open drawer
-  useEffect(() => {
-    if (isMobile || focusMode) return;
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!drawerOpen && e.clientX <= 8) {
-        setDrawerOpen(true);
-      }
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [drawerOpen, isMobile, focusMode]);
-
   // SEN Focus Mode: Esc key to exit (desktop)
   const handleEscKey = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape' && focusMode) {
-      toggleFocusMode();
-    }
+    if (e.key === 'Escape' && focusMode) toggleFocusMode();
   }, [focusMode, toggleFocusMode]);
 
   useEffect(() => {
@@ -74,28 +61,37 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const handleSignOut = async () => {
     const { error } = await signOut();
-    if (error) {
-      toast.error(t("toast.signOutError"));
-    } else {
-      toast.success(t("toast.signOutSuccess"));
-    }
+    if (error) toast.error(t("toast.signOutError"));
+    else toast.success(t("toast.signOutSuccess"));
   };
 
   const handleLanguageChange = async (newLanguage: string) => {
     setLanguage(newLanguage as Language);
     if (user) {
       const { error } = await updateLanguage(newLanguage);
-      if (error) {
-        toast.error(t("toast.languageError"));
-      } else {
-        toast.success(t("toast.languageUpdated"));
-      }
+      if (error) toast.error(t("toast.languageError"));
+      else toast.success(t("toast.languageUpdated"));
     }
+  };
+
+  // Bottom tab items for mobile
+  const tabs = [
+    { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/" },
+    { id: "echo", icon: AudioLines, label: isEn ? "Echo" : "迴聲", path: "/" },
+    { id: "quest", icon: Swords, label: isEn ? "Quest" : "冒險", path: "/speech-quest" },
+    { id: "ipa", icon: BookOpen, label: "IPA", path: "/ipa" },
+  ];
+
+  const isTabActive = (path: string, id: string) => {
+    if (id === "echo") return false; // Echo is always on home
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center hero-gradient" role="status" aria-label="Loading">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4" role="status" aria-label="Loading">
+        <img src={mascot} alt="" className="h-16 w-16 mascot-bounce" />
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -108,12 +104,11 @@ export function AppLayout({ children }: AppLayoutProps) {
         {isEn ? 'Skip to main content' : '跳至主要內容'}
       </a>
 
-      {/* Focus Mode Overlay with fade */}
+      {/* Focus Mode Overlay */}
       {focusMode && (
         <>
-          {/* Mobile: Floating exit button */}
           {isMobile && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in duration-300">
+            <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 animate-in fade-in duration-300">
               <Button
                 onClick={toggleFocusMode}
                 variant="default"
@@ -126,11 +121,9 @@ export function AppLayout({ children }: AppLayoutProps) {
               </Button>
             </div>
           )}
-
-          {/* Desktop: subtle top-right hint */}
           {!isMobile && (
             <div className="fixed top-4 right-4 z-50 animate-in fade-in duration-300">
-              <p className="text-xs text-muted-foreground bg-card/80 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-border/50">
+              <p className="text-xs text-muted-foreground bg-card/90 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-border">
                 {isEn ? 'Press Esc to exit Focus Mode' : '按 Esc 退出專注模式'}
               </p>
             </div>
@@ -138,20 +131,10 @@ export function AppLayout({ children }: AppLayoutProps) {
         </>
       )}
 
-      {/* Hover zone — invisible strip on left edge */}
-      {!focusMode && !isMobile && (
-        <div
-          ref={hoverZoneRef}
-          className="fixed left-0 top-0 w-2 h-full z-50"
-          onMouseEnter={() => setDrawerOpen(true)}
-          aria-hidden="true"
-        />
-      )}
-
       {/* Drawer overlay */}
       {!focusMode && drawerOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setDrawerOpen(false)}
           aria-hidden="true"
         />
@@ -160,9 +143,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Sidebar drawer */}
       {!focusMode && (
         <div
-          ref={drawerRef}
           className={`fixed left-0 top-0 h-full z-50 transition-transform duration-300 ease-out ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
-          onMouseLeave={() => !isMobile && setDrawerOpen(false)}
           role="navigation"
           aria-label="Main navigation"
         >
@@ -170,36 +151,34 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
       )}
 
-      {/* Header — hidden in focus mode */}
+      {/* Header — friendly, minimal */}
       {!focusMode && (
-        <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 md:px-6 border-b border-border bg-card/80 backdrop-blur-xl transition-opacity duration-300">
+        <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 border-b-2 border-border bg-card transition-opacity duration-300">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setDrawerOpen(true)}
               className="p-2 rounded-xl hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring"
               aria-label={isEn ? 'Open navigation menu' : '打開導航選單'}
             >
-              <svg className="h-5 w-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu className="h-5 w-5 text-foreground" />
             </button>
             <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
-              <img src={logo} alt="" className="h-7 w-7 object-contain" />
-              <span className="text-sm font-bold text-foreground hidden sm:inline">SpeakAble HK</span>
+              <img src={mascot} alt="" className="h-8 w-8 object-contain" />
+              <span className="text-base font-extrabold text-foreground hidden sm:inline">SpeakAble HK</span>
             </Link>
           </div>
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-2">
             <LanguageSwitcher value={language} onChange={handleLanguageChange} />
           </div>
         </header>
       )}
 
-      {/* Guest Banner */}
+      {/* Guest Banner — friendly tone */}
       {!focusMode && !user && (
-        <div className="bg-primary/10 border-b border-primary/20 px-4 py-2 text-center text-sm" role="alert">
+        <div className="bg-accent/15 border-b-2 border-accent/20 px-4 py-2.5 text-center text-sm" role="alert">
           <span className="text-foreground">
-            {t("guest.banner")}
-            <a href="/auth" className="text-primary font-medium ml-1 hover:underline focus-visible:ring-2 focus-visible:ring-ring rounded">
+            🦜 {isEn ? "You're exploring as a guest!" : isTW ? "你正以訪客身份探索！" : "你正以访客身份探索！"}
+            <a href="/auth" className="text-primary font-bold ml-1 hover:underline focus-visible:ring-2 focus-visible:ring-ring rounded">
               {t("guest.signUp")}
             </a>
             <span className="text-muted-foreground ml-1">{t("guest.saveProgress")}</span>
@@ -207,24 +186,53 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
       )}
 
-      {/* Main Content — with smooth transition for focus mode */}
-      <main id="main-content" className="flex-1 overflow-auto transition-all duration-300" role="main">
+      {/* Main Content */}
+      <main id="main-content" className={`flex-1 overflow-auto transition-all duration-300 ${isMobile && !focusMode ? 'pb-20' : ''}`} role="main">
         {children || <Outlet />}
       </main>
 
-      {/* Footer — hidden in focus mode */}
-      {!focusMode && (
-        <footer className="bg-muted/30 border-t border-border py-6 text-center transition-opacity duration-300" role="contentinfo">
-          <div className="max-w-4xl mx-auto px-4 space-y-2">
-            <p className="text-sm text-muted-foreground">
-              © 2026 SpeakAble HK. All rights reserved.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {isEn
-                ? 'We are committed to digital accessibility. This website is designed to meet WCAG 2.1 Level AA standards.'
-                : '我們致力於數位無障礙。本網站按照 WCAG 2.1 AA 級標準設計。'}
-            </p>
+      {/* Mobile Bottom Tab Bar */}
+      {isMobile && !focusMode && (
+        <nav className="bottom-tab-bar" aria-label="Quick navigation">
+          <div className="flex items-center justify-around h-16">
+            {tabs.map((tab) => {
+              const active = isTabActive(tab.path, tab.id);
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    if (tab.id === "echo") {
+                      navigate("/");
+                      setTimeout(() => {
+                        document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
+                      }, 100);
+                    } else {
+                      navigate(tab.path);
+                    }
+                  }}
+                  className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] min-h-[48px] rounded-xl transition-colors ${
+                    active
+                      ? 'text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  <tab.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
+                  <span className={`text-[10px] font-bold ${active ? 'text-primary' : ''}`}>{tab.label}</span>
+                  {active && <div className="w-5 h-0.5 rounded-full bg-primary mt-0.5" />}
+                </button>
+              );
+            })}
           </div>
+        </nav>
+      )}
+
+      {/* Footer — hidden in focus mode, hidden on mobile (bottom tabs replace it) */}
+      {!focusMode && !isMobile && (
+        <footer className="bg-muted/30 border-t-2 border-border py-4 text-center" role="contentinfo">
+          <p className="text-xs text-muted-foreground">
+            © 2026 SpeakAble HK. All rights reserved.
+          </p>
         </footer>
       )}
     </div>

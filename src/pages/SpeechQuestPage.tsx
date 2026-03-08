@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserStats } from "@/hooks/useUserStats";
-import logo from "@/assets/logo.png";
+import mascot from "@/assets/mascot.png";
 import { IPALibraryModal } from "@/components/IPALibraryModal";
 import { RewardsShop } from "@/components/RewardsShop";
 import { toast } from "@/hooks/use-toast";
@@ -62,7 +62,6 @@ const SpeechQuestPage = () => {
   const [showConfetti, setShowConfetti] = useState<number | null>(null);
 
   const { completed, spentPoints } = progress;
-
   const totalEarned = questNodesData.filter(n => completed.has(n.id)).reduce((s, n) => s + n.points, 0);
   const availablePoints = totalEarned - spentPoints;
   const completedCount = completed.size;
@@ -70,29 +69,20 @@ const SpeechQuestPage = () => {
 
   const isLocked = (node: QuestNode): boolean => {
     if (node.id <= 2) return false;
-    // Unlock if previous node is completed
     return !completed.has(node.id - 1);
   };
 
   const handleCompleteQuest = useCallback((node: QuestNode) => {
     if (completed.has(node.id) || isLocked(node)) return;
-
-    // Start animation
     setAnimatingNode(node.id);
     setShowConfetti(node.id);
-
     setTimeout(() => {
       const newCompleted = new Set([...completed, node.id]);
       const newProgress = { completed: newCompleted, spentPoints };
       setProgress(newProgress);
       saveProgress(newCompleted, spentPoints);
-
       const name = isEn ? node.titleEn : isTW ? node.titleTW : node.titleCN;
-      toast({
-        title: isEn ? "🎉 Quest Complete!" : isTW ? "🎉 任務完成！" : "🎉 任务完成！",
-        description: `${name} — +${node.points} ${isEn ? 'pts' : '分'}`,
-      });
-
+      toast({ title: isEn ? "🎉 Quest Complete!" : isTW ? "🎉 任務完成！" : "🎉 任务完成！", description: `${name} — +${node.points} ${isEn ? 'pts' : '分'}` });
       setAnimatingNode(null);
       setTimeout(() => setShowConfetti(null), 1500);
     }, 600);
@@ -109,56 +99,50 @@ const SpeechQuestPage = () => {
 
   return (
     <div className="min-h-full bg-background">
-      {/* Top Bar: Back + Score + IPA */}
-      <div className="sticky top-14 z-20 bg-card/95 backdrop-blur border-b border-border px-4 py-3">
+      {/* Top Bar */}
+      <div className="sticky top-14 z-20 bg-card border-b-2 border-border px-4 py-3">
         <div className="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-2 min-h-[48px] min-w-[48px]">
+            <Button variant="ghost" size="sm" className="gap-2 min-h-[48px] font-bold">
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">{isEn ? 'Back to Home' : isTW ? '返回首頁' : '返回首页'}</span>
+              <span className="hidden sm:inline">{isEn ? 'Back' : isTW ? '返回' : '返回'}</span>
             </Button>
           </Link>
-
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" aria-hidden="true" />
+            <div className="flex items-center gap-1.5 text-sm font-extrabold text-foreground bg-accent/15 px-3 py-1 rounded-full">
+              <Star className="h-4 w-4 text-accent" aria-hidden="true" />
               {availablePoints} {isEn ? 'pts' : '分'}
             </div>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-bold">
               <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
               {completedCount}/{questNodesData.length}
             </div>
-            <div className="w-16 sm:w-[120px]">
-              <Progress value={progressPct} className="h-2" />
+            <div className="w-16 sm:w-[100px]">
+              <Progress value={progressPct} className="h-2.5 rounded-full" />
             </div>
-            <Button
-              onClick={() => setIpaOpen(true)}
-              size="sm"
-              className="gap-1.5 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 hover:shadow-lg transition-all duration-200 min-h-[48px]"
-            >
+            <Button onClick={() => setIpaOpen(true)} size="sm" className="gap-1.5 font-extrabold min-h-[48px] game-btn" style={{ boxShadow: '0 3px 0 hsl(var(--primary-dark))' }}>
               <BookOpen className="h-4 w-4" />
-              {isEn ? 'IPA Library' : isTW ? 'IPA 音標庫' : 'IPA 音标库'}
+              IPA
             </Button>
           </div>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-
         {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-            {isEn ? 'Speech Quest' : isTW ? '語音冒險' : '语音冒险'}
+          <img src={mascot} alt="" className="h-16 w-16 mx-auto mb-3 mascot-bounce" />
+          <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2">
+            {isEn ? 'Speech Quest' : isTW ? '語音冒險' : '语音冒险'} 🗺️
           </h1>
           <p className="text-muted-foreground">
-            {isEn ? 'Master Cantonese pronunciation one quest at a time.' : isTW ? '一步一步掌握廣東話發音。' : '一步一步掌握广东话发音。'}
+            {isEn ? 'Complete quests to earn points and unlock rewards!' : isTW ? '完成任務賺取積分並解鎖獎勵！' : '完成任务赚取积分并解锁奖励！'}
           </p>
         </div>
 
         {/* Progression Path */}
         <div className="relative w-[90%] max-w-md mx-auto">
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-border -translate-x-1/2" aria-hidden="true" />
-
+          <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border rounded-full -translate-x-1/2" aria-hidden="true" />
           <div className="space-y-6 relative">
             {questNodesData.map((node, index) => {
               const isLeft = index % 2 === 0;
@@ -169,17 +153,13 @@ const SpeechQuestPage = () => {
 
               return (
                 <div key={node.id} className={`flex items-center gap-3 sm:gap-4 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}>
-                  {/* Card */}
                   <div className={`flex-1 ${isLeft ? 'text-right' : 'text-left'}`}>
                     <Card
-                      className={`speech-quest-node inline-block w-full max-w-[280px] transition-all duration-300 ${
-                        isAnimating
-                          ? 'scale-105 border-primary ring-2 ring-primary/40 shadow-lg'
-                          : nodeLocked
-                            ? 'opacity-50 cursor-not-allowed'
-                            : nodeCompleted
-                              ? 'border-green-500/30 bg-green-500/5 hover:shadow-[var(--shadow-card-hover)]'
-                              : 'border-primary/30 hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 cursor-pointer'
+                      className={`speech-quest-node inline-block w-full max-w-[280px] transition-all duration-300 border-2 rounded-2xl ${
+                        isAnimating ? 'scale-105 border-accent ring-2 ring-accent/40 shadow-lg'
+                          : nodeLocked ? 'opacity-50 cursor-not-allowed border-border'
+                          : nodeCompleted ? 'border-success/40 bg-success/5'
+                          : 'border-primary/30 hover:shadow-md hover:-translate-y-0.5 cursor-pointer'
                       }`}
                       onClick={() => !nodeCompleted && !nodeLocked && handleCompleteQuest(node)}
                     >
@@ -190,19 +170,17 @@ const SpeechQuestPage = () => {
                           ) : (
                             <Layers className="h-4 w-4 text-accent flex-shrink-0" aria-hidden="true" />
                           )}
-                          <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                            {node.type === 'read-aloud'
-                              ? (isEn ? 'Read Aloud' : isTW ? '朗讀' : '朗读')
-                              : (isEn ? 'Card Match' : isTW ? '卡片配對' : '卡片配对')}
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground">
+                            {node.type === 'read-aloud' ? (isEn ? 'Read Aloud' : isTW ? '朗讀' : '朗读') : (isEn ? 'Card Match' : isTW ? '卡片配對' : '卡片配对')}
                           </span>
                         </div>
-                        <p className="font-semibold text-foreground text-sm mb-1">{getTitle(node)}</p>
+                        <p className="font-extrabold text-foreground text-sm mb-1">{getTitle(node)}</p>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Star className="h-3 w-3 text-yellow-500" aria-hidden="true" />
+                          <Star className="h-3 w-3 text-accent" aria-hidden="true" />
                           {node.points} {isEn ? 'pts' : '分'}
                         </div>
                         {!nodeCompleted && !nodeLocked && (
-                          <p className="text-[10px] text-primary mt-2 font-medium">
+                          <p className="text-[10px] text-primary mt-2 font-extrabold">
                             {isEn ? '▶ Tap to complete' : isTW ? '▶ 點擊完成' : '▶ 点击完成'}
                           </p>
                         )}
@@ -210,47 +188,29 @@ const SpeechQuestPage = () => {
                     </Card>
                   </div>
 
-                  {/* Center Node — min 48px touch target */}
+                  {/* Center Node */}
                   <div className="relative">
-                    <div className={`speech-quest-circle relative z-10 flex items-center justify-center w-12 h-12 min-w-[48px] min-h-[48px] rounded-full border-2 transition-all duration-500 ${
-                      isAnimating
-                        ? 'bg-yellow-400 border-yellow-400 scale-125'
-                        : nodeLocked
-                          ? 'bg-muted border-border'
-                          : nodeCompleted
-                            ? 'bg-green-500 border-green-500'
-                            : 'bg-primary border-primary animate-pulse'
+                    <div className={`relative z-10 flex items-center justify-center w-12 h-12 min-w-[48px] min-h-[48px] rounded-full border-3 transition-all duration-500 ${
+                      isAnimating ? 'bg-accent border-accent scale-125'
+                        : nodeLocked ? 'bg-muted border-border'
+                        : nodeCompleted ? 'bg-success border-success'
+                        : 'bg-primary border-primary animate-pulse'
                     }`}>
-                      {isAnimating ? (
-                        <Sparkles className="h-5 w-5 text-white animate-spin" aria-hidden="true" />
-                      ) : nodeLocked ? (
-                        <Lock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                      ) : nodeCompleted ? (
-                        <CheckCircle className="h-5 w-5 text-white" aria-hidden="true" />
-                      ) : (
-                        <img src={logo} alt="" className="h-7 w-7 object-contain" />
-                      )}
+                      {isAnimating ? <Sparkles className="h-5 w-5 text-white animate-spin" />
+                        : nodeLocked ? <Lock className="h-4 w-4 text-muted-foreground" />
+                        : nodeCompleted ? <CheckCircle className="h-5 w-5 text-white" />
+                        : <img src={mascot} alt="" className="h-8 w-8 object-contain" />}
                     </div>
-                    {/* Confetti burst */}
                     {hasConfetti && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         {['🎉', '⭐', '✨', '🌟'].map((emoji, i) => (
-                          <span
-                            key={i}
-                            className="absolute text-lg animate-ping"
-                            style={{
-                              animationDuration: `${0.6 + i * 0.15}s`,
-                              transform: `translate(${(i % 2 === 0 ? -1 : 1) * (16 + i * 8)}px, ${(i < 2 ? -1 : 1) * (16 + i * 6)}px)`,
-                            }}
-                          >
+                          <span key={i} className="absolute text-lg animate-ping" style={{ animationDuration: `${0.6 + i * 0.15}s`, transform: `translate(${(i % 2 === 0 ? -1 : 1) * (16 + i * 8)}px, ${(i < 2 ? -1 : 1) * (16 + i * 6)}px)` }}>
                             {emoji}
                           </span>
                         ))}
                       </div>
                     )}
                   </div>
-
-                  {/* Spacer */}
                   <div className="flex-1" />
                 </div>
               );
@@ -259,14 +219,14 @@ const SpeechQuestPage = () => {
         </div>
 
         {/* Legend */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-muted-foreground">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-muted-foreground font-bold">
           <div className="flex items-center gap-1.5">
             <Mic className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-            {isEn ? 'Read Aloud Articulation' : isTW ? '朗讀發音' : '朗读发音'}
+            {isEn ? 'Read Aloud' : isTW ? '朗讀' : '朗读'}
           </div>
           <div className="flex items-center gap-1.5">
             <Layers className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
-            {isEn ? 'Card Matching' : isTW ? '卡片配對' : '卡片配对'}
+            {isEn ? 'Card Match' : isTW ? '卡片配對' : '卡片配对'}
           </div>
           <div className="flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5" aria-hidden="true" />
@@ -274,11 +234,9 @@ const SpeechQuestPage = () => {
           </div>
         </div>
 
-        {/* Rewards Shop */}
         <RewardsShop totalPoints={availablePoints} onSpendPoints={handleSpendPoints} />
       </div>
 
-      {/* IPA Library Modal */}
       <IPALibraryModal open={ipaOpen} onOpenChange={setIpaOpen} />
     </div>
   );
