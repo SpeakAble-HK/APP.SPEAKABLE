@@ -58,6 +58,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const isTabActive = (path: string, id: string) => {
     if (id === "home") return location.pathname === "/";
+    if (id === "resources") return location.pathname.startsWith("/resources") || location.pathname.startsWith("/ipa");
     return location.pathname.startsWith(path);
   };
 
