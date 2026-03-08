@@ -215,7 +215,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       {/* Back to Home */}
       <div className="w-full max-w-[420px] mb-4">
-        <Link to="/home" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <Home className="h-3.5 w-3.5" />
           {isEn ? 'Back to Home' : '返回首頁'}
         </Link>
