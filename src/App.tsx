@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { AppLayout } from "./components/AppLayout";
+import WelcomePage from "./pages/WelcomePage";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -36,6 +37,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Welcome screen — the opening flow */}
+              <Route path="/welcome" element={<WelcomePage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/signup" element={<AuthPage />} />
               <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
