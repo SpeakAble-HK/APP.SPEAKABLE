@@ -15,6 +15,7 @@ import PronunciationResultsPage from "./pages/PronunciationResultsPage";
 import SpeechQuestPage from "./pages/SpeechQuestPage";
 import AboutPage from "./pages/AboutPage";
 import SpeechTherapyInfoPage from "./pages/SpeechTherapyInfoPage";
+import AboutSpeechTherapyPage from "./pages/AboutSpeechTherapyPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import IPALibraryPage from "./pages/IPALibraryPage";
 import IPAPage from "./pages/IPAPage";
