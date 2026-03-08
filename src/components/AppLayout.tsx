@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Swords, BookOpen, User, AudioLines } from "lucide-react";
+import { Home, Swords, BookOpen, User, AudioLines, Library } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
