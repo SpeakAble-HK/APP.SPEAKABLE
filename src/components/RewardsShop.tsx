@@ -116,6 +116,15 @@ export function RewardsShop({ totalPoints, onSpendPoints }: RewardsShopProps) {
           <HomeIcon className="h-3.5 w-3.5" />
           {isEn ? 'Home Decorations' : isTW ? '家居裝飾' : '家居装饰'}
         </Button>
+        <Button
+          variant={activeTab === 'mics' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveTab('mics')}
+          className="gap-1.5"
+        >
+          <Mic className="h-3.5 w-3.5" />
+          {isEn ? 'Mic Skins' : isTW ? '麥克風外觀' : '麦克风外观'}
+        </Button>
       </div>
 
       {/* Grid */}
