@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mic, Square, Play, Sparkles, Loader2, Upload, X, BarChart3, BookOpen, ArrowRight, AudioLines, Headphones, Swords, Shield, Target } from "lucide-react";
+import { Mic, Square, Play, Sparkles, Loader2, Upload, X, BarChart3, BookOpen, ArrowRight, AudioLines, Headphones, Swords, Shield, Target, Star, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,9 +12,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useGuestTrial } from "@/hooks/useGuestTrial";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { useUserStats } from "@/hooks/useUserStats";
 import { TrialLimitModal } from "@/components/TrialLimitModal";
 import { toast } from "sonner";
-import logo from "@/assets/logo.png";
+import mascot from "@/assets/mascot.png";
 
 const ALLOWED_AUDIO_TYPES = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/webm', 'audio/ogg', 'audio/m4a', 'audio/x-m4a'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -23,6 +24,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const { user } = useAuth();
+  const { stats } = useUserStats();
   const isAuthenticated = !!user && !user.is_anonymous;
   const { ensureGuestSession, showTrialModal, setShowTrialModal, markTrialUsed, isLocked } = useGuestTrial(isAuthenticated);
   const scrollRef = useScrollReveal();
@@ -55,6 +57,7 @@ const Index = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // --- All handlers remain exactly the same (no API changes) ---
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -68,15 +71,11 @@ const Index = () => {
         const elapsed = (Date.now() - recordingStartTimeRef.current) / 1000;
         setAudioDuration(elapsed);
       }, 100);
-
       mediaRecorder.ondataavailable = event => {
         if (event.data.size > 0) audioChunksRef.current.push(event.data);
       };
       mediaRecorder.onstop = () => {
-        if (recordingIntervalRef.current) {
-          clearInterval(recordingIntervalRef.current);
-          recordingIntervalRef.current = null;
-        }
+        if (recordingIntervalRef.current) { clearInterval(recordingIntervalRef.current); recordingIntervalRef.current = null; }
         const finalDuration = (Date.now() - recordingStartTimeRef.current) / 1000;
         setAudioDuration(finalDuration);
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
@@ -126,17 +125,9 @@ const Index = () => {
 
   const handleClearAudio = () => {
     if (recordingUrl) URL.revokeObjectURL(recordingUrl);
-    setRecordingUrl(null);
-    setAudioBlob(null);
-    setHasRecording(false);
-    setUploadedFileName(null);
-    setAudioDuration(0);
-    setPlaybackProgress(0);
-    setIsPlaying(false);
-    if (audioElementRef.current) {
-      audioElementRef.current.pause();
-      audioElementRef.current = null;
-    }
+    setRecordingUrl(null); setAudioBlob(null); setHasRecording(false);
+    setUploadedFileName(null); setAudioDuration(0); setPlaybackProgress(0); setIsPlaying(false);
+    if (audioElementRef.current) { audioElementRef.current.pause(); audioElementRef.current = null; }
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -145,334 +136,346 @@ const Index = () => {
       toast.error(isEn ? "Please provide audio and enter the text you're speaking" : "請提供音頻並輸入您正在說的文字");
       return;
     }
-    if (isLocked) {
-      setShowTrialModal(true);
-      return;
-    }
-    if (!isAuthenticated) {
-      await ensureGuestSession();
-    }
+    if (isLocked) { setShowTrialModal(true); return; }
+    if (!isAuthenticated) await ensureGuestSession();
     const result = await processRecording(audioBlob, spokenText);
-    if (result && 'trialExhausted' in result && result.trialExhausted) {
-      markTrialUsed();
-      return;
-    }
+    if (result && 'trialExhausted' in result && result.trialExhausted) { markTrialUsed(); return; }
     if (result && 'spoken' in result) {
       toast.success(isEn ? "Processing complete!" : "處理完成！");
       const contentType = result.clone.content_type || 'audio/wav';
       const generatedAudioUrl = `data:${contentType};base64,${result.clone.audio_base64}`;
       navigate('/pronunciation/results', {
-        state: {
-          spokenPhonemes: result.spoken,
-          intendedPhonemes: result.intended,
-          generatedAudioUrl,
-          recordingUrl,
-          intendedText: spokenText.trim()
-        }
+        state: { spokenPhonemes: result.spoken, intendedPhonemes: result.intended, generatedAudioUrl, recordingUrl, intendedText: spokenText.trim() }
       });
-    } else if (error) {
-      toast.error(error);
-    }
+    } else if (error) toast.error(error);
   };
 
   const handlePlayRecording = () => {
     if (!recordingUrl) return;
-    if (isPlaying && audioElementRef.current) {
-      audioElementRef.current.pause();
-      setIsPlaying(false);
-      return;
-    }
+    if (isPlaying && audioElementRef.current) { audioElementRef.current.pause(); setIsPlaying(false); return; }
     const audio = new Audio(recordingUrl);
     audioElementRef.current = audio;
-    audio.addEventListener('timeupdate', () => {
-      if (audio.duration > 0) setPlaybackProgress((audio.currentTime / audio.duration) * 100);
-    });
-    audio.addEventListener('ended', () => {
-      setIsPlaying(false);
-      setPlaybackProgress(0);
-    });
+    audio.addEventListener('timeupdate', () => { if (audio.duration > 0) setPlaybackProgress((audio.currentTime / audio.duration) * 100); });
+    audio.addEventListener('ended', () => { setIsPlaying(false); setPlaybackProgress(0); });
     audio.play();
     setIsPlaying(true);
   };
 
-  const slogan = isEn
-    ? "AI-Powered Cantonese Speech Articulation"
-    : isTW ? "AI 驅動的廣東話語音發音" : "AI 驱动的广东话语音发音";
-  const subSlogan = isEn
-    ? "Learning from your own voice."
-    : isTW ? "從你自己的聲音中學習。" : "从你自己的声音中学习。";
-
-  const features = [
-    {
-      icon: AudioLines,
-      title: isEn ? "Real-time Feedback" : isTW ? "即時反饋" : "即时反馈",
-      desc: isEn ? "Phoneme-level accuracy scoring with instant analysis" : isTW ? "音素級準確度評分和即時分析" : "音素级准确度评分和即时分析",
-      link: "/",
-      span: "col-span-1",
-    },
-    {
-      icon: Headphones,
-      title: isEn ? "Echo Speech" : isTW ? "迴聲語音" : "回声语音",
-      desc: isEn ? "AI-generated correct pronunciation to compare with yours" : isTW ? "AI 生成的正確發音與您的比較" : "AI 生成的正确发音与您的比较",
-      link: "/",
-      span: "col-span-1",
-      featured: true,
-    },
+  const quickActions = [
     {
       icon: Swords,
       title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险",
-      desc: isEn ? "Gamified learning with quests and progression" : isTW ? "遊戲化學習，包含任務和進度" : "游戏化学习，包含任务和进度",
+      desc: isEn ? "Game-based learning path" : isTW ? "遊戲化學習路線" : "游戏化学习路线",
       link: "/speech-quest",
-      span: "col-span-1",
+      color: "bg-primary/10 text-primary border-primary/20",
+      iconBg: "bg-primary/15",
     },
     {
       icon: BookOpen,
-      title: isEn ? "IPA Learning" : isTW ? "國際音標學習" : "国际音标学习",
-      desc: isEn ? "Interactive guides to master the phonetic alphabet" : isTW ? "互動指南掌握音標" : "互动指南掌握音标",
-      link: "/learning/library",
-      span: "col-span-1",
+      title: isEn ? "IPA Library" : isTW ? "IPA 音標庫" : "IPA 音标库",
+      desc: isEn ? "Learn phonetic symbols" : isTW ? "學習音標符號" : "学习音标符号",
+      link: "/ipa",
+      color: "bg-accent/10 text-accent-foreground border-accent/20",
+      iconBg: "bg-accent/15",
     },
     {
       icon: BarChart3,
-      title: isEn ? "Progress Tracking" : isTW ? "進度追蹤" : "进度追踪",
-      desc: isEn ? "Detailed analytics of your improvement over time" : isTW ? "詳細分析您的進步" : "详细分析您的进步",
+      title: isEn ? "Progress" : isTW ? "進度" : "进度",
+      desc: isEn ? "Track your improvement" : isTW ? "追蹤進步" : "追踪进步",
       link: "/learning/progress",
-      span: "col-span-1",
-    },
-    {
-      icon: Shield,
-      title: isEn ? "Accessibility First" : isTW ? "無障礙優先" : "无障碍优先",
-      desc: isEn ? "WCAG 2.1 AA compliant with full keyboard navigation" : isTW ? "符合 WCAG 2.1 AA 標準" : "符合 WCAG 2.1 AA 标准",
-      link: "/about",
-      span: "col-span-1",
+      color: "bg-success/10 text-foreground border-success/20",
+      iconBg: "bg-success/15",
     },
   ];
 
   return (
     <div className="min-h-full bg-background" ref={scrollRef}>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden px-4 pt-16 pb-12 md:pt-24 md:pb-16">
-        {/* Subtle radial glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse,hsl(185_100%_50%/0.08)_0%,transparent_70%)] pointer-events-none" aria-hidden="true" />
-
-        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6">
-          <div className="scroll-reveal">
-            <img src={logo} alt="SpeakAble HK Logo" className="h-16 w-16 mx-auto object-contain mb-6 drop-shadow-[0_0_20px_hsl(185_100%_50%/0.3)]" />
-            <h1 className="text-5xl md:text-[64px] font-bold text-foreground tracking-tight leading-[1.1] glow-text">
-              {slogan}
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mt-4 max-w-xl mx-auto">
-              {subSlogan}
-            </p>
+      {/* Hero — friendly, mascot-led */}
+      <section className="relative overflow-hidden px-4 pt-8 pb-6 md:pt-12 md:pb-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="scroll-reveal flex flex-col items-center text-center gap-4">
+            <img src={mascot} alt="SpeakAble mascot" className="h-24 w-24 md:h-28 md:w-28 object-contain mascot-bounce" />
+            <div>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
+                {isEn ? "Learn Cantonese" : isTW ? "學廣東話" : "学广东话"}
+                <br />
+                <span className="text-primary">{isEn ? "the fun way!" : isTW ? "輕鬆有趣！" : "轻松有趣！"}</span>
+              </h1>
+              <p className="text-muted-foreground mt-2 text-base md:text-lg max-w-md mx-auto">
+                {isEn
+                  ? "Practice pronunciation with AI feedback and game-based learning."
+                  : isTW ? "透過 AI 反饋和遊戲化學習練習發音。"
+                  : "通过 AI 反馈和游戏化学习练习发音。"}
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Main Content — Bento Grid */}
-      <section className="px-4 pb-12 md:pb-20">
-        <div className="max-w-5xl mx-auto space-y-[var(--bento-gap)]">
-
-          {/* Golden Speaker Card — large featured card */}
-          <div className="scroll-reveal">
-            <div className="bento-card glass-card glow-accent p-0 overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                {/* Left: Input interface */}
-                <div className="p-6 md:p-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="h-5 w-5 text-primary" aria-hidden="true" />
-                    <span className="text-sm font-semibold text-primary uppercase tracking-wider">
-                      {isEn ? "Echo Speech" : "迴聲語音"}
-                    </span>
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-                    {isEn ? "Analyse your pronunciation" : isTW ? "分析您的發音" : "分析您的发音"}
-                  </h2>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="practice-text" className="sr-only">
-                        {isEn ? "Enter the sentence you want to practice" : "輸入您想練習的句子"}
-                      </label>
-                      <Textarea
-                        id="practice-text"
-                        placeholder={isEn
-                          ? "Type a sentence to practice... e.g. 你今日食咗飯未啊"
-                          : "輸入您想練習的句子... 例如 你今日食咗飯未啊"}
-                        value={spokenText}
-                        onChange={e => setSpokenText(e.target.value)}
-                        className="min-h-[80px] resize-none border border-border bg-background/50 text-base rounded-2xl"
-                        aria-describedby="text-input-help"
-                      />
-                    </div>
-
-                    <Tabs value={audioSource} onValueChange={v => setAudioSource(v as 'record' | 'upload')}>
-                      <TabsList className="h-9 bg-muted p-0.5 gap-0.5 rounded-xl">
-                        <TabsTrigger value="record" className="gap-1.5 text-xs px-3 h-8 rounded-lg data-[state=active]:bg-card data-[state=active]:text-foreground">
-                          <Mic className="h-3.5 w-3.5" aria-hidden="true" />
-                          {t("voiceLab.record")}
-                        </TabsTrigger>
-                        <TabsTrigger value="upload" className="gap-1.5 text-xs px-3 h-8 rounded-lg data-[state=active]:bg-card data-[state=active]:text-foreground">
-                          <Upload className="h-3.5 w-3.5" aria-hidden="true" />
-                          {t("voiceLab.upload")}
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="record" className="mt-3">
-                        <div className="flex flex-col items-center gap-3">
-                          <button
-                            onClick={isRecording ? handleStopRecording : handleStartRecording}
-                            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${isRecording ? "bg-destructive animate-pulse shadow-[0_0_20px_hsl(0_72%_51%/0.4)]" : "bg-primary hover:bg-primary/90 shadow-[0_0_20px_hsl(185_100%_50%/0.3)]"}`}
-                            aria-label={isRecording ? (isEn ? 'Stop recording' : '停止錄音') : (isEn ? 'Start recording' : '開始錄音')}
-                          >
-                            {isRecording ? <Square className="h-5 w-5 text-primary-foreground" aria-hidden="true" /> : <Mic className="h-5 w-5 text-primary-foreground" aria-hidden="true" />}
-                          </button>
-                          <p className="text-xs text-muted-foreground" aria-live="polite">
-                            {isRecording ? (isEn ? 'Recording... tap to stop' : '錄音中... 點擊停止') : (isEn ? 'Tap to record' : '點擊錄音')}
-                          </p>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="upload" className="mt-3">
-                        <input ref={fileInputRef} type="file" accept=".mp3,.wav,.webm,.ogg,.m4a,audio/*" onChange={handleFileUpload} className="hidden" id="audio-upload" aria-label={isEn ? "Upload audio file" : "上傳音頻文件"} />
-                        <div className="w-full border border-dashed border-border rounded-2xl p-5 text-center hover:border-primary/40 transition-colors cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                          <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" aria-hidden="true" />
-                          <p className="text-xs text-muted-foreground">{t("voiceLab.chooseFile")}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1">MP3, WAV, WebM, OGG, M4A (max 10MB)</p>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-
-                    {/* Audio Preview */}
-                    {hasRecording && (
-                      <div className="p-3 bg-muted/40 rounded-2xl" role="region" aria-label={isEn ? "Audio preview" : "音頻預覽"}>
-                        <div className="flex items-center gap-3">
-                          <Button variant="outline" size="icon" className="shrink-0 h-8 w-8 rounded-xl" onClick={handlePlayRecording} aria-label={isPlaying ? (isEn ? 'Pause' : '暫停') : (isEn ? 'Play' : '播放')}>
-                            {isPlaying ? <Square className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                          </Button>
-                          <div className="flex-1">
-                            <div className="h-1 bg-muted rounded-full overflow-hidden" role="progressbar" aria-valuenow={Math.round(isPlaying ? playbackProgress : 100)} aria-valuemin={0} aria-valuemax={100}>
-                              <div className="h-full bg-primary rounded-full transition-all duration-100" style={{ width: `${isPlaying ? playbackProgress : 100}%` }} />
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                              <p className="text-[10px] text-muted-foreground">{uploadedFileName || t("voiceLab.recordingReady")}</p>
-                              <p className="text-[10px] font-medium text-foreground">{formatDuration(audioDuration)}</p>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive rounded-xl" onClick={handleClearAudio} aria-label={isEn ? "Remove recording" : "刪除錄音"}>
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    <Button
-                      onClick={handleProcessRecording}
-                      className="w-full gap-2 rounded-2xl h-12 text-base font-semibold shadow-[0_0_20px_hsl(185_100%_50%/0.2)]"
-                      disabled={!hasRecording || !spokenText.trim() || isProcessing}
-                      aria-busy={isProcessing}
-                    >
-                      {isProcessing ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                          {isEn ? 'Analysing Articulation...' : isTW ? '正在分析發音...' : '正在分析发音...'}
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4" aria-hidden="true" />
-                          {isEn ? 'Analyse Pronunciation' : isTW ? '分析發音' : '分析发音'}
-                        </>
-                      )}
-                    </Button>
-                  </div>
+      {/* Quick Stats Bar (if logged in) */}
+      {user && stats && (
+        <section className="px-4 pb-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center justify-center gap-6 bg-card border-2 border-border rounded-2xl py-3 px-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-7 h-7 rounded-lg bg-accent/20 flex items-center justify-center">
+                  <Trophy className="h-4 w-4 text-accent" />
                 </div>
-
-                {/* Right: Waveform Visualization */}
-                <div className="p-6 md:p-8 flex flex-col justify-center border-t md:border-t-0 md:border-l border-border">
-                  <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                      {isEn ? "Live Waveform" : "即時波形"}
-                    </h3>
-                  </div>
-                  <WaveformVisualizer
-                    isRecording={isRecording}
-                    audioStream={audioStream}
-                    accuracy={null}
-                  />
-
-                  {/* 3D Abstract visual placeholder */}
-                  <div className="mt-6 flex items-center justify-center">
-                    <div className="relative w-24 h-24">
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-primary/5 blur-xl" />
-                      <div className="absolute inset-2 rounded-full bg-gradient-to-br from-primary/20 to-transparent border border-primary/20" />
-                      <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/40 to-primary/10 border border-primary/30 flex items-center justify-center">
-                        <AudioLines className="h-8 w-8 text-primary drop-shadow-[0_0_8px_hsl(185_100%_50%/0.5)]" aria-hidden="true" />
-                      </div>
-                    </div>
-                  </div>
+                <div className="text-left">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase">{isEn ? "Streak" : "連續"}</p>
+                  <p className="text-sm font-extrabold text-foreground">{stats.streak_days}</p>
+                </div>
+              </div>
+              <div className="w-px h-8 bg-border" />
+              <div className="flex items-center gap-1.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center">
+                  <Star className="h-4 w-4 text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase">{isEn ? "Score" : "分數"}</p>
+                  <p className="text-sm font-extrabold text-foreground">{stats.fluency_score}</p>
+                </div>
+              </div>
+              <div className="w-px h-8 bg-border" />
+              <div className="flex items-center gap-1.5">
+                <div className="w-7 h-7 rounded-lg bg-success/15 flex items-center justify-center">
+                  <Target className="h-4 w-4 text-success" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase">{isEn ? "Goal" : "目標"}</p>
+                  <p className="text-sm font-extrabold text-foreground">{stats.daily_progress_minutes}/{stats.daily_goal_minutes}m</p>
                 </div>
               </div>
             </div>
           </div>
+        </section>
+      )}
 
-          {/* Pricing Banner */}
-          <div className="scroll-reveal">
-            <Link to="/pricing">
-              <div className="bento-card flex flex-col sm:flex-row items-center justify-between gap-3 hover:border-primary/30 cursor-pointer group">
-                <p className="text-base text-foreground">
-                  {isEn ? "Need more credits? View our subscription plans." : isTW ? "需要更多額度？查看我們的訂閱方案。" : "需要更多额度？查看我们的订阅方案。"}
-                </p>
-                <span className="text-sm font-semibold text-primary whitespace-nowrap flex items-center gap-1 group-hover:gap-2 transition-all">
-                  {isEn ? "See Pricing" : isTW ? "查看定價" : "查看定价"} <ArrowRight className="h-3.5 w-3.5" />
-                </span>
-              </div>
-            </Link>
-          </div>
-
-          {/* Tone Analysis + Precision Practice */}
-          <div className="bento-grid grid-cols-1 lg:grid-cols-2">
-            <div className="scroll-reveal">
-              <div className="bento-card">
-                <ToneContourVisualizer isRecording={isRecording} audioStream={audioStream} />
-              </div>
-            </div>
-            <div className="scroll-reveal">
-              <div className="bento-card">
-                <PrecisionPractice audioUrl={recordingUrl} />
-              </div>
-            </div>
-          </div>
-
-          {/* Feature Bento Grid */}
-          <div className="bento-grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feat, i) => (
-              <Link key={i} to={feat.link} className="scroll-reveal group">
-                <div className={`bento-card h-full ${feat.featured ? 'glass-card glow-accent' : ''}`}>
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-5 ${feat.featured ? 'bg-primary/20' : 'bg-muted'}`}>
-                    <feat.icon className="h-6 w-6 text-primary" aria-hidden="true" />
+      {/* Quick Actions — game-style cards */}
+      <section className="px-4 pb-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-3 gap-3">
+            {quickActions.map((action, i) => (
+              <Link key={i} to={action.link} className="scroll-reveal group">
+                <div className={`bg-card border-2 ${action.color} rounded-2xl p-3 md:p-4 text-center hover:shadow-md transition-all hover:-translate-y-1`}>
+                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${action.iconBg} flex items-center justify-center mx-auto mb-2`}>
+                    <action.icon className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground mb-2">{feat.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{feat.desc}</p>
-                  <div className="mt-4 flex items-center gap-1 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                    {isEn ? "Explore" : "探索"} <ArrowRight className="h-3.5 w-3.5" />
-                  </div>
+                  <p className="text-xs md:text-sm font-extrabold text-foreground leading-tight">{action.title}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 hidden md:block">{action.desc}</p>
                 </div>
               </Link>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Sign in prompt */}
-          {!user && (
-            <div className="scroll-reveal text-center py-4">
-              <p className="text-sm text-muted-foreground">
-                {isEn ? 'Results are available instantly. ' : isTW ? '結果即時可用。' : '结果即时可用。'}
-                <Link to="/auth" className="text-primary font-medium hover:underline focus-visible:ring-2 focus-visible:ring-ring rounded">
-                  {isEn ? 'Sign in to save your history' : isTW ? '登入以保存記錄' : '登录以保存记录'}
-                </Link>
-              </p>
+      {/* Echo Speech Card — main interaction */}
+      <section className="px-4 pb-6" id="golden-speaker">
+        <div className="max-w-2xl mx-auto scroll-reveal">
+          <div className="bg-card border-2 border-primary/20 rounded-2xl overflow-hidden">
+            {/* Header */}
+            <div className="bg-primary/5 border-b-2 border-primary/10 px-4 py-3 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="text-sm font-extrabold text-foreground">
+                  {isEn ? "Echo Speech" : "迴聲語音"}
+                </h2>
+                <p className="text-[10px] text-muted-foreground">
+                  {isEn ? "Practice your pronunciation" : isTW ? "練習你的發音" : "练习你的发音"}
+                </p>
+              </div>
             </div>
+
+            <div className="p-4 space-y-4">
+              {/* Text input */}
+              <div>
+                <label htmlFor="practice-text" className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                  {isEn ? "What will you say?" : isTW ? "你要說什麼？" : "你要说什么？"}
+                </label>
+                <Textarea
+                  id="practice-text"
+                  placeholder={isEn ? "Type a sentence... e.g. 你今日食咗飯未啊" : "輸入句子... 例如 你今日食咗飯未啊"}
+                  value={spokenText}
+                  onChange={e => setSpokenText(e.target.value)}
+                  className="min-h-[72px] resize-none border-2 border-border bg-background text-base rounded-xl focus:border-primary"
+                />
+              </div>
+
+              {/* Audio input tabs */}
+              <Tabs value={audioSource} onValueChange={v => setAudioSource(v as 'record' | 'upload')}>
+                <TabsList className="h-10 bg-muted p-1 gap-1 rounded-xl w-full">
+                  <TabsTrigger value="record" className="gap-1.5 text-xs px-3 h-8 rounded-lg font-bold flex-1 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                    <Mic className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t("voiceLab.record")}
+                  </TabsTrigger>
+                  <TabsTrigger value="upload" className="gap-1.5 text-xs px-3 h-8 rounded-lg font-bold flex-1 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                    <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t("voiceLab.upload")}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="record" className="mt-3">
+                  <div className="flex flex-col items-center gap-3">
+                    <button
+                      onClick={isRecording ? handleStopRecording : handleStartRecording}
+                      className={`w-20 h-20 rounded-full flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-ring ${
+                        isRecording
+                          ? "bg-destructive animate-pulse shadow-lg"
+                          : "bg-primary hover:bg-primary/90 shadow-md game-btn"
+                      }`}
+                      style={!isRecording ? { boxShadow: '0 4px 0 hsl(var(--primary-dark))' } : {}}
+                      aria-label={isRecording ? (isEn ? 'Stop recording' : '停止錄音') : (isEn ? 'Start recording' : '開始錄音')}
+                    >
+                      {isRecording ? <Square className="h-6 w-6 text-primary-foreground" /> : <Mic className="h-7 w-7 text-primary-foreground" />}
+                    </button>
+                    <p className="text-xs text-muted-foreground font-bold" aria-live="polite">
+                      {isRecording
+                        ? `🔴 ${isEn ? 'Recording...' : '錄音中...'} ${formatDuration(audioDuration)}`
+                        : (isEn ? 'Tap to record' : '點擊錄音')}
+                    </p>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="upload" className="mt-3">
+                  <input ref={fileInputRef} type="file" accept=".mp3,.wav,.webm,.ogg,.m4a,audio/*" onChange={handleFileUpload} className="hidden" id="audio-upload" />
+                  <div
+                    className="w-full border-2 border-dashed border-border rounded-xl p-5 text-center hover:border-primary/40 transition-colors cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" aria-hidden="true" />
+                    <p className="text-xs font-bold text-muted-foreground">{t("voiceLab.chooseFile")}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">MP3, WAV, WebM, OGG, M4A (max 10MB)</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              {/* Audio Preview */}
+              {hasRecording && (
+                <div className="p-3 bg-muted/50 rounded-xl border-2 border-border" role="region" aria-label={isEn ? "Audio preview" : "音頻預覽"}>
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" size="icon" className="shrink-0 h-9 w-9 rounded-lg" onClick={handlePlayRecording}>
+                      {isPlaying ? <Square className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                    </Button>
+                    <div className="flex-1">
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full transition-all duration-100" style={{ width: `${isPlaying ? playbackProgress : 100}%` }} />
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-[10px] text-muted-foreground font-bold">{uploadedFileName || (isEn ? 'Recording ready' : '錄音就緒')}</p>
+                        <p className="text-[10px] font-extrabold text-foreground">{formatDuration(audioDuration)}</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive rounded-lg" onClick={handleClearAudio}>
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Waveform */}
+              {(isRecording || hasRecording) && (
+                <div className="bg-muted/30 rounded-xl p-3 border-2 border-border">
+                  <WaveformVisualizer isRecording={isRecording} audioStream={audioStream} accuracy={null} />
+                </div>
+              )}
+
+              {/* Submit */}
+              <Button
+                onClick={handleProcessRecording}
+                className="w-full gap-2 rounded-xl h-12 text-base font-extrabold game-btn"
+                style={{ boxShadow: '0 4px 0 hsl(var(--primary-dark))' }}
+                disabled={!hasRecording || !spokenText.trim() || isProcessing}
+                aria-busy={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    {isEn ? 'Analysing...' : isTW ? '分析中...' : '分析中...'}
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" aria-hidden="true" />
+                    {isEn ? 'Check My Pronunciation' : isTW ? '檢查我的發音' : '检查我的发音'}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tone & Precision Practice */}
+      <section className="px-4 pb-6">
+        <div className="max-w-2xl mx-auto space-y-4">
+          <div className="scroll-reveal bg-card border-2 border-border rounded-2xl p-4">
+            <ToneContourVisualizer isRecording={isRecording} audioStream={audioStream} />
+          </div>
+          <div className="scroll-reveal bg-card border-2 border-border rounded-2xl p-4">
+            <PrecisionPractice audioUrl={recordingUrl} />
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid — game cards */}
+      <section className="px-4 pb-8">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-xl font-extrabold text-foreground mb-4 text-center">
+            {isEn ? "What you can do" : isTW ? "你可以做什麼" : "你可以做什么"} 🎯
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { icon: AudioLines, title: isEn ? "AI Feedback" : isTW ? "AI 反饋" : "AI 反馈", desc: isEn ? "Instant pronunciation scoring" : isTW ? "即時發音評分" : "即时发音评分", color: "border-primary/20" },
+              { icon: Headphones, title: isEn ? "Echo Speech" : "迴聲語音", desc: isEn ? "Hear the correct way" : isTW ? "聽正確發音" : "听正确发音", color: "border-accent/20" },
+              { icon: Swords, title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", desc: isEn ? "Learn through games" : isTW ? "透過遊戲學習" : "通过游戏学习", color: "border-success/20" },
+              { icon: Shield, title: isEn ? "Accessible" : isTW ? "無障礙" : "无障碍", desc: isEn ? "WCAG 2.1 AA ready" : "WCAG 2.1 AA", color: "border-border" },
+            ].map((feat, i) => (
+              <div key={i} className={`scroll-reveal bg-card border-2 ${feat.color} rounded-2xl p-4 hover:shadow-md transition-all`}>
+                <feat.icon className="h-6 w-6 text-primary mb-2" aria-hidden="true" />
+                <p className="text-sm font-extrabold text-foreground">{feat.title}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA — sign in or pricing */}
+      <section className="px-4 pb-8">
+        <div className="max-w-2xl mx-auto">
+          {!user ? (
+            <div className="scroll-reveal bg-primary/5 border-2 border-primary/20 rounded-2xl p-6 text-center">
+              <img src={mascot} alt="" className="h-14 w-14 mx-auto mb-3" />
+              <h3 className="text-lg font-extrabold text-foreground mb-1">
+                {isEn ? "Ready to start learning?" : isTW ? "準備好開始學習了嗎？" : "准备好开始学习了吗？"}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {isEn ? "Create a free account to track your progress!" : isTW ? "建立免費帳戶來追蹤你的進度！" : "创建免费账户来追踪你的进度！"}
+              </p>
+              <Link to="/auth">
+                <Button className="game-btn gap-2 px-8 h-12 font-extrabold text-base" style={{ boxShadow: '0 4px 0 hsl(var(--primary-dark))' }}>
+                  {isEn ? "Sign Up Free" : isTW ? "免費註冊" : "免费注册"}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <Link to="/pricing" className="scroll-reveal block">
+              <div className="bg-accent/10 border-2 border-accent/20 rounded-2xl p-4 flex items-center justify-between hover:shadow-md transition-all">
+                <p className="text-sm font-bold text-foreground">
+                  {isEn ? "Need more credits? 🚀" : isTW ? "需要更多額度？🚀" : "需要更多额度？🚀"}
+                </p>
+                <span className="text-sm font-extrabold text-accent flex items-center gap-1">
+                  {isEn ? "See Plans" : isTW ? "查看方案" : "查看方案"} <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </div>
+            </Link>
           )}
         </div>
       </section>
+
       <TrialLimitModal open={showTrialModal} onOpenChange={setShowTrialModal} />
     </div>
   );
