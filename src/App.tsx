@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import ProfilePage from "./pages/ProfilePage";
 import ProfileEditPage from "./pages/ProfileEditPage";
+import EchoSpeechPage from "./pages/EchoSpeechPage";
 import PronunciationResultsPage from "./pages/PronunciationResultsPage";
 import SpeechQuestPage from "./pages/SpeechQuestPage";
 import AboutPage from "./pages/AboutPage";
@@ -48,6 +49,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/edit" element={<ProfileEditPage />} />
+                <Route path="/echo-speech" element={<EchoSpeechPage />} />
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                 <Route path="/speech-quest" element={<SpeechQuestPage />} />
                 <Route path="/about" element={<AboutPage />} />
