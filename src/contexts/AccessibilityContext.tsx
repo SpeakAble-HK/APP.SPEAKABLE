@@ -47,18 +47,12 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("text-size-large", "text-size-xl", "high-contrast", "reduce-motion", "light", "focus-mode");
+    root.classList.remove("text-size-large", "text-size-xl", "dark");
     if (TEXT_SIZE_CLASSES[textSize]) root.classList.add(TEXT_SIZE_CLASSES[textSize]);
-    if (contrastMode === "high-contrast") root.classList.add("high-contrast");
-    if (!animationsEnabled) root.classList.add("reduce-motion");
-    if (theme === "light") root.classList.add("light");
-    if (focusMode) root.classList.add("focus-mode");
+    if (theme === "dark") root.classList.add("dark");
     localStorage.setItem("a11y_text_size", textSize);
-    localStorage.setItem("a11y_contrast", contrastMode);
-    localStorage.setItem("a11y_animations", String(animationsEnabled));
     localStorage.setItem("a11y_theme", theme);
-    localStorage.setItem("a11y_focus_mode", String(focusMode));
-  }, [textSize, contrastMode, animationsEnabled, theme, focusMode]);
+  }, [textSize, theme]);
 
   const cycleTextSize = () => {
     setTextSize(prev => {
