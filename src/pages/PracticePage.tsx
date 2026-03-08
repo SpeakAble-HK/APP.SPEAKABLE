@@ -289,7 +289,7 @@ const PracticePage = () => {
       <div className="hero-gradient min-h-full">
         <div className="container mx-auto px-4 py-6 md:py-8">
           {/* Back Button */}
-          <Link to="/home">
+          <Link to="/">
             <Button variant="ghost" className="mb-6 gap-2">
               <ArrowLeft className="h-4 w-4" />
               {t("nav.backToHome")}
