@@ -100,18 +100,9 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 border-b-2 border-border bg-card">
         <div className="flex items-center gap-2">
-          {!isMobile && (
-            <button
-              onClick={() => setDrawerOpen(true)}
-              className="p-2 rounded-xl hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label={isEn ? 'Open navigation menu' : '打開導航選單'}
-            >
-              <Menu className="h-5 w-5 text-foreground" />
-            </button>
-          )}
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
             <img src={mascot} alt="" className="h-8 w-8 object-contain" />
-            <span className="text-base font-extrabold text-foreground hidden sm:inline">SpeakAble HK</span>
+            <span className="text-base font-extrabold text-foreground">SpeakAble HK</span>
           </Link>
         </div>
       </header>
