@@ -1,18 +1,18 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mic, Square, Play, Sparkles, Loader2, Upload, X } from "lucide-react";
+import { Mic, Square, Play, Sparkles, Loader2, Upload, X, History, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WaveformVisualizer } from "@/components/WaveformVisualizer";
-import { ToneContourVisualizer } from "@/components/ToneContourVisualizer";
-import { PrecisionPractice } from "@/components/PrecisionPractice";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
+import { usePronunciationResults } from "@/hooks/usePronunciationResults";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useGuestTrial } from "@/hooks/useGuestTrial";
 import { TrialLimitModal } from "@/components/TrialLimitModal";
 import { toast } from "sonner";
+import { format } from "date-fns";
 import mascot from "@/assets/mascot.png";
 
 const ALLOWED_AUDIO_TYPES = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/webm', 'audio/ogg', 'audio/m4a', 'audio/x-m4a'];
@@ -24,6 +24,7 @@ export default function EchoSpeechPage() {
   const { user } = useAuth();
   const isAuthenticated = !!user && !user.is_anonymous;
   const { ensureGuestSession, showTrialModal, setShowTrialModal, markTrialUsed, isLocked } = useGuestTrial(isAuthenticated);
+  const { results, isLoading: historyLoading } = usePronunciationResults();
 
   const [isRecording, setIsRecording] = useState(false);
   const [spokenText, setSpokenText] = useState("");
@@ -154,6 +155,12 @@ export default function EchoSpeechPage() {
     audio.addEventListener('ended', () => { setIsPlaying(false); setPlaybackProgress(0); });
     audio.play();
     setIsPlaying(true);
+  };
+
+  const getAccuracyColor = (accuracy: number) => {
+    if (accuracy >= 80) return "text-success";
+    if (accuracy >= 50) return "text-accent";
+    return "text-destructive";
   };
 
   return (
@@ -295,15 +302,57 @@ export default function EchoSpeechPage() {
         </div>
       </section>
 
-      {/* Tone & Precision Practice */}
+      {/* History Records */}
       <section className="px-4 pb-6">
-        <div className="max-w-2xl mx-auto space-y-4">
-          <div className="bg-card border-2 border-border rounded-2xl p-4">
-            <ToneContourVisualizer isRecording={isRecording} audioStream={audioStream} />
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center gap-2 mb-3">
+            <History className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-extrabold text-foreground">
+              {isEn ? "History" : isTW ? "歷史紀錄" : "历史记录"}
+            </h2>
           </div>
-          <div className="bg-card border-2 border-border rounded-2xl p-4">
-            <PrecisionPractice audioUrl={recordingUrl} />
-          </div>
+
+          {!isAuthenticated ? (
+            <div className="bg-card border-2 border-border rounded-2xl p-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                {isEn ? "Sign in to view your pronunciation history." : isTW ? "登入以查看你的發音紀錄。" : "登录以查看你的发音记录。"}
+              </p>
+              <Button variant="outline" size="sm" className="mt-3 font-bold" onClick={() => navigate('/auth')}>
+                {isEn ? "Sign In" : "登入"}
+              </Button>
+            </div>
+          ) : historyLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : results.length === 0 ? (
+            <div className="bg-card border-2 border-border rounded-2xl p-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                {isEn ? "No records yet. Try analysing your pronunciation!" : isTW ? "尚無紀錄。試試分析你的發音吧！" : "暂无记录。试试分析你的发音吧！"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {results.map((result) => (
+                <button
+                  key={result.id}
+                  onClick={() => navigate('/pronunciation/results', { state: { fromHistory: true, historyId: result.id } })}
+                  className="w-full flex items-center gap-3 bg-card border-2 border-border rounded-2xl p-3 hover:border-primary/30 hover:shadow-sm transition-all text-left"
+                >
+                  <div className={`text-lg font-extrabold ${getAccuracyColor(result.overall_accuracy)} min-w-[48px] text-center`}>
+                    {result.overall_accuracy}%
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground truncate">{result.intended_text}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {format(new Date(result.created_at), 'yyyy-MM-dd HH:mm')}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
