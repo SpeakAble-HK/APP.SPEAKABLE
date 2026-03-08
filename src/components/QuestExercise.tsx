@@ -29,8 +29,6 @@ interface QuestExerciseProps {
 export function QuestExercise({ lesson, onComplete, onExit }: QuestExerciseProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const isAuthenticated = !!user && !user.is_anonymous;
-  const { ensureGuestSession } = useGuestTrial(isAuthenticated);
   const { processRecording, isProcessing } = usePronunciationAPI();
 
   const isEn = language === "en-GB";
