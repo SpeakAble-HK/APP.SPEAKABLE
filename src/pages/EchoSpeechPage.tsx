@@ -128,10 +128,7 @@ export default function EchoSpeechPage() {
       toast.error(isEn ? "Please provide audio and enter the text you're speaking" : "請提供音頻並輸入您正在說的文字");
       return;
     }
-    if (isLocked) { setShowTrialModal(true); return; }
-    if (!isAuthenticated) await ensureGuestSession();
     const result = await processRecording(audioBlob, spokenText);
-    if (result && 'trialExhausted' in result && result.trialExhausted) { markTrialUsed(); return; }
     if (result && 'spoken' in result) {
       toast.success(isEn ? "Processing complete!" : "處理完成！");
       const contentType = result.clone.content_type || 'audio/wav';
