@@ -90,11 +90,11 @@ const Index = () => {
                     <span className="text-xl font-extrabold block leading-tight">
                       {isEn ? "Resources" : isTW ? "資源" : "资源"}
                   </span>
-                  <span className="text-sm font-medium text-muted-foreground mt-0.5 block leading-snug">
-                    {isEn
-                      ? "Educational information about speech therapy."
-                      : isTW ? "關於言語治療和語言發展的教育資訊。"
-                      : "关于言语治疗和语言发展的教育资讯。"}
+                    <span className="text-sm font-medium text-muted-foreground mt-0.5 block leading-snug">
+                      {isEn
+                        ? "Speech therapy, IPA, and learning materials."
+                        : isTW ? "言語治療、IPA 及學習資源。"
+                        : "言语治疗、IPA 及学习资源。"}
                   </span>
                 </div>
               </div>
