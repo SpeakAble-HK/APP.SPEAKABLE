@@ -102,7 +102,7 @@ const SpeechQuestPage = () => {
       {/* Top Bar */}
       <div className="sticky top-14 z-20 bg-card border-b-2 border-border px-4 py-3">
         <div className="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          <Link to="/">
+          <Link to="/home">
             <Button variant="ghost" size="sm" className="gap-2 min-h-[48px] font-bold">
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">{isEn ? 'Back' : isTW ? '返回' : '返回'}</span>

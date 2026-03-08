@@ -70,7 +70,7 @@ const FeaturesPage = () => {
       {/* CTA */}
       <section className="pb-20 px-4 text-center">
         <Link
-          to="/"
+          to="/home"
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           {isEn ? "Try Echo Speech Now" : isTW ? "立即試用迴聲語音" : "立即试用回声语音"}

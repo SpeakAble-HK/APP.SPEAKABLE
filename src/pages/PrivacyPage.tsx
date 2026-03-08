@@ -8,7 +8,7 @@ export default function PrivacyPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
+      <Link to="/home" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
         <Home className="h-3.5 w-3.5" />
         {isEn ? "Back to Home" : "返回首頁"}
       </Link>

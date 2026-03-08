@@ -37,15 +37,15 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Welcome screen — the opening flow */}
-              <Route path="/welcome" element={<WelcomePage />} />
+              {/* Welcome screen — default landing */}
+              <Route path="/" element={<WelcomePage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/signup" element={<AuthPage />} />
               <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
               <Route path="/auth/confirm" element={<ConfirmSignupPage />} />
               <Route path="/auth/invite" element={<InvitePage />} />
               <Route element={<AppLayout />}>
-                <Route path="/" element={<Index />} />
+                <Route path="/home" element={<Index />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                 <Route path="/speech-quest" element={<SpeechQuestPage />} />
