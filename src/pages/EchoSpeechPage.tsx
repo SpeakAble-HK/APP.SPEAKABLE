@@ -197,6 +197,19 @@ export default function EchoSpeechPage() {
                   onChange={e => setSpokenText(e.target.value)}
                   className="min-h-[72px] resize-none border-2 border-border bg-background text-base rounded-xl focus:border-primary"
                 />
+                <p className="text-[11px] text-muted-foreground font-bold mt-1.5">{spokenText.length} {isEn ? "characters" : "字"}</p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {["你好", "早晨", "多謝", "再見", "食咗飯未", "唔該"].map(word => (
+                    <button
+                      key={word}
+                      type="button"
+                      onClick={() => setSpokenText(word)}
+                      className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold border border-primary/20 hover:bg-primary/20 transition-colors"
+                    >
+                      {word}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Audio input tabs */}
