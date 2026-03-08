@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, CreditCard, ChevronRight, Globe, Moon, Sun, Type, Eye, LogIn, LogOut, HelpCircle, Info, Shield } from 'lucide-react';
+import { User, CreditCard, ChevronRight, Globe, Moon, Sun, Type, LogIn, LogOut, HelpCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import React from 'react';
 
 const languages = [
   { value: 'zh-TW', label: '繁體中文' },
@@ -18,7 +19,7 @@ const languages = [
 export default function ProfilePage() {
   const { user, profile, loading, signOut, updateLanguage } = useAuth();
   const { language, setLanguage } = useLanguage();
-  const { theme, textSize, focusMode, contrastMode, toggleTheme, setTextSize, toggleFocusMode, toggleContrast } = useAccessibility();
+  const { theme, textSize, toggleTheme, setTextSize } = useAccessibility();
   const navigate = useNavigate();
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
@@ -144,27 +145,18 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
               <Type className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">{isEn ? 'Large Text' : '放大文字'}</span>
+              <span className="text-sm font-medium text-foreground">{isEn ? 'Text Size' : '文字大小'}</span>
             </div>
-            <Switch checked={textSize !== 'normal'} onCheckedChange={() => setTextSize(textSize === 'normal' ? 'large' : 'normal')} />
-          </div>
-
-          {/* High Contrast */}
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3">
-              <Eye className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">{isEn ? 'High Contrast' : '高對比'}</span>
-            </div>
-            <Switch checked={contrastMode === 'high-contrast'} onCheckedChange={toggleContrast} />
-          </div>
-
-          {/* Focus Mode */}
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">{isEn ? 'SEN Focus Mode' : 'SEN 專注模式'}</span>
-            </div>
-            <Switch checked={focusMode} onCheckedChange={toggleFocusMode} />
+            <Select value={textSize} onValueChange={(v) => setTextSize(v as any)}>
+              <SelectTrigger className="w-[140px] h-9 bg-background border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border z-[60]">
+                <SelectItem value="normal">{isEn ? 'Regular' : '標準'} ABC</SelectItem>
+                <SelectItem value="large">{isEn ? 'Large' : '大'} ABC</SelectItem>
+                <SelectItem value="extra-large">{isEn ? 'Super Large' : '超大'} ABC</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </MenuSection>
 
@@ -228,14 +220,16 @@ function MenuSection({ title, icon: Icon, children }: { title: string; icon: Rea
   );
 }
 
-function MenuRow({ label, onClick, chevron }: { label: string; onClick?: () => void; chevron?: boolean }) {
-  return (
+const MenuRow = React.forwardRef<HTMLButtonElement, { label: string; onClick?: () => void; chevron?: boolean }>(
+  ({ label, onClick, chevron }, ref) => (
     <button
+      ref={ref}
       onClick={onClick}
       className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/50 transition-colors text-left"
     >
       <span className="text-sm font-medium text-foreground">{label}</span>
       {chevron && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
     </button>
-  );
-}
+  )
+);
+MenuRow.displayName = 'MenuRow';
