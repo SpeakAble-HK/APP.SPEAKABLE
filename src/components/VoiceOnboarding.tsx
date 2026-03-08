@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { useAuth } from "@/hooks/useAuth";
-import { useGuestTrial } from "@/hooks/useGuestTrial";
 import mascot from "@/assets/mascot.png";
 
 const ONBOARDING_SENTENCES = [
