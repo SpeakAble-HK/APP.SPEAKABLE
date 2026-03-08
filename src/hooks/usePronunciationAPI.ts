@@ -59,7 +59,7 @@ export const usePronunciationAPI = () => {
   };
 
   const invokeFunction = async (functionName: string, formData: FormData) => {
-    const token = await getSessionToken();
+    const token = await getAuthToken();
     const projectUrl = import.meta.env.VITE_SUPABASE_URL;
     const url = `${projectUrl}/functions/v1/${functionName}`;
 
