@@ -58,7 +58,7 @@ const AboutPage = () => {
 
       {/* CTA */}
       <section className="pb-16 px-4 text-center scroll-reveal">
-        <Link to="/">
+        <Link to="/home">
           <button className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3 rounded-xl font-extrabold text-base game-btn" style={{ boxShadow: '0 4px 0 hsl(var(--primary-dark))' }}>
             {isEn ? "Try Echo Speech Now" : isTW ? "立即試用迴聲語音" : "立即试用回声语音"}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />

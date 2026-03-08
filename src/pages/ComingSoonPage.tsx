@@ -21,7 +21,7 @@ const ComingSoonPage = () => {
             ? '我們正在努力開發此功能，敬請期待！'
             : '我们正在努力开发此功能，敬请期待！'}
       </p>
-      <Link to="/">
+      <Link to="/home">
         <Button variant="outline" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           {isEn ? 'Back to Home' : isTW ? '返回首頁' : '返回首页'}
