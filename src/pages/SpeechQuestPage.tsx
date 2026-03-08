@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { useCallback } from "react";
 import { Lock, CheckCircle, Star, Trophy, BookOpen, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
