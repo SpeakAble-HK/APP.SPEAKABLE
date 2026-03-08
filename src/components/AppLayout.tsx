@@ -4,7 +4,6 @@ import { Home, Swords, BookOpen, User, AudioLines } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import { useIsMobile } from "@/hooks/use-mobile";
 import mascot from "@/assets/mascot.png";
 import { toast } from "sonner";
 
