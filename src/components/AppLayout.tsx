@@ -1,8 +1,8 @@
 import { ReactNode, useEffect, useState, useRef, useCallback } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, AudioLines, Swords, BookOpen, Menu, X } from "lucide-react";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Home, AudioLines, Swords, BookOpen, Menu, X, Settings } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
+import { SettingsModal } from "@/components/SettingsModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
@@ -21,6 +21,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { focusMode, toggleFocusMode } = useAccessibility();
   const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -65,26 +66,18 @@ export function AppLayout({ children }: AppLayoutProps) {
     else toast.success(t("toast.signOutSuccess"));
   };
 
-  const handleLanguageChange = async (newLanguage: string) => {
-    setLanguage(newLanguage as Language);
-    if (user) {
-      const { error } = await updateLanguage(newLanguage);
-      if (error) toast.error(t("toast.languageError"));
-      else toast.success(t("toast.languageUpdated"));
-    }
-  };
-
-  // Bottom tab items for mobile
+  // Bottom tab items for mobile — 5 tabs
   const tabs = [
-    { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/home" },
-    { id: "echo", icon: AudioLines, label: isEn ? "Echo" : "迴聲", path: "/home" },
-    { id: "quest", icon: Swords, label: isEn ? "Quest" : "冒險", path: "/speech-quest" },
     { id: "ipa", icon: BookOpen, label: "IPA", path: "/ipa" },
+    { id: "echo", icon: AudioLines, label: isEn ? "Echo" : "迴聲", path: "/" },
+    { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/" },
+    { id: "quest", icon: Swords, label: isEn ? "Quest" : "冒險", path: "/speech-quest" },
+    { id: "settings", icon: Settings, label: isEn ? "Settings" : "設定", path: "" },
   ];
 
   const isTabActive = (path: string, id: string) => {
-    if (id === "echo") return false;
-    if (path === "/home") return location.pathname === "/home";
+    if (id === "echo" || id === "settings") return false;
+    if (id === "home") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
 
@@ -151,7 +144,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
       )}
 
-      {/* Header — friendly, minimal */}
+      {/* Header — friendly, minimal, no language switcher */}
       {!focusMode && (
         <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-4 border-b-2 border-border bg-card transition-opacity duration-300">
           <div className="flex items-center gap-2">
@@ -162,13 +155,10 @@ export function AppLayout({ children }: AppLayoutProps) {
             >
               <Menu className="h-5 w-5 text-foreground" />
             </button>
-            <Link to="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
+            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
               <img src={mascot} alt="" className="h-8 w-8 object-contain" />
               <span className="text-base font-extrabold text-foreground hidden sm:inline">SpeakAble HK</span>
             </Link>
-          </div>
-          <div className="flex items-center gap-2">
-            <LanguageSwitcher value={language} onChange={handleLanguageChange} />
           </div>
         </header>
       )}
@@ -191,18 +181,21 @@ export function AppLayout({ children }: AppLayoutProps) {
         {children || <Outlet />}
       </main>
 
-      {/* Mobile Bottom Tab Bar */}
+      {/* Mobile Bottom Tab Bar — 5 tabs */}
       {isMobile && !focusMode && (
         <nav className="bottom-tab-bar" aria-label="Quick navigation">
           <div className="flex items-center justify-around h-16">
             {tabs.map((tab) => {
               const active = isTabActive(tab.path, tab.id);
+              const isHome = tab.id === "home";
               return (
                 <button
                   key={tab.id}
                   onClick={() => {
-                    if (tab.id === "echo") {
-                      navigate("/home");
+                    if (tab.id === "settings") {
+                      setSettingsOpen(true);
+                    } else if (tab.id === "echo") {
+                      navigate("/");
                       setTimeout(() => {
                         document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
                       }, 100);
@@ -210,22 +203,33 @@ export function AppLayout({ children }: AppLayoutProps) {
                       navigate(tab.path);
                     }
                   }}
-                  className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] min-h-[48px] rounded-xl transition-colors ${
-                    active
+                  className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
+                    isHome && active
+                      ? 'text-primary'
+                      : active
                       ? 'text-primary'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                   aria-current={active ? "page" : undefined}
                 >
-                  <tab.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
-                  <span className={`text-[10px] font-bold ${active ? 'text-primary' : ''}`}>{tab.label}</span>
-                  {active && <div className="w-5 h-0.5 rounded-full bg-primary mt-0.5" />}
+                  {isHome ? (
+                    <div className={`w-11 h-11 rounded-full flex items-center justify-center -mt-3 shadow-md ${active ? 'bg-primary' : 'bg-muted'}`}>
+                      <tab.icon className={`h-6 w-6 ${active ? 'text-primary-foreground' : 'text-foreground'}`} />
+                    </div>
+                  ) : (
+                    <tab.icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
+                  )}
+                  <span className={`text-[10px] font-bold ${isHome && active ? 'text-primary' : active ? 'text-primary' : ''}`}>{tab.label}</span>
+                  {active && !isHome && <div className="w-5 h-0.5 rounded-full bg-primary mt-0.5" />}
                 </button>
               );
             })}
           </div>
         </nav>
       )}
+
+      {/* Settings Modal (triggered from bottom tab) */}
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
 
       {/* Footer — hidden in focus mode, hidden on mobile (bottom tabs replace it) */}
       {!focusMode && !isMobile && (

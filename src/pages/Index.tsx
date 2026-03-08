@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mic, Square, Play, Sparkles, Loader2, Upload, X, BarChart3, BookOpen, ArrowRight, AudioLines, Headphones, Swords, Shield, Target, Star, Trophy } from "lucide-react";
+import { Mic, Square, Play, Sparkles, Loader2, Upload, X, BarChart3, BookOpen, ArrowRight, AudioLines, Headphones, Swords, Shield, Target, Star, Trophy, Gamepad2, BookHeart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,7 +57,7 @@ const Index = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // --- All handlers remain exactly the same (no API changes) ---
+  // --- All handlers remain exactly the same ---
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -161,53 +161,79 @@ const Index = () => {
     setIsPlaying(true);
   };
 
-  const quickActions = [
-    {
-      icon: Swords,
-      title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险",
-      desc: isEn ? "Game-based learning path" : isTW ? "遊戲化學習路線" : "游戏化学习路线",
-      link: "/speech-quest",
-      color: "bg-primary/10 text-primary border-primary/20",
-      iconBg: "bg-primary/15",
-    },
-    {
-      icon: BookOpen,
-      title: isEn ? "IPA Library" : isTW ? "IPA 音標庫" : "IPA 音标库",
-      desc: isEn ? "Learn phonetic symbols" : isTW ? "學習音標符號" : "学习音标符号",
-      link: "/ipa",
-      color: "bg-accent/10 text-accent-foreground border-accent/20",
-      iconBg: "bg-accent/15",
-    },
-    {
-      icon: BarChart3,
-      title: isEn ? "Progress" : isTW ? "進度" : "进度",
-      desc: isEn ? "Track your improvement" : isTW ? "追蹤進步" : "追踪进步",
-      link: "/learning/progress",
-      color: "bg-success/10 text-foreground border-success/20",
-      iconBg: "bg-success/15",
-    },
-  ];
-
   return (
     <div className="min-h-full bg-background" ref={scrollRef}>
-      {/* Hero — friendly, mascot-led */}
+      {/* Hero — mascot greeting + mode selection */}
       <section className="relative overflow-hidden px-4 pt-8 pb-6 md:pt-12 md:pb-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="scroll-reveal flex flex-col items-center text-center gap-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="scroll-reveal flex flex-col items-center text-center gap-4 mb-8">
             <img src={mascot} alt="SpeakAble mascot" className="h-24 w-24 md:h-28 md:w-28 object-contain mascot-bounce" />
             <div>
               <h1 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
-                {isEn ? "Learn Cantonese" : isTW ? "學廣東話" : "学广东话"}
-                <br />
-                <span className="text-primary">{isEn ? "the fun way!" : isTW ? "輕鬆有趣！" : "轻松有趣！"}</span>
+                {isEn ? "Welcome to" : isTW ? "歡迎來到" : "欢迎来到"}
+                {" "}
+                <span className="text-primary">SpeakAble HK</span>
               </h1>
               <p className="text-muted-foreground mt-2 text-base md:text-lg max-w-md mx-auto">
                 {isEn
-                  ? "Practice pronunciation with AI feedback and game-based learning."
-                  : isTW ? "透過 AI 反饋和遊戲化學習練習發音。"
-                  : "通过 AI 反馈和游戏化学习练习发音。"}
+                  ? "Let's practise Cantonese together."
+                  : isTW ? "一起練習廣東話吧。"
+                  : "一起练习广东话吧。"}
               </p>
             </div>
+          </div>
+
+          {/* Two Mode Buttons — side by side */}
+          <div className="scroll-reveal grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Game Mode */}
+            <button
+              onClick={() => {
+                document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="bg-primary text-primary-foreground rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-1 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
+              style={{ boxShadow: "0 6px 0 hsl(var(--primary-dark))" }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 min-w-[56px] rounded-xl bg-primary-foreground/20 flex items-center justify-center">
+                  <Gamepad2 className="h-7 w-7 text-primary-foreground" aria-hidden="true" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-xl font-extrabold block leading-tight">
+                    {isEn ? "Game Mode" : isTW ? "遊戲模式" : "游戏模式"}
+                  </span>
+                  <span className="text-sm font-medium text-primary-foreground/80 mt-0.5 block leading-snug">
+                    {isEn
+                      ? "Interactive pronunciation practice through games."
+                      : isTW ? "通過遊戲進行互動發音練習。"
+                      : "通过游戏进行互动发音练习。"}
+                  </span>
+                </div>
+              </div>
+            </button>
+
+            {/* Speech Therapy Information */}
+            <button
+              onClick={() => navigate("/about")}
+              className="bg-card text-foreground border-2 border-border rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
+              style={{ boxShadow: "0 6px 0 hsl(var(--border))" }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 min-w-[56px] rounded-xl bg-accent/15 flex items-center justify-center">
+                  <BookHeart className="h-7 w-7 text-accent" aria-hidden="true" />
+                </div>
+                <div className="flex-1">
+                  <span className="text-xl font-extrabold block leading-tight">
+                    {isEn ? "Speech Therapy Information" : isTW ? "言語治療資訊" : "言语治疗资讯"}
+                  </span>
+                  <span className="text-sm font-medium text-muted-foreground mt-0.5 block leading-snug">
+                    {isEn
+                      ? "Educational information about speech therapy."
+                      : isTW ? "關於言語治療和語言發展的教育資訊。"
+                      : "关于言语治疗和语言发展的教育资讯。"}
+                  </span>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
       </section>
@@ -255,7 +281,32 @@ const Index = () => {
       <section className="px-4 pb-6">
         <div className="max-w-2xl mx-auto">
           <div className="grid grid-cols-3 gap-3">
-            {quickActions.map((action, i) => (
+            {[
+              {
+                icon: Swords,
+                title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险",
+                desc: isEn ? "Game-based learning path" : isTW ? "遊戲化學習路線" : "游戏化学习路线",
+                link: "/speech-quest",
+                color: "bg-primary/10 text-primary border-primary/20",
+                iconBg: "bg-primary/15",
+              },
+              {
+                icon: BookOpen,
+                title: isEn ? "IPA Library" : isTW ? "IPA 音標庫" : "IPA 音标库",
+                desc: isEn ? "Learn phonetic symbols" : isTW ? "學習音標符號" : "学习音标符号",
+                link: "/ipa",
+                color: "bg-accent/10 text-accent-foreground border-accent/20",
+                iconBg: "bg-accent/15",
+              },
+              {
+                icon: BarChart3,
+                title: isEn ? "Progress" : isTW ? "進度" : "进度",
+                desc: isEn ? "Track your improvement" : isTW ? "追蹤進步" : "追踪进步",
+                link: "/learning/progress",
+                color: "bg-success/10 text-foreground border-success/20",
+                iconBg: "bg-success/15",
+              },
+            ].map((action, i) => (
               <Link key={i} to={action.link} className="scroll-reveal group">
                 <div className={`bg-card border-2 ${action.color} rounded-2xl p-3 md:p-4 text-center hover:shadow-md transition-all hover:-translate-y-1`}>
                   <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${action.iconBg} flex items-center justify-center mx-auto mb-2`}>
