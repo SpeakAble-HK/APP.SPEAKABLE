@@ -173,12 +173,12 @@ const Index = () => {
               },
             ].map((action, i) => (
               <Link key={i} to={action.link} className="scroll-reveal group">
-                <div className={`bg-card border-2 ${action.color} rounded-2xl p-3 md:p-4 text-center hover:shadow-md transition-all hover:-translate-y-1`}>
-                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${action.iconBg} flex items-center justify-center mx-auto mb-2`}>
-                    <action.icon className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
+                <div className={`bg-card border-2 ${action.color} rounded-2xl p-3 text-center hover:shadow-md transition-all hover:-translate-y-1`}>
+                  <div className={`w-10 h-10 rounded-xl ${action.iconBg} flex items-center justify-center mx-auto mb-2`}>
+                    <action.icon className="h-5 w-5" aria-hidden="true" />
                   </div>
-                  <p className="text-xs md:text-sm font-extrabold text-foreground leading-tight">{action.title}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 hidden md:block">{action.desc}</p>
+                  <p className="text-xs font-extrabold text-foreground leading-tight">{action.title}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{action.desc}</p>
                 </div>
               </Link>
             ))}

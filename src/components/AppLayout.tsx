@@ -14,7 +14,6 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const { user, profile, loading, signOut, updateLanguage } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const isMobile = useIsMobile();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();

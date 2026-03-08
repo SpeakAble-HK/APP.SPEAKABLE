@@ -148,7 +148,7 @@ const SpeechQuestPage = () => {
         {/* Header */}
         <div className="text-center mb-10">
           <img src={mascot} alt="" className="h-16 w-16 mx-auto mb-3 mascot-bounce" />
-          <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mb-2">
+          <h1 className="text-3xl font-extrabold text-foreground mb-2">
             {isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险"} 🗺️
           </h1>
           <p className="text-muted-foreground">
