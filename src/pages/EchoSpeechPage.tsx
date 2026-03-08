@@ -312,16 +312,7 @@ export default function EchoSpeechPage() {
             </h2>
           </div>
 
-          {!isAuthenticated ? (
-            <div className="bg-card border-2 border-border rounded-2xl p-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                {isEn ? "Sign in to view your pronunciation history." : isTW ? "登入以查看你的發音紀錄。" : "登录以查看你的发音记录。"}
-              </p>
-              <Button variant="outline" size="sm" className="mt-3 font-bold" onClick={() => navigate('/auth')}>
-                {isEn ? "Sign In" : "登入"}
-              </Button>
-            </div>
-          ) : historyLoading ? (
+          {historyLoading ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
