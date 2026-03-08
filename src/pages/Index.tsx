@@ -195,7 +195,7 @@ const Index = () => {
                 if (!hasVoiceProfile) {
                   setShowOnboarding(true);
                 } else {
-                  document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
+                  navigate('/speech-quest');
                 }
               }}
               className="bg-primary text-primary-foreground rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-1 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
