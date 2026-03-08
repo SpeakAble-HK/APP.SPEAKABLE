@@ -84,7 +84,7 @@ const PricingPage = () => {
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
         {/* Top bar: Back + Currency */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link to="/">
+          <Link to="/home">
             <Button variant="ghost" size="sm" className="gap-1.5 min-h-[48px]">
               <ArrowLeft className="h-4 w-4" />
               {t("Back to Home", "返回主頁", "返回主页")}

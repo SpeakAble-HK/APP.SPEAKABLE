@@ -38,7 +38,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
 
   const handleNav = (url: string) => {
     if (url.includes("#")) {
-      navigate("/");
+      navigate("/home");
       setTimeout(() => {
         const el = document.getElementById(url.split("#")[1]);
         el?.scrollIntoView({ behavior: "smooth" });
