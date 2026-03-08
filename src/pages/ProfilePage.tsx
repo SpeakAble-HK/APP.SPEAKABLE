@@ -18,7 +18,7 @@ const languages = [
 export default function ProfilePage() {
   const { user, profile, loading, signOut, updateLanguage } = useAuth();
   const { language, setLanguage } = useLanguage();
-  const { theme, textSize, focusMode, contrastMode, toggleTheme, setTextSize, toggleFocusMode, toggleContrast } = useAccessibility();
+  const { theme, textSize, toggleTheme, setTextSize } = useAccessibility();
   const navigate = useNavigate();
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
