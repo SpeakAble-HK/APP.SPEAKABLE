@@ -35,7 +35,7 @@ const Index = () => {
                 {" "}
                 <span className="text-primary">SpeakAble HK</span>
               </h1>
-              <p className="text-muted-foreground mt-2 text-base md:text-lg max-w-md mx-auto">
+              <p className="text-muted-foreground mt-2 text-base max-w-md mx-auto">
                 {isEn
                   ? "Let's practise Cantonese together."
                   : isTW ? "一起練習廣東話吧。"
