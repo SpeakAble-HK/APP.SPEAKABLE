@@ -353,7 +353,6 @@ export default function EchoSpeechPage() {
         </div>
       </section>
 
-      <TrialLimitModal open={showTrialModal} onOpenChange={setShowTrialModal} />
     </div>
   );
 }
