@@ -536,6 +536,19 @@ const Index = () => {
       </section>
 
       <TrialLimitModal open={showTrialModal} onOpenChange={setShowTrialModal} />
+
+      {showOnboarding && (
+        <VoiceOnboarding
+          onComplete={async () => {
+            if (user?.id) await markProfileCreated(user.id);
+            setShowOnboarding(false);
+            setTimeout(() => {
+              document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+          }}
+          onCancel={() => setShowOnboarding(false)}
+        />
+      )}
     </div>
   );
 };
