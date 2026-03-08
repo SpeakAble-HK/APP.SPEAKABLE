@@ -54,6 +54,9 @@ const App = () => (
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                 <Route path="/speech-quest" element={<SpeechQuestPage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/resources" element={<ResourcesPage />} />
+                <Route path="/resources/find-provider" element={<SpeechTherapyInfoPage />} />
+                <Route path="/resources/speech-therapy-info" element={<AboutSpeechTherapyPage />} />
                 <Route path="/speech-therapy-info" element={<SpeechTherapyInfoPage />} />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/ipa" element={<IPAPage />} />
