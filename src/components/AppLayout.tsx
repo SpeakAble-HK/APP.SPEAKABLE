@@ -191,16 +191,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <button
                   key={tab.id}
                   onClick={() => {
-                    if (tab.id === "settings") {
-                      setSettingsOpen(true);
-                    } else if (tab.id === "echo") {
-                      navigate("/");
-                      setTimeout(() => {
-                        document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
-                      }, 100);
-                    } else {
-                      navigate(tab.path);
-                    }
+                    navigate(tab.path);
                   }}
                   className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
                     isHome && active
