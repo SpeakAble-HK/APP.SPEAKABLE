@@ -121,7 +121,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       )}
 
       {/* Main Content */}
-      <main id="main-content" className={`flex-1 overflow-auto ${isMobile ? 'pb-20' : ''}`} role="main">
+      <main id="main-content" className="flex-1 overflow-auto pb-20" role="main">
         {children || <Outlet />}
       </main>
 
