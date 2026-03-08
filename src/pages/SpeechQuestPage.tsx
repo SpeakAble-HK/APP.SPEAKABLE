@@ -134,7 +134,7 @@ const SpeechQuestPage = () => {
             <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
             {completedCount}/{totalLessons}
           </div>
-          <div className="w-16 sm:w-[100px]">
+          <div className="w-16">
             <Progress value={progressPct} className="h-2.5 rounded-full" />
           </div>
           <Button onClick={() => setIpaOpen(true)} size="sm" className="gap-1.5 font-extrabold min-h-[48px] game-btn" style={{ boxShadow: "0 3px 0 hsl(var(--primary-dark))" }}>
