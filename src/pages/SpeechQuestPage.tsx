@@ -126,24 +126,22 @@ const SpeechQuestPage = () => {
     <div className="min-h-full bg-background">
       {/* Top Bar */}
       <div className="sticky top-0 z-20 bg-card border-b-2 border-border px-4 py-3">
-        <div className="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
-            <div className="flex items-center gap-1.5 text-sm font-extrabold text-foreground bg-accent/15 px-3 py-1 rounded-full">
-              <Star className="h-4 w-4 text-accent" aria-hidden="true" />
-              {availablePoints} XP
-            </div>
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-bold">
-              <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
-              {completedCount}/{totalLessons}
-            </div>
-            <div className="w-16 sm:w-[100px]">
-              <Progress value={progressPct} className="h-2.5 rounded-full" />
-            </div>
-            <Button onClick={() => setIpaOpen(true)} size="sm" className="gap-1.5 font-extrabold min-h-[48px] game-btn" style={{ boxShadow: "0 3px 0 hsl(var(--primary-dark))" }}>
-              <BookOpen className="h-4 w-4" />
-              IPA
-            </Button>
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 text-sm font-extrabold text-foreground bg-accent/15 px-3 py-1 rounded-full">
+            <Star className="h-4 w-4 text-accent" aria-hidden="true" />
+            {availablePoints} XP
           </div>
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-bold">
+            <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
+            {completedCount}/{totalLessons}
+          </div>
+          <div className="w-16 sm:w-[100px]">
+            <Progress value={progressPct} className="h-2.5 rounded-full" />
+          </div>
+          <Button onClick={() => setIpaOpen(true)} size="sm" className="gap-1.5 font-extrabold min-h-[48px] game-btn" style={{ boxShadow: "0 3px 0 hsl(var(--primary-dark))" }}>
+            <BookOpen className="h-4 w-4" />
+            IPA
+          </Button>
         </div>
       </div>
 
