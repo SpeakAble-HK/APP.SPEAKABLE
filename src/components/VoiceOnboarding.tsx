@@ -93,7 +93,7 @@ export function VoiceOnboarding({ onComplete, onCancel }: VoiceOnboardingProps) 
     setError(null);
 
     try {
-      if (!isAuthenticated) await ensureGuestSession();
+      
 
       // Use the last recording + its sentence with the existing voice-clone API
       const sentence = ONBOARDING_SENTENCES[totalSentences - 1].zh;

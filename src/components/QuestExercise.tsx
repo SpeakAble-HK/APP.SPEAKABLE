@@ -105,7 +105,7 @@ export function QuestExercise({ lesson, onComplete, onExit }: QuestExerciseProps
 
   const handleAnalyze = async (blob: Blob, recUrl: string) => {
     setStep("analyzing");
-    if (!isAuthenticated) await ensureGuestSession();
+    
 
     const result = await processRecording(blob, word.character);
 
