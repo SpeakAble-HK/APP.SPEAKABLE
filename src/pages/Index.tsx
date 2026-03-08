@@ -87,8 +87,8 @@ const Index = () => {
                   <BookHeart className="h-7 w-7 text-accent" aria-hidden="true" />
                 </div>
                 <div className="flex-1">
-                  <span className="text-xl font-extrabold block leading-tight">
-                    {isEn ? "Speech Therapy Information" : isTW ? "言語治療資訊" : "言语治疗资讯"}
+                    <span className="text-xl font-extrabold block leading-tight">
+                      {isEn ? "Resources" : isTW ? "資源" : "资源"}
                   </span>
                   <span className="text-sm font-medium text-muted-foreground mt-0.5 block leading-snug">
                     {isEn
