@@ -28,6 +28,8 @@ const Index = () => {
   const { user } = useAuth();
   const { stats } = useUserStats();
   const isAuthenticated = !!user && !user.is_anonymous;
+  const { hasVoiceProfile, markProfileCreated } = useVoiceProfile(user?.id);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const { ensureGuestSession, showTrialModal, setShowTrialModal, markTrialUsed, isLocked } = useGuestTrial(isAuthenticated);
   const scrollRef = useScrollReveal();
 
