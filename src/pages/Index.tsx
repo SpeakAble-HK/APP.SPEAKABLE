@@ -25,12 +25,12 @@ const Index = () => {
   return (
     <div className="min-h-full bg-background" ref={scrollRef}>
       {/* Hero — mascot greeting + mode selection */}
-      <section className="relative overflow-hidden px-4 pt-8 pb-6 md:pt-12 md:pb-8">
-        <div className="max-w-3xl mx-auto">
+      <section className="relative overflow-hidden px-4 pt-8 pb-6">
+        <div className="max-w-2xl mx-auto">
           <div className="scroll-reveal flex flex-col items-center text-center gap-4 mb-8">
-            <img src={mascot} alt="SpeakAble mascot" className="h-24 w-24 md:h-28 md:w-28 object-contain mascot-bounce" />
+            <img src={mascot} alt="SpeakAble mascot" className="h-24 w-24 object-contain mascot-bounce" />
             <div>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight">
+              <h1 className="text-3xl font-extrabold text-foreground leading-tight">
                 {isEn ? "Welcome to" : isTW ? "歡迎來到" : "欢迎来到"}
                 {" "}
                 <span className="text-primary">SpeakAble HK</span>
