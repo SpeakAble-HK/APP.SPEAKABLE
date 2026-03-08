@@ -69,7 +69,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   // Bottom tab items for mobile — 5 tabs
   const tabs = [
     { id: "ipa", icon: BookOpen, label: "IPA", path: "/ipa" },
-    { id: "echo", icon: AudioLines, label: isEn ? "Echo Speech" : "迴聲語音", path: "/#golden-speaker" },
+    { id: "echo", icon: AudioLines, label: isEn ? "Echo Speech" : "迴聲語音", path: "/echo-speech" },
     { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/" },
     { id: "quest", icon: Swords, label: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", path: "/speech-quest" },
     { id: "profile", icon: User, label: isEn ? "Profile" : "個人", path: "/profile" },
