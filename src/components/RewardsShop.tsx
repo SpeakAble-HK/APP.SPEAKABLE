@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ShoppingBag, Lock, Check, Shirt, Home as HomeIcon, Sparkles } from "lucide-react";
+import { ShoppingBag, Lock, Check, Shirt, Home as HomeIcon, Sparkles, Mic } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
