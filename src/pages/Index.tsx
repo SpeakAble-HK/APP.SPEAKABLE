@@ -7,7 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WaveformVisualizer } from "@/components/WaveformVisualizer";
 import { ToneContourVisualizer } from "@/components/ToneContourVisualizer";
 import { PrecisionPractice } from "@/components/PrecisionPractice";
+import { VoiceOnboarding } from "@/components/VoiceOnboarding";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
+import { useVoiceProfile } from "@/hooks/useVoiceProfile";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useGuestTrial } from "@/hooks/useGuestTrial";
@@ -26,6 +28,8 @@ const Index = () => {
   const { user } = useAuth();
   const { stats } = useUserStats();
   const isAuthenticated = !!user && !user.is_anonymous;
+  const { hasVoiceProfile, markProfileCreated } = useVoiceProfile(user?.id);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const { ensureGuestSession, showTrialModal, setShowTrialModal, markTrialUsed, isLocked } = useGuestTrial(isAuthenticated);
   const scrollRef = useScrollReveal();
 
@@ -188,7 +192,11 @@ const Index = () => {
             {/* Game Mode */}
             <button
               onClick={() => {
-                document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
+                if (!hasVoiceProfile) {
+                  setShowOnboarding(true);
+                } else {
+                  document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
+                }
               }}
               className="bg-primary text-primary-foreground rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-1 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
               style={{ boxShadow: "0 6px 0 hsl(var(--primary-dark))" }}
@@ -528,6 +536,19 @@ const Index = () => {
       </section>
 
       <TrialLimitModal open={showTrialModal} onOpenChange={setShowTrialModal} />
+
+      {showOnboarding && (
+        <VoiceOnboarding
+          onComplete={async () => {
+            if (user?.id) await markProfileCreated(user.id);
+            setShowOnboarding(false);
+            setTimeout(() => {
+              document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+          }}
+          onCancel={() => setShowOnboarding(false)}
+        />
+      )}
     </div>
   );
 };
