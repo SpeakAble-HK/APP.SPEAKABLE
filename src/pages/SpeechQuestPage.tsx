@@ -127,13 +127,7 @@ const SpeechQuestPage = () => {
       {/* Top Bar */}
       <div className="sticky top-0 z-20 bg-card border-b-2 border-border px-4 py-3">
         <div className="max-w-2xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="gap-2 min-h-[48px] font-bold">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">{isEn ? "Back" : "返回"}</span>
-            </Button>
-          </Link>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 w-full">
             <div className="flex items-center gap-1.5 text-sm font-extrabold text-foreground bg-accent/15 px-3 py-1 rounded-full">
               <Star className="h-4 w-4 text-accent" aria-hidden="true" />
               {availablePoints} XP
