@@ -144,27 +144,18 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
               <Type className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">{isEn ? 'Large Text' : '放大文字'}</span>
+              <span className="text-sm font-medium text-foreground">{isEn ? 'Text Size' : '文字大小'}</span>
             </div>
-            <Switch checked={textSize !== 'normal'} onCheckedChange={() => setTextSize(textSize === 'normal' ? 'large' : 'normal')} />
-          </div>
-
-          {/* High Contrast */}
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3">
-              <Eye className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">{isEn ? 'High Contrast' : '高對比'}</span>
-            </div>
-            <Switch checked={contrastMode === 'high-contrast'} onCheckedChange={toggleContrast} />
-          </div>
-
-          {/* Focus Mode */}
-          <div className="flex items-center justify-between px-4 py-3">
-            <div className="flex items-center gap-3">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">{isEn ? 'SEN Focus Mode' : 'SEN 專注模式'}</span>
-            </div>
-            <Switch checked={focusMode} onCheckedChange={toggleFocusMode} />
+            <Select value={textSize} onValueChange={(v) => setTextSize(v as any)}>
+              <SelectTrigger className="w-[140px] h-9 bg-background border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border z-[60]">
+                <SelectItem value="normal">{isEn ? 'Regular' : '標準'} ABC</SelectItem>
+                <SelectItem value="large">{isEn ? 'Large' : '大'} ABC</SelectItem>
+                <SelectItem value="extra-large">{isEn ? 'Super Large' : '超大'} ABC</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </MenuSection>
 
