@@ -23,8 +23,6 @@ type Step = "intro" | "recording" | "processing" | "done";
 export function VoiceOnboarding({ onComplete, onCancel }: VoiceOnboardingProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const isAuthenticated = !!user && !user.is_anonymous;
-  const { ensureGuestSession } = useGuestTrial(isAuthenticated);
   const { processRecording, isProcessing } = usePronunciationAPI();
 
   const isEn = language === "en-GB";
