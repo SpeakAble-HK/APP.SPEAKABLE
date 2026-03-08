@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState, useRef, useCallback } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, AudioLines, Swords, BookOpen, Menu, X, Settings } from "lucide-react";
+import { Home, Swords, BookOpen, Menu, X, Settings, BarChart3, User } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsModal } from "@/components/SettingsModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -68,15 +68,14 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   // Bottom tab items for mobile — 5 tabs
   const tabs = [
-    { id: "ipa", icon: BookOpen, label: "IPA", path: "/ipa" },
-    { id: "echo", icon: AudioLines, label: isEn ? "Echo" : "迴聲", path: "/" },
     { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/" },
-    { id: "quest", icon: Swords, label: isEn ? "Quest" : "冒險", path: "/speech-quest" },
-    { id: "settings", icon: Settings, label: isEn ? "Settings" : "設定", path: "" },
+    { id: "quest", icon: Swords, label: isEn ? "Practice" : "練習", path: "/speech-quest" },
+    { id: "progress", icon: BarChart3, label: isEn ? "Progress" : "進度", path: "/learning/progress" },
+    { id: "learn", icon: BookOpen, label: isEn ? "Learn" : "學習", path: "/ipa" },
+    { id: "profile", icon: User, label: isEn ? "Profile" : "個人", path: "/profile" },
   ];
 
   const isTabActive = (path: string, id: string) => {
-    if (id === "echo" || id === "settings") return false;
     if (id === "home") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
@@ -192,16 +191,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <button
                   key={tab.id}
                   onClick={() => {
-                    if (tab.id === "settings") {
-                      setSettingsOpen(true);
-                    } else if (tab.id === "echo") {
-                      navigate("/");
-                      setTimeout(() => {
-                        document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
-                      }, 100);
-                    } else {
-                      navigate(tab.path);
-                    }
+                    navigate(tab.path);
                   }}
                   className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
                     isHome && active

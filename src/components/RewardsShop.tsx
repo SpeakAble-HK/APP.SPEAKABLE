@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ShoppingBag, Lock, Check, Shirt, Home as HomeIcon, Sparkles } from "lucide-react";
+import { ShoppingBag, Lock, Check, Shirt, Home as HomeIcon, Sparkles, Mic } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,13 @@ const homeDecorations: ShopItem[] = [
   { id: "trophy", nameEn: "Gold Trophy", nameTW: "金獎盃", nameCN: "金奖杯", cost: 500, emoji: "🏆" },
 ];
 
+const micSkins: ShopItem[] = [
+  { id: "mic-gold", nameEn: "Gold Mic", nameTW: "金色麥克風", nameCN: "金色麦克风", cost: 150, emoji: "🎤" },
+  { id: "mic-neon", nameEn: "Neon Mic", nameTW: "霓虹麥克風", nameCN: "霓虹麦克风", cost: 200, emoji: "💜" },
+  { id: "mic-crystal", nameEn: "Crystal Mic", nameTW: "水晶麥克風", nameCN: "水晶麦克风", cost: 300, emoji: "💎" },
+  { id: "mic-retro", nameEn: "Retro Mic", nameTW: "復古麥克風", nameCN: "复古麦克风", cost: 175, emoji: "📻" },
+];
+
 const STORAGE_KEY = "speakable-rewards-shop";
 
 interface RewardsShopProps {
@@ -44,7 +51,7 @@ export function RewardsShop({ totalPoints, onSpendPoints }: RewardsShopProps) {
   const { language } = useLanguage();
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
-  const [activeTab, setActiveTab] = useState<'outfits' | 'decorations'>('outfits');
+  const [activeTab, setActiveTab] = useState<'outfits' | 'decorations' | 'mics'>('outfits');
   const [ownedItems, setOwnedItems] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -74,7 +81,7 @@ export function RewardsShop({ totalPoints, onSpendPoints }: RewardsShopProps) {
     });
   }, [totalPoints, ownedItems, onSpendPoints, isEn, isTW]);
 
-  const items = activeTab === 'outfits' ? parrotOutfits : homeDecorations;
+  const items = activeTab === 'outfits' ? parrotOutfits : activeTab === 'mics' ? micSkins : homeDecorations;
   const getName = (item: ShopItem) => isEn ? item.nameEn : isTW ? item.nameTW : item.nameCN;
 
   return (
@@ -108,6 +115,15 @@ export function RewardsShop({ totalPoints, onSpendPoints }: RewardsShopProps) {
         >
           <HomeIcon className="h-3.5 w-3.5" />
           {isEn ? 'Home Decorations' : isTW ? '家居裝飾' : '家居装饰'}
+        </Button>
+        <Button
+          variant={activeTab === 'mics' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveTab('mics')}
+          className="gap-1.5"
+        >
+          <Mic className="h-3.5 w-3.5" />
+          {isEn ? 'Mic Skins' : isTW ? '麥克風外觀' : '麦克风外观'}
         </Button>
       </div>
 

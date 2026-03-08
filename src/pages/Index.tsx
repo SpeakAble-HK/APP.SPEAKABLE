@@ -221,7 +221,7 @@ const Index = () => {
 
             {/* Speech Therapy Information */}
             <button
-              onClick={() => navigate("/about")}
+              onClick={() => navigate("/speech-therapy-info")}
               className="bg-card text-foreground border-2 border-border rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-1 hover:border-accent/40 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
               style={{ boxShadow: "0 6px 0 hsl(var(--border))" }}
             >
