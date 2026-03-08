@@ -1,191 +1,41 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { ArrowLeft, Eye, EyeOff, Save, Camera } from 'lucide-react';
-import { CalendarIcon } from 'lucide-react';
+import { User, CreditCard, ChevronRight, Globe, Moon, Sun, Type, Eye, LogIn, LogOut, HelpCircle, Info, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { useLanguage, Language } from '@/contexts/LanguageContext';
+import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{};:'",.<>?/\\|`~]).{6,}$/;
-const PASSWORD_HELPER_EN = 'Password must be at least 6 characters long and include one uppercase letter, one lowercase letter, one number, and one special character.';
-const PASSWORD_HELPER_ZH = '密碼必須至少6個字符，並包含一個大寫字母、一個小寫字母、一個數字和一個特殊字符。';
+const languages = [
+  { value: 'zh-TW', label: '繁體中文' },
+  { value: 'zh-CN', label: '简体中文' },
+  { value: 'en-GB', label: 'English (UK)' },
+];
 
 export default function ProfilePage() {
-  const { user, profile, loading } = useAuth();
-  const { language } = useLanguage();
+  const { user, profile, loading, signOut, updateLanguage } = useAuth();
+  const { language, setLanguage } = useLanguage();
+  const { theme, textSize, focusMode, contrastMode, toggleTheme, setTextSize, toggleFocusMode, toggleContrast } = useAccessibility();
   const navigate = useNavigate();
   const isEn = language === 'en-GB';
   const isTW = language === 'zh-TW';
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>(undefined);
-  const [email, setEmail] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) toast.error(isEn ? 'Sign out failed' : '登出失敗');
+    else toast.success(isEn ? 'Signed out' : '已登出');
+  };
 
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
-
-  // Hydrate form with existing profile data
-  useEffect(() => {
-    if (profile) {
-      setFirstName(profile.first_name || '');
-      setLastName(profile.last_name || '');
-      setUsername(profile.username || '');
-      setAvatarUrl((profile as any).avatar_url || null);
-      if (profile.date_of_birth) {
-        setDateOfBirth(new Date(profile.date_of_birth + 'T00:00:00'));
-      }
-    }
+  const handleLanguageChange = async (newLanguage: string) => {
+    setLanguage(newLanguage as Language);
     if (user) {
-      setEmail(user.email || '');
-    }
-  }, [profile, user]);
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error(isEn ? 'Please select an image file' : '請選擇圖片檔案');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(isEn ? 'Image must be under 5MB' : '圖片必須小於 5MB');
-      return;
-    }
-
-    setUploadingAvatar(true);
-    try {
-      const ext = file.name.split('.').pop();
-      const filePath = `${user.id}/avatar.${ext}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      // Append cache-buster
-      const freshUrl = `${publicUrl}?t=${Date.now()}`;
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: freshUrl } as any)
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      setAvatarUrl(freshUrl);
-      toast.success(isEn ? 'Avatar updated!' : '頭像已更新！');
-    } catch (err: any) {
-      toast.error(err.message || (isEn ? 'Failed to upload avatar' : '上傳頭像失敗'));
-    } finally {
-      setUploadingAvatar(false);
+      const { error } = await updateLanguage(newLanguage);
+      if (error) toast.error(isEn ? 'Failed to update language' : '更新語言失敗');
     }
   };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    // Password validation
-    if (newPassword.length > 0 || confirmPassword.length > 0) {
-      if (newPassword !== confirmPassword) {
-        toast.error(isEn ? 'New passwords do not match' : '新密碼不匹配');
-        return;
-      }
-      if (!PASSWORD_REGEX.test(newPassword)) {
-        toast.error(isEn ? 'Password does not meet requirements' : '密碼不符合要求');
-        return;
-      }
-      if (!currentPassword) {
-        toast.error(isEn ? 'Please enter your current password' : '請輸入目前密碼');
-        return;
-      }
-    }
-
-    setSaving(true);
-
-    try {
-      // Update profile table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          first_name: firstName,
-          last_name: lastName,
-          display_name: `${firstName} ${lastName}`.trim(),
-          date_of_birth: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : null,
-        })
-        .eq('user_id', user.id);
-
-      if (profileError) throw profileError;
-
-      // Update email if changed
-      if (email !== user.email) {
-        const { error: emailError } = await supabase.auth.updateUser({ email });
-        if (emailError) throw emailError;
-      }
-
-      // Update password if provided
-      if (newPassword.length > 0 && newPassword === confirmPassword) {
-        // Re-authenticate with current password first
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: user.email!,
-          password: currentPassword,
-        });
-        if (signInError) {
-          toast.error(isEn ? 'Current password is incorrect' : '目前密碼不正確');
-          setSaving(false);
-          return;
-        }
-
-        const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
-        if (pwError) throw pwError;
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-      }
-
-      toast.success(isEn ? 'Profile updated!' : '個人資料已更新！');
-    } catch (err: any) {
-      toast.error(err.message || (isEn ? 'Failed to update profile' : '更新失敗'));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'U';
-  const passwordsMatch = newPassword.length === 0 || newPassword === confirmPassword;
-  const passwordValid = newPassword.length === 0 || PASSWORD_REGEX.test(newPassword);
-  const canSubmitPassword = newPassword.length === 0 || (passwordValid && passwordsMatch && currentPassword.length > 0);
 
   if (loading) {
     return (
@@ -195,166 +45,197 @@ export default function ProfilePage() {
     );
   }
 
+  const initials = user && profile
+    ? `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || 'U'
+    : 'U';
+
   return (
-    <div className="container mx-auto max-w-lg py-8 px-4">
-      <Button variant="ghost" className="mb-4 gap-2" onClick={() => navigate(-1)}>
-        <ArrowLeft className="h-4 w-4" />
-        {isEn ? 'Back' : '返回'}
-      </Button>
+    <div className="container mx-auto max-w-lg py-6 px-4 space-y-6">
+      {/* Page Title */}
+      <h1 className="text-2xl font-extrabold text-center text-foreground">
+        {isEn ? 'Profile' : isTW ? '個人檔案' : '个人档案'}
+      </h1>
 
-      <Card className="card-shadow">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-              <Avatar className="h-20 w-20">
-                {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" />}
-                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="h-6 w-6 text-white" />
-              </div>
-              {uploadingAvatar && (
-                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
-                </div>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarUpload}
-              />
-            </div>
+      {/* Account Section */}
+      {user ? (
+        <div className="flex flex-col items-center gap-2">
+          <div className="relative cursor-pointer" onClick={() => navigate('/profile/edit')}>
+            <Avatar className="h-20 w-20">
+              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt="Avatar" />}
+              <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
           </div>
-          <CardTitle className="text-2xl">{isEn ? 'Profile Settings' : isTW ? '個人資料設定' : '个人资料设置'}</CardTitle>
-          <CardDescription>{isEn ? 'Manage your account information' : isTW ? '管理您的帳號資料' : '管理您的账号资料'}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSave} className="space-y-4">
-            {/* First & Last Name */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="profile-firstname">{isEn ? 'First Name' : '名'}</Label>
-                <Input id="profile-firstname" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="profile-lastname">{isEn ? 'Last Name' : '姓'}</Label>
-                <Input id="profile-lastname" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-              </div>
+          <p className="text-lg font-bold text-foreground">
+            {profile?.display_name || user.email}
+          </p>
+          <p className="text-sm text-muted-foreground">{user.email}</p>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-3 py-4">
+          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+            <User className="h-10 w-10 text-muted-foreground" />
+          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            {isEn ? 'Sign in to save your progress and access all features.' : isTW ? '登入以保存進度並使用所有功能。' : '登录以保存进度并使用所有功能。'}
+          </p>
+          <button
+            onClick={() => navigate('/auth')}
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-base hover:opacity-90 transition-opacity"
+          >
+            <LogIn className="h-5 w-5" />
+            {isEn ? 'Sign In' : '登入'}
+          </button>
+        </div>
+      )}
+
+      {/* Menu Sections */}
+      <div className="space-y-3">
+        {/* Personal — only if signed in */}
+        {user && (
+          <MenuSection title={isEn ? 'Personal' : isTW ? '個人資料' : '个人资料'} icon={User}>
+            <MenuRow
+              label={isEn ? 'Edit Profile' : isTW ? '編輯個人資料' : '编辑个人资料'}
+              onClick={() => navigate('/profile/edit')}
+              chevron
+            />
+          </MenuSection>
+        )}
+
+        {/* Subscription */}
+        <MenuSection title={isEn ? 'Subscription' : isTW ? '訂閱方案' : '订阅方案'} icon={CreditCard}>
+          <MenuRow
+            label={isEn ? 'View Plans' : isTW ? '查看方案' : '查看方案'}
+            onClick={() => navigate('/pricing')}
+            chevron
+          />
+        </MenuSection>
+
+        {/* General / Settings */}
+        <MenuSection title={isEn ? 'General' : isTW ? '一般設定' : '一般设置'} icon={Globe}>
+          {/* Language */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <span className="text-sm font-medium text-foreground">{isEn ? 'Language' : '語言'}</span>
+            <Select value={language} onValueChange={handleLanguageChange}>
+              <SelectTrigger className="w-[140px] h-9 bg-background border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border z-[60]">
+                {languages.map((lang) => (
+                  <SelectItem key={lang.value} value={lang.value}>
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Dark Mode */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              {theme === 'dark' ? <Moon className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-muted-foreground" />}
+              <span className="text-sm font-medium text-foreground">{isEn ? 'Dark Mode' : '深色模式'}</span>
             </div>
+            <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
+          </div>
 
-            {/* Username (disabled) */}
-            <div className="space-y-2">
-              <Label htmlFor="profile-username">{isEn ? 'Username' : '用戶名'}</Label>
-              <Input id="profile-username" type="text" value={username} disabled readOnly className="opacity-60 cursor-not-allowed" />
-              <p className="text-xs text-muted-foreground">{isEn ? 'Username cannot be changed after registration.' : '用戶名在註冊後無法更改。'}</p>
+          {/* Font Size */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Type className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">{isEn ? 'Large Text' : '放大文字'}</span>
             </div>
+            <Switch checked={textSize !== 'normal'} onCheckedChange={() => setTextSize(textSize === 'normal' ? 'large' : 'normal')} />
+          </div>
 
-            {/* Date of Birth */}
-            <div className="space-y-2">
-              <Label>{isEn ? 'Date of Birth' : '出生日期'}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn("w-full justify-start text-left font-normal", !dateOfBirth && "text-muted-foreground")}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateOfBirth ? format(dateOfBirth, "PPP") : (isEn ? 'Pick a date' : '選擇日期')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={dateOfBirth}
-                    onSelect={setDateOfBirth}
-                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
+          {/* High Contrast */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Eye className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">{isEn ? 'High Contrast' : '高對比'}</span>
             </div>
+            <Switch checked={contrastMode === 'high-contrast'} onCheckedChange={toggleContrast} />
+          </div>
 
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="profile-email">{isEn ? 'Email' : '電郵'}</Label>
-              <Input id="profile-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          {/* Focus Mode */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Shield className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">{isEn ? 'SEN Focus Mode' : 'SEN 專注模式'}</span>
             </div>
+            <Switch checked={focusMode} onCheckedChange={toggleFocusMode} />
+          </div>
+        </MenuSection>
 
-            {/* Password Section */}
-            <div className="space-y-3 pt-2 border-t border-border">
-              <p className="text-sm font-medium text-foreground pt-2">{isEn ? 'Change Password' : '更改密碼'}</p>
+        {/* Help */}
+        <MenuSection title={isEn ? 'Help' : isTW ? '幫助' : '帮助'} icon={HelpCircle}>
+          <MenuRow
+            label={isEn ? 'About' : isTW ? '關於' : '关于'}
+            onClick={() => navigate('/about')}
+            chevron
+          />
+          <MenuRow
+            label={isEn ? 'Speech Therapy Info' : isTW ? '言語治療資訊' : '言语治疗资讯'}
+            onClick={() => navigate('/speech-therapy-info')}
+            chevron
+          />
+          <MenuRow
+            label={isEn ? 'Terms of Service' : isTW ? '服務條款' : '服务条款'}
+            onClick={() => navigate('/terms')}
+            chevron
+          />
+          <MenuRow
+            label={isEn ? 'Privacy Policy' : isTW ? '隱私權政策' : '隐私政策'}
+            onClick={() => navigate('/privacy')}
+            chevron
+          />
+        </MenuSection>
 
-              {/* Current Password */}
-              <div className="space-y-2">
-                <Label htmlFor="profile-current-password">{isEn ? 'Current Password' : '目前密碼'}</Label>
-                <div className="relative">
-                  <Input
-                    id="profile-current-password"
-                    type={showCurrentPassword ? "text" : "password"}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder={isEn ? 'Enter current password' : '輸入目前密碼'}
-                  />
-                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
-                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
+        {/* Sign Out — only if signed in */}
+        {user && (
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-card border-2 border-border hover:bg-muted/50 transition-colors"
+          >
+            <LogOut className="h-5 w-5 text-destructive" />
+            <span className="text-sm font-bold text-destructive">{isEn ? 'Sign Out' : '登出'}</span>
+          </button>
+        )}
+      </div>
 
-              {/* New Password */}
-              <div className="space-y-2">
-                <Label htmlFor="profile-new-password">{isEn ? 'New Password' : '新密碼'}</Label>
-                <div className="relative">
-                  <Input
-                    id="profile-new-password"
-                    type={showNewPassword ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder={isEn ? 'Enter new password' : '輸入新密碼'}
-                  />
-                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowNewPassword(!showNewPassword)}>
-                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">{isEn ? PASSWORD_HELPER_EN : PASSWORD_HELPER_ZH}</p>
-                {newPassword.length > 0 && !passwordValid && (
-                  <p className="text-xs text-destructive">{isEn ? 'Password does not meet requirements' : '密碼不符合要求'}</p>
-                )}
-              </div>
-
-              {/* Confirm New Password */}
-              <div className="space-y-2">
-                <Label htmlFor="profile-confirm-password">{isEn ? 'Confirm New Password' : '確認新密碼'}</Label>
-                <div className="relative">
-                  <Input
-                    id="profile-confirm-password"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder={isEn ? 'Confirm new password' : '確認新密碼'}
-                  />
-                  <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-                {confirmPassword.length > 0 && !passwordsMatch && (
-                  <p className="text-xs text-destructive">{isEn ? 'Passwords do not match' : '密碼不匹配'}</p>
-                )}
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full gap-2" disabled={saving || !canSubmitPassword}>
-              <Save className="h-4 w-4" />
-              {saving ? (isEn ? 'Saving...' : '儲存中...') : (isEn ? 'Save Changes' : isTW ? '儲存變更' : '保存更改')}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      {/* Footer */}
+      <p className="text-xs text-muted-foreground text-center pt-2">
+        © 2026 SpeakAble HK
+      </p>
     </div>
+  );
+}
+
+/* ── Reusable sub-components ── */
+
+function MenuSection({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl bg-card border-2 border-border overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+        <Icon className="h-5 w-5 text-primary" />
+        <span className="text-sm font-bold text-foreground">{title}</span>
+      </div>
+      <div className="divide-y divide-border">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function MenuRow({ label, onClick, chevron }: { label: string; onClick?: () => void; chevron?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/50 transition-colors text-left"
+    >
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      {chevron && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+    </button>
   );
 }
