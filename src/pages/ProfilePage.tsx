@@ -152,9 +152,9 @@ export default function ProfilePage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-card border-border z-[60]">
-                <SelectItem value="normal">{isEn ? 'Regular' : '標準'} ABC</SelectItem>
-                <SelectItem value="large">{isEn ? 'Large' : '大'} ABC</SelectItem>
-                <SelectItem value="extra-large">{isEn ? 'Super Large' : '超大'} ABC</SelectItem>
+                <SelectItem value="normal"><span style={{ fontSize: '14px' }}>{isEn ? 'Regular' : '標準'} ABC</span></SelectItem>
+                <SelectItem value="large"><span style={{ fontSize: '18px' }}>{isEn ? 'Large' : '大'} ABC</span></SelectItem>
+                <SelectItem value="extra-large"><span style={{ fontSize: '22px' }}>{isEn ? 'Super Large' : '超大'} ABC</span></SelectItem>
               </SelectContent>
             </Select>
           </div>
