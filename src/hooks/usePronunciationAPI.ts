@@ -224,13 +224,10 @@ export const usePronunciationAPI = () => {
       return { spoken, intended, clone };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      const trialExhausted = (err as any)?.trialExhausted === true;
       setError(errorMessage);
       console.error('Processing error:', err);
-      if (!trialExhausted) {
-        toast.error(errorMessage);
-      }
-      return trialExhausted ? { trialExhausted: true } : null;
+      toast.error(errorMessage);
+      return null;
     } finally {
       setIsProcessing(false);
     }
