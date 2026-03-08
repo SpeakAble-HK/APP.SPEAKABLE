@@ -220,14 +220,16 @@ function MenuSection({ title, icon: Icon, children }: { title: string; icon: Rea
   );
 }
 
-function MenuRow({ label, onClick, chevron }: { label: string; onClick?: () => void; chevron?: boolean }) {
-  return (
+const MenuRow = React.forwardRef<HTMLButtonElement, { label: string; onClick?: () => void; chevron?: boolean }>(
+  ({ label, onClick, chevron }, ref) => (
     <button
+      ref={ref}
       onClick={onClick}
       className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/50 transition-colors text-left"
     >
       <span className="text-sm font-medium text-foreground">{label}</span>
       {chevron && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
     </button>
-  );
-}
+  )
+);
+MenuRow.displayName = 'MenuRow';
