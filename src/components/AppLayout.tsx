@@ -162,7 +162,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             >
               <Menu className="h-5 w-5 text-foreground" />
             </button>
-            <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
+            <Link to="/home" className="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="SpeakAble HK — Home">
               <img src={mascot} alt="" className="h-8 w-8 object-contain" />
               <span className="text-base font-extrabold text-foreground hidden sm:inline">SpeakAble HK</span>
             </Link>
