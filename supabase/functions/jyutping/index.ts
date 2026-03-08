@@ -8,36 +8,6 @@ const corsHeaders = {
 
 const API_BASE_URL = "http://comp.naozumi.me"
 const MAX_TEXT_LENGTH = 5000
-const GUEST_DAILY_LIMIT = 5
-
-async function checkGuestRateLimit(userId: string, isAnonymous: boolean): Promise<{ allowed: boolean; remaining: number }> {
-  if (!isAnonymous) return { allowed: true, remaining: -1 }
-  
-  const adminClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-  )
-  
-  const today = new Date().toISOString().split('T')[0]
-  const { data } = await adminClient
-    .from('guest_usage')
-    .select('request_count')
-    .eq('user_id', userId)
-    .eq('usage_date', today)
-    .maybeSingle()
-  
-  const currentCount = data?.request_count ?? 0
-  if (currentCount >= GUEST_DAILY_LIMIT) {
-    return { allowed: false, remaining: 0 }
-  }
-  
-  await adminClient.from('guest_usage').upsert(
-    { user_id: userId, usage_date: today, request_count: currentCount + 1, updated_at: new Date().toISOString() },
-    { onConflict: 'user_id,usage_date' }
-  )
-  
-  return { allowed: true, remaining: GUEST_DAILY_LIMIT - currentCount - 1 }
-}
 
 function sanitizeText(text: string): string {
   return text.replace(/[<>"'\\]/g, '').trim()
@@ -70,16 +40,6 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const isAnonymous = data.claims.is_anonymous === true
-    const userId = data.claims.sub as string
-    const { allowed, remaining } = await checkGuestRateLimit(userId, isAnonymous)
-    if (!allowed) {
-      return new Response(
-        JSON.stringify({ error: 'Daily guest limit reached. Please create a free account to continue.', trial_exhausted: true }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
