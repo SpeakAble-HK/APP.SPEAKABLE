@@ -39,7 +39,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     return stored !== "false";
   });
   const [theme, setTheme] = useState<ThemeMode>(() => {
-    return (localStorage.getItem("a11y_theme") as ThemeMode) || "dark";
+    return (localStorage.getItem("a11y_theme") as ThemeMode) || "light";
   });
   const [focusMode, setFocusMode] = useState<boolean>(() => {
     return localStorage.getItem("a11y_focus_mode") === "true";
