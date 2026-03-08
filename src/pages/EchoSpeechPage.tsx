@@ -9,8 +9,6 @@ import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { usePronunciationResults } from "@/hooks/usePronunciationResults";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
-import { useGuestTrial } from "@/hooks/useGuestTrial";
-import { TrialLimitModal } from "@/components/TrialLimitModal";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import mascot from "@/assets/mascot.png";
@@ -22,8 +20,6 @@ export default function EchoSpeechPage() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const { user } = useAuth();
-  const isAuthenticated = !!user && !user.is_anonymous;
-  const { ensureGuestSession, showTrialModal, setShowTrialModal, markTrialUsed, isLocked } = useGuestTrial(isAuthenticated);
   const { results, isLoading: historyLoading } = usePronunciationResults();
 
   const [isRecording, setIsRecording] = useState(false);
@@ -132,10 +128,7 @@ export default function EchoSpeechPage() {
       toast.error(isEn ? "Please provide audio and enter the text you're speaking" : "請提供音頻並輸入您正在說的文字");
       return;
     }
-    if (isLocked) { setShowTrialModal(true); return; }
-    if (!isAuthenticated) await ensureGuestSession();
     const result = await processRecording(audioBlob, spokenText);
-    if (result && 'trialExhausted' in result && result.trialExhausted) { markTrialUsed(); return; }
     if (result && 'spoken' in result) {
       toast.success(isEn ? "Processing complete!" : "處理完成！");
       const contentType = result.clone.content_type || 'audio/wav';
@@ -360,7 +353,6 @@ export default function EchoSpeechPage() {
         </div>
       </section>
 
-      <TrialLimitModal open={showTrialModal} onOpenChange={setShowTrialModal} />
     </div>
   );
 }

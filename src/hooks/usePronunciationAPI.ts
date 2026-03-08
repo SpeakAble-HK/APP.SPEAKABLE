@@ -53,9 +53,14 @@ export const usePronunciationAPI = () => {
   const [error, setError] = useState<string | null>(null);
 
   const getSessionToken = async (): Promise<string> => {
-    const { data: { session } } = await supabase.auth.getSession();
+    let { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
-      throw new Error('You must be logged in to use this feature.');
+      // Auto-create anonymous session for unauthenticated users
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error || !data.session?.access_token) {
+        throw new Error('Unable to start session. Please try again.');
+      }
+      session = data.session;
     }
     return session.access_token;
   };
