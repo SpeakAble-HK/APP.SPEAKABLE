@@ -202,7 +202,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   key={tab.id}
                   onClick={() => {
                     if (tab.id === "echo") {
-                      navigate("/");
+                      navigate("/home");
                       setTimeout(() => {
                         document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
                       }, 100);

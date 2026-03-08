@@ -69,7 +69,7 @@ const WelcomePage = () => {
       >
         {/* Game Mode */}
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
           className="w-full bg-primary text-primary-foreground rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-1 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
           style={{ boxShadow: "0 6px 0 hsl(var(--primary-dark))" }}
         >

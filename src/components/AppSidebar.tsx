@@ -23,8 +23,8 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
   const isTW = language === 'zh-TW';
 
   const navItems = [
-    { title: isEn ? "Dashboard" : isTW ? "儀表板" : "仪表板", url: "/", icon: Home },
-    { title: isEn ? "Echo Speech" : "迴聲語音", url: "/#golden-speaker", icon: AudioLines },
+    { title: isEn ? "Dashboard" : isTW ? "儀表板" : "仪表板", url: "/home", icon: Home },
+    { title: isEn ? "Echo Speech" : "迴聲語音", url: "/home#golden-speaker", icon: AudioLines },
     { title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", url: "/speech-quest", icon: Swords },
     { title: "IPA", url: "/ipa", icon: BookOpen },
     { title: isEn ? "About" : isTW ? "關於" : "关于", url: "/about", icon: Info },
