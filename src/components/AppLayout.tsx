@@ -76,9 +76,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   ];
 
   const isTabActive = (path: string, id: string) => {
-    if (id === "home") return location.pathname === "/" && !location.hash;
-    if (id === "echo") return location.pathname === "/" && location.hash === "#golden-speaker";
-    if (id === "ipa") return location.pathname.startsWith("/ipa");
+    if (id === "home") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
 
