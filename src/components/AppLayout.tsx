@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState, useRef, useCallback } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Swords, BookOpen, Menu, X, Settings, BarChart3, User } from "lucide-react";
+import { Home, Swords, BookOpen, Menu, X, Settings, BarChart3, User, AudioLines } from "lucide-react";
 import { AppSidebar } from "@/components/AppSidebar";
 import { SettingsModal } from "@/components/SettingsModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -68,15 +68,17 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   // Bottom tab items for mobile — 5 tabs
   const tabs = [
+    { id: "ipa", icon: BookOpen, label: "IPA", path: "/ipa" },
+    { id: "echo", icon: AudioLines, label: isEn ? "Echo Speech" : "迴聲語音", path: "/#golden-speaker" },
     { id: "home", icon: Home, label: isEn ? "Home" : "首頁", path: "/" },
-    { id: "quest", icon: Swords, label: isEn ? "Practice" : "練習", path: "/speech-quest" },
-    { id: "progress", icon: BarChart3, label: isEn ? "Progress" : "進度", path: "/learning/progress" },
-    { id: "learn", icon: BookOpen, label: isEn ? "Learn" : "學習", path: "/ipa" },
+    { id: "quest", icon: Swords, label: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", path: "/speech-quest" },
     { id: "profile", icon: User, label: isEn ? "Profile" : "個人", path: "/profile" },
   ];
 
   const isTabActive = (path: string, id: string) => {
-    if (id === "home") return location.pathname === "/";
+    if (id === "home") return location.pathname === "/" && !location.hash;
+    if (id === "echo") return location.pathname === "/" && location.hash === "#golden-speaker";
+    if (id === "ipa") return location.pathname.startsWith("/ipa");
     return location.pathname.startsWith(path);
   };
 
@@ -193,7 +195,18 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <button
                   key={tab.id}
                   onClick={() => {
-                    navigate(tab.path);
+                    if (tab.path.includes('#')) {
+                      if (location.pathname !== '/') {
+                        navigate('/');
+                        setTimeout(() => {
+                          document.getElementById(tab.path.split('#')[1])?.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                      } else {
+                        document.getElementById(tab.path.split('#')[1])?.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    } else {
+                      navigate(tab.path);
+                    }
                   }}
                   className={`flex flex-col items-center justify-center gap-0.5 min-w-[56px] min-h-[48px] rounded-xl transition-colors ${
                     isHome && active

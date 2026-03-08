@@ -195,7 +195,7 @@ const Index = () => {
                 if (!hasVoiceProfile) {
                   setShowOnboarding(true);
                 } else {
-                  document.getElementById("golden-speaker")?.scrollIntoView({ behavior: "smooth" });
+                  navigate('/speech-quest');
                 }
               }}
               className="bg-primary text-primary-foreground rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-1 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 group"
@@ -207,7 +207,7 @@ const Index = () => {
                 </div>
                 <div className="flex-1">
                   <span className="text-xl font-extrabold block leading-tight">
-                    {isEn ? "Game Mode" : isTW ? "遊戲模式" : "游戏模式"}
+                    {isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险"}
                   </span>
                   <span className="text-sm font-medium text-primary-foreground/80 mt-0.5 block leading-snug">
                     {isEn
