@@ -53,9 +53,16 @@ export const usePronunciationAPI = () => {
   const [error, setError] = useState<string | null>(null);
 
   const getAuthToken = async (): Promise<string> => {
-    const { data: { session } } = await supabase.auth.getSession();
-    // Use session token if logged in, otherwise anon key works since verify_jwt is disabled
-    return session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    let { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      // Create anonymous session for guests — edge functions need a valid JWT
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error || !data.session?.access_token) {
+        throw new Error('Unable to start session. Please try again.');
+      }
+      session = data.session;
+    }
+    return session.access_token;
   };
 
   const invokeFunction = async (functionName: string, formData: FormData) => {
