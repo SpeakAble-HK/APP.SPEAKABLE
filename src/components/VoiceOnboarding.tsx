@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { useAuth } from "@/hooks/useAuth";
-import { useGuestTrial } from "@/hooks/useGuestTrial";
 import mascot from "@/assets/mascot.png";
 
 const ONBOARDING_SENTENCES = [
@@ -24,8 +23,6 @@ type Step = "intro" | "recording" | "processing" | "done";
 export function VoiceOnboarding({ onComplete, onCancel }: VoiceOnboardingProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const isAuthenticated = !!user && !user.is_anonymous;
-  const { ensureGuestSession } = useGuestTrial(isAuthenticated);
   const { processRecording, isProcessing } = usePronunciationAPI();
 
   const isEn = language === "en-GB";
@@ -96,7 +93,7 @@ export function VoiceOnboarding({ onComplete, onCancel }: VoiceOnboardingProps) 
     setError(null);
 
     try {
-      if (!isAuthenticated) await ensureGuestSession();
+      
 
       // Use the last recording + its sentence with the existing voice-clone API
       const sentence = ONBOARDING_SENTENCES[totalSentences - 1].zh;
