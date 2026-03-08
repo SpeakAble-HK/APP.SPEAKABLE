@@ -15,15 +15,30 @@ export interface PronunciationResult {
   created_at: string;
 }
 
+const SESSION_KEY = 'echo_speech_session_results';
+
+function getSessionResults(): PronunciationResult[] {
+  try {
+    return JSON.parse(sessionStorage.getItem(SESSION_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function setSessionResults(results: PronunciationResult[]) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(results));
+}
+
 export function usePronunciationResults() {
   const { user } = useAuth();
+  const isAuthenticated = !!user && !user.is_anonymous;
   const [results, setResults] = useState<PronunciationResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchResults = async () => {
-    if (!user) {
-      setResults([]);
+    if (!isAuthenticated) {
+      setResults(getSessionResults());
       setIsLoading(false);
       return;
     }
@@ -33,12 +48,11 @@ export function usePronunciationResults() {
       const { data, error: fetchError } = await supabase
         .from('pronunciation_results')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user!.id)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
-      // Cast the JSONB data to proper types
       const typedResults: PronunciationResult[] = (data || []).map((item: any) => ({
         ...item,
         spoken_phonemes: item.spoken_phonemes as { character: string; phoneme: string | null }[],
@@ -63,16 +77,31 @@ export function usePronunciationResults() {
     finalAccuracy: number,
     toneAccuracy: number
   ): Promise<string | null> => {
-    if (!user) {
-      console.log("No user logged in, skipping save");
-      return null;
+    if (!isAuthenticated) {
+      const sessionResult: PronunciationResult = {
+        id: crypto.randomUUID(),
+        user_id: 'guest',
+        intended_text: intendedText,
+        spoken_phonemes: spokenPhonemes,
+        intended_phonemes: intendedPhonemes,
+        overall_accuracy: overallAccuracy,
+        initial_accuracy: initialAccuracy,
+        final_accuracy: finalAccuracy,
+        tone_accuracy: toneAccuracy,
+        created_at: new Date().toISOString(),
+      };
+      const existing = getSessionResults();
+      const updated = [sessionResult, ...existing];
+      setSessionResults(updated);
+      setResults(updated);
+      return sessionResult.id;
     }
 
     try {
       const { data, error: insertError } = await supabase
         .from('pronunciation_results')
         .insert({
-          user_id: user.id,
+          user_id: user!.id,
           intended_text: intendedText,
           spoken_phonemes: spokenPhonemes,
           intended_phonemes: intendedPhonemes,
@@ -86,7 +115,6 @@ export function usePronunciationResults() {
 
       if (insertError) throw insertError;
 
-      // Refresh results list
       await fetchResults();
       return data?.id || null;
     } catch (err: any) {
@@ -97,14 +125,19 @@ export function usePronunciationResults() {
   };
 
   const deleteResult = async (resultId: string) => {
-    if (!user) return;
+    if (!isAuthenticated) {
+      const updated = getSessionResults().filter(r => r.id !== resultId);
+      setSessionResults(updated);
+      setResults(updated);
+      return;
+    }
 
     try {
       const { error: deleteError } = await supabase
         .from('pronunciation_results')
         .delete()
         .eq('id', resultId)
-        .eq('user_id', user.id);
+        .eq('user_id', user!.id);
 
       if (deleteError) throw deleteError;
 
