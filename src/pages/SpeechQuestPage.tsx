@@ -1,23 +1,41 @@
 import { useState } from "react";
-import { Lock, CheckCircle, Star, Trophy, BookOpen, ChevronRight } from "lucide-react";
+import { Star, Trophy, BookOpen, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useVoiceProfile } from "@/hooks/useVoiceProfile";
+import { useQuestProgress } from "@/hooks/useQuestProgress";
 import { IPALibraryModal } from "@/components/IPALibraryModal";
 import { RewardsShop } from "@/components/RewardsShop";
 import { QuestSentenceExercise } from "@/components/QuestSentenceExercise";
-import { questWorldsData, QuestLessonData } from "@/data/questLessons";
-import { useQuestProgress } from "@/hooks/useQuestProgress";
+import { QuestWorldList } from "@/components/QuestWorldList";
+import { QuestLessonList } from "@/components/QuestLessonList";
+import { VoiceCloneGateModal } from "@/components/VoiceCloneGateModal";
+import { VoiceOnboarding } from "@/components/VoiceOnboarding";
+import { QuestLessonData, QuestWorldData } from "@/data/questLessons";
 import { toast } from "@/hooks/use-toast";
-import mascot from "@/assets/mascot.png";
+import parrot from "@/assets/quest-parrot.png";
+
+type View = "hub" | "worlds" | "lessons" | "exercise" | "redeem";
 
 const SpeechQuestPage = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const { hasVoiceProfile, loading: vpLoading, markProfileCreated } = useVoiceProfile(user?.id);
+
   const isEn = language === "en-GB";
   const isTW = language === "zh-TW";
 
-  const [ipaOpen, setIpaOpen] = useState(false);
+  const [view, setView] = useState<View>("hub");
+  const [selectedWorld, setSelectedWorld] = useState<{ world: QuestWorldData; index: number } | null>(null);
   const [activeLesson, setActiveLesson] = useState<QuestLessonData | null>(null);
+  const [ipaOpen, setIpaOpen] = useState(false);
+
+  // Voice clone gate state
+  const [showGate, setShowGate] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [skippedClone, setSkippedClone] = useState(false);
 
   const {
     getLessonStatus,
@@ -29,27 +47,47 @@ const SpeechQuestPage = () => {
   } = useQuestProgress();
 
   const progressPct = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+  const dailyTasks = Math.min(completedCount * 2, 10);
+  const allLocked = !hasVoiceProfile && skippedClone;
 
-  const getTitle = (item: { titleEn: string; titleTW: string; titleCN: string }) =>
-    isEn ? item.titleEn : isTW ? item.titleTW : item.titleCN;
-
-  const isWorldUnlocked = (worldIndex: number): boolean => {
-    if (worldIndex === 0) return true;
-    const prevWorld = questWorldsData[worldIndex - 1];
-    return prevWorld.lessons.every(l => getLessonStatus(l.lesson_id) === "completed");
+  // Handle Start Practice — check voice clone
+  const handleStartPractice = () => {
+    if (vpLoading) return;
+    if (hasVoiceProfile) {
+      setView("worlds");
+    } else {
+      setShowGate(true);
+    }
   };
 
-  const getWorldProgress = (worldIndex: number): number => {
-    const world = questWorldsData[worldIndex];
-    const done = world.lessons.filter(l => getLessonStatus(l.lesson_id) === "completed").length;
-    return world.lessons.length > 0 ? (done / world.lessons.length) * 100 : 0;
+  const handleGateStartClone = () => {
+    setShowGate(false);
+    setShowOnboarding(true);
   };
 
-  const handleLessonTap = (lesson: QuestLessonData) => {
-    const status = getLessonStatus(lesson.lesson_id);
-    if (status === "locked") return;
-    // Allow replaying completed lessons too
+  const handleGateSkip = () => {
+    setShowGate(false);
+    setSkippedClone(true);
+    setView("worlds");
+  };
+
+  const handleOnboardingComplete = async () => {
+    if (user?.id) {
+      await markProfileCreated(user.id);
+    }
+    setShowOnboarding(false);
+    setSkippedClone(false);
+    setView("worlds");
+  };
+
+  const handleSelectWorld = (world: QuestWorldData, index: number) => {
+    setSelectedWorld({ world, index });
+    setView("lessons");
+  };
+
+  const handleSelectLesson = (lesson: QuestLessonData) => {
     setActiveLesson(lesson);
+    setView("exercise");
   };
 
   const handleLessonComplete = async (xpEarned: number, accuracy: number) => {
@@ -70,169 +108,186 @@ const SpeechQuestPage = () => {
     }
 
     setActiveLesson(null);
+    setView("lessons");
   };
 
-  // ─── EXERCISE MODE ───
-  if (activeLesson) {
+  // ─── VOICE CLONE GATE MODAL ───
+  if (showGate) {
     return (
-      <QuestSentenceExercise
-        lesson={activeLesson}
-        onComplete={handleLessonComplete}
-        onExit={() => setActiveLesson(null)}
+      <VoiceCloneGateModal
+        onStartClone={handleGateStartClone}
+        onSkip={handleGateSkip}
       />
     );
   }
 
-  // ─── WORLD MAP ───
-  return (
-    <div className="min-h-full bg-background">
-      {/* Top Bar */}
-      <div className="sticky top-0 z-20 bg-card border-b-2 border-border px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 text-sm font-extrabold text-foreground bg-accent/15 px-3 py-1 rounded-full">
-            <Star className="h-4 w-4 text-accent" aria-hidden="true" />
-            {availablePoints} XP
-          </div>
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-bold">
-            <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
-            {completedCount}/{totalLessons}
-          </div>
-          <div className="w-16">
-            <Progress value={progressPct} className="h-2.5 rounded-full" />
-          </div>
-          <Button onClick={() => setIpaOpen(true)} size="sm" className="gap-1.5 font-extrabold min-h-[48px] game-btn" style={{ boxShadow: "0 3px 0 hsl(var(--primary-dark))" }}>
-            <BookOpen className="h-4 w-4" />
-            IPA
-          </Button>
+  // ─── VOICE ONBOARDING ───
+  if (showOnboarding) {
+    return (
+      <VoiceOnboarding
+        onComplete={handleOnboardingComplete}
+        onCancel={() => {
+          setShowOnboarding(false);
+          setSkippedClone(true);
+          setView("worlds");
+        }}
+      />
+    );
+  }
+
+  // ─── EXERCISE MODE ───
+  if (view === "exercise" && activeLesson) {
+    return (
+      <QuestSentenceExercise
+        lesson={activeLesson}
+        onComplete={handleLessonComplete}
+        onExit={() => {
+          setActiveLesson(null);
+          setView("lessons");
+        }}
+      />
+    );
+  }
+
+  // ─── TOP BAR (shared across hub/worlds/lessons) ───
+  const topBar = (
+    <div className="sticky top-0 z-20 bg-card border-b-2 border-border px-4 py-3">
+      <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 text-sm font-extrabold text-foreground bg-accent/15 px-3 py-1 rounded-full">
+          <Star className="h-4 w-4 text-accent" aria-hidden="true" />
+          {availablePoints} XP
         </div>
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-bold">
+          <Trophy className="h-4 w-4 text-primary" aria-hidden="true" />
+          {dailyTasks}/10
+        </div>
+        <div className="w-16">
+          <Progress value={progressPct} className="h-2.5 rounded-full" />
+        </div>
+        <Button onClick={() => setIpaOpen(true)} size="sm" className="gap-1.5 font-extrabold min-h-[48px] game-btn" style={{ boxShadow: "0 3px 0 hsl(var(--primary-dark))" }}>
+          <BookOpen className="h-4 w-4" />
+          IPA
+        </Button>
       </div>
-
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <img src={mascot} alt="" className="h-16 w-16 mx-auto mb-3 mascot-bounce" />
-          <h1 className="text-3xl font-extrabold text-foreground mb-2">
-            {isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险"} 🗺️
-          </h1>
-          <p className="text-muted-foreground">
-            {isEn ? "Complete lessons to earn XP and unlock new worlds!" : isTW ? "完成課程賺取 XP 並解鎖新世界！" : "完成课程赚取 XP 并解锁新世界！"}
-          </p>
-        </div>
-
-        {/* World Map */}
-        <div className="space-y-10">
-          {questWorldsData.map((world, wi) => {
-            const worldUnlocked = isWorldUnlocked(wi);
-            const worldProg = getWorldProgress(wi);
-            const worldDone = worldProg === 100;
-
-            return (
-              <div key={world.id} className={!worldUnlocked ? "opacity-50" : ""}>
-                {/* World Header */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${
-                    worldDone ? "bg-success/15" : worldUnlocked ? "bg-primary/10" : "bg-muted"
-                  }`}>
-                    {worldUnlocked ? world.emoji : "🔒"}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-extrabold text-foreground truncate">
-                        {isEn ? `World ${wi + 1}` : `世界 ${wi + 1}`}
-                      </h2>
-                      {worldDone && <CheckCircle className="h-4 w-4 text-success shrink-0" />}
-                    </div>
-                    <p className="text-sm text-muted-foreground font-bold">{getTitle(world)}</p>
-                  </div>
-                  <div className="w-16 shrink-0">
-                    <Progress value={worldProg} className="h-2" />
-                  </div>
-                </div>
-
-                {/* Lesson Nodes — zigzag */}
-                <div className="relative w-[90%] max-w-md mx-auto">
-                  <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border rounded-full -translate-x-1/2" aria-hidden="true" />
-
-                  <div className="space-y-5 relative">
-                    {world.lessons.map((lesson, li) => {
-                      const isLeft = li % 2 === 0;
-                      const status = getLessonStatus(lesson.lesson_id);
-                      const lessonDone = status === "completed";
-                      const isCurrent = status === "unlocked";
-
-                      return (
-                        <div key={lesson.lesson_id} className={`flex items-center gap-3 ${isLeft ? "flex-row" : "flex-row-reverse"}`}>
-                          {/* Card */}
-                          <div className={`flex-1 ${isLeft ? "text-right" : "text-left"}`}>
-                            <button
-                              onClick={() => handleLessonTap(lesson)}
-                              disabled={status === "locked"}
-                              className={`inline-block w-full max-w-[240px] text-left border-2 rounded-2xl p-3 transition-all ${
-                                lessonDone
-                                  ? "border-success/30 bg-success/5 cursor-pointer hover:bg-success/10"
-                                  : isCurrent
-                                  ? "border-primary/40 bg-card hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
-                                  : "border-border bg-muted/30 cursor-not-allowed opacity-60"
-                              }`}
-                            >
-                              <p className="text-sm font-extrabold text-foreground leading-tight">{lesson.sentence}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5">{lesson.english_translation}</p>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                                <Star className="h-3 w-3 text-accent" aria-hidden="true" />
-                                {lesson.xp_reward} XP
-                              </div>
-                              {isCurrent && (
-                                <div className="flex items-center gap-1 text-xs text-primary mt-1.5 font-extrabold">
-                                  <ChevronRight className="h-3 w-3" />
-                                  {isEn ? "Start" : "開始"}
-                                </div>
-                              )}
-                              {lessonDone && (
-                                <div className="flex items-center gap-1 text-xs text-success mt-1 font-bold">
-                                  <CheckCircle className="h-3 w-3" />
-                                  {isEn ? "Completed" : "已完成"}
-                                </div>
-                              )}
-                            </button>
-                          </div>
-
-                          {/* Node circle */}
-                          <div className="relative">
-                            <div className={`relative z-10 flex items-center justify-center w-12 h-12 min-w-[48px] min-h-[48px] rounded-full border-3 transition-all ${
-                              lessonDone
-                                ? "bg-success border-success"
-                                : isCurrent
-                                ? "bg-primary border-primary animate-pulse"
-                                : "bg-muted border-border"
-                            }`}>
-                              {lessonDone ? (
-                                <CheckCircle className="h-5 w-5 text-success-foreground" />
-                              ) : isCurrent ? (
-                                <img src={mascot} alt="" className="h-8 w-8 object-contain" />
-                              ) : (
-                                <Lock className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex-1" />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Rewards Shop */}
-        <RewardsShop totalPoints={availablePoints} onSpendPoints={spendPoints} />
-      </div>
-
-      <IPALibraryModal open={ipaOpen} onOpenChange={setIpaOpen} />
     </div>
   );
+
+  // ─── HUB VIEW ───
+  if (view === "hub") {
+    return (
+      <div className="min-h-full bg-background">
+        {topBar}
+        <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col items-center">
+          {/* Mascot */}
+          <img
+            src={parrot}
+            alt="Speech Quest Parrot"
+            className="h-48 w-48 md:h-56 md:w-56 mx-auto mb-6 mascot-bounce drop-shadow-lg"
+          />
+
+          <h1 className="text-3xl font-extrabold text-foreground mb-2 text-center">
+            {isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险"} 🗺️
+          </h1>
+          <p className="text-muted-foreground text-center mb-8">
+            {isEn ? "Practice Cantonese and earn rewards!" : isTW ? "練習廣東話，賺取獎勵！" : "练习广东话，赚取奖励！"}
+          </p>
+
+          {/* Daily progress */}
+          <div className="w-full max-w-xs bg-card border-2 border-border rounded-2xl p-4 mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-muted-foreground">
+                {isEn ? "Daily Tasks" : isTW ? "每日任務" : "每日任务"}
+              </span>
+              <span className="text-sm font-extrabold text-primary">{dailyTasks}/10</span>
+            </div>
+            <Progress value={dailyTasks * 10} className="h-3 rounded-full" />
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-4 w-full max-w-xs">
+            <Button
+              onClick={handleStartPractice}
+              className="flex-1 h-16 text-lg font-extrabold rounded-full game-btn gap-2"
+              style={{
+                boxShadow: "0 5px 0 hsl(var(--primary-dark))",
+                background: "hsl(var(--success))",
+              }}
+            >
+              {isEn ? "Start Practice" : isTW ? "開始練習" : "开始练习"}
+            </Button>
+
+            <Button
+              onClick={() => setView("redeem")}
+              variant="outline"
+              className="h-16 w-16 rounded-full shrink-0 border-2 border-accent/50 hover:bg-accent/10"
+              aria-label={isEn ? "Redeem" : "兌換"}
+            >
+              <ShoppingBag className="h-6 w-6 text-accent" />
+            </Button>
+          </div>
+        </div>
+
+        <IPALibraryModal open={ipaOpen} onOpenChange={setIpaOpen} />
+      </div>
+    );
+  }
+
+  // ─── REDEEM VIEW ───
+  if (view === "redeem") {
+    return (
+      <div className="min-h-full bg-background">
+        {topBar}
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <button
+            onClick={() => setView("hub")}
+            className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors mb-4"
+          >
+            ← {isEn ? "Back" : "返回"}
+          </button>
+          <RewardsShop totalPoints={availablePoints} onSpendPoints={spendPoints} />
+        </div>
+        <IPALibraryModal open={ipaOpen} onOpenChange={setIpaOpen} />
+      </div>
+    );
+  }
+
+  // ─── WORLDS VIEW ───
+  if (view === "worlds") {
+    return (
+      <div className="min-h-full bg-background">
+        {topBar}
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <QuestWorldList
+            onSelectWorld={handleSelectWorld}
+            onBack={() => setView("hub")}
+            allLocked={allLocked}
+          />
+        </div>
+        <IPALibraryModal open={ipaOpen} onOpenChange={setIpaOpen} />
+      </div>
+    );
+  }
+
+  // ─── LESSONS VIEW ───
+  if (view === "lessons" && selectedWorld) {
+    return (
+      <div className="min-h-full bg-background">
+        {topBar}
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <QuestLessonList
+            world={selectedWorld.world}
+            worldIndex={selectedWorld.index}
+            onSelectLesson={handleSelectLesson}
+            onBack={() => setView("worlds")}
+            allLocked={allLocked}
+          />
+        </div>
+        <IPALibraryModal open={ipaOpen} onOpenChange={setIpaOpen} />
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default SpeechQuestPage;
