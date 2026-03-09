@@ -105,8 +105,11 @@ const SpeechQuestPage = () => {
     if (accuracy >= 70 && status !== "completed") {
       // Record streak & get bonus
       const { newStreak, bonusXp } = await recordActivity();
-      const totalXpEarned = xpEarned + bonusXp;
 
+      // Record for daily challenges
+      recordLessonCompleted(activeLesson.lesson_id);
+
+      const totalXpEarned = xpEarned + bonusXp;
       await completeLesson(activeLesson.lesson_id, totalXpEarned);
 
       // Check achievements
@@ -117,8 +120,15 @@ const SpeechQuestPage = () => {
         streakDays: newStreak,
       });
 
+      // Check daily challenges
+      const challengeBonus = await checkAndCompleteChallenges(newCompleted);
+      if (challengeBonus > 0) {
+        await completeLesson(-1, challengeBonus); // Add challenge bonus XP (lesson_id -1 won't duplicate)
+      }
+
       const parts = [`+${xpEarned} XP (${accuracy}%)`];
       if (bonusXp > 0) parts.push(`🔥 +${bonusXp} streak bonus!`);
+      if (challengeBonus > 0) parts.push(`⚡ +${challengeBonus} challenge bonus!`);
       if (newStreak > 1) parts.push(`${newStreak}-day streak!`);
 
       toast({
