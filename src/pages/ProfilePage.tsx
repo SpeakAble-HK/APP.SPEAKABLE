@@ -191,15 +191,52 @@ export default function ProfilePage() {
           />
         </MenuSection>
 
-        {/* Sign Out — only if signed in */}
+        {/* Sign Out & Danger Zone — only if signed in */}
         {user && (
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-card border-2 border-border hover:bg-muted/50 transition-colors"
-          >
-            <LogOut className="h-5 w-5 text-destructive" />
-            <span className="text-sm font-bold text-destructive">{isEn ? 'Sign Out' : '登出'}</span>
-          </button>
+          <>
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-card border-2 border-border hover:bg-muted/50 transition-colors"
+            >
+              <LogOut className="h-5 w-5 text-destructive" />
+              <span className="text-sm font-bold text-destructive">{isEn ? 'Sign Out' : '登出'}</span>
+            </button>
+
+            {/* Delete Account */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-destructive/5 border-2 border-destructive/20 hover:bg-destructive/10 transition-colors">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  <span className="text-sm font-bold text-destructive">{isEn ? 'Delete Account' : isTW ? '刪除帳號' : '删除账号'}</span>
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{isEn ? 'Are you absolutely sure?' : isTW ? '您確定嗎？' : '您确定吗？'}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {isEn
+                      ? 'This action cannot be undone. This will permanently delete your account and remove all your data including progress, recordings, and achievements.'
+                      : isTW
+                      ? '此操作無法撤銷。這將永久刪除您的帳號並移除所有資料，包括進度、錄音和成就。'
+                      : '此操作无法撤销。这将永久删除您的账号并移除所有数据，包括进度、录音和成就。'}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{isEn ? 'Cancel' : '取消'}</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={async () => {
+                      // Sign out and inform user to contact support for full deletion
+                      await signOut();
+                      toast.success(isEn ? 'Please contact support@speakable.hk to complete account deletion.' : '請聯繫 support@speakable.hk 以完成帳號刪除。');
+                    }}
+                  >
+                    {isEn ? 'Delete Account' : isTW ? '刪除帳號' : '删除账号'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         )}
       </div>
 

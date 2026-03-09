@@ -112,6 +112,7 @@ export default function ProfileEditPage() {
       if (email !== user.email) {
         const { error: emailError } = await supabase.auth.updateUser({ email });
         if (emailError) throw emailError;
+        toast.info(isEn ? 'A confirmation email has been sent to your new address. Please verify it.' : '確認電郵已發送至新地址，請驗證。');
       }
       if (newPassword.length > 0 && newPassword === confirmPassword) {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email: user.email!, password: currentPassword });

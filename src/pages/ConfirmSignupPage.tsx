@@ -37,7 +37,7 @@ export default function ConfirmSignupPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <div className="flex items-center gap-2.5 mb-8">
         <img src={logo} alt="SpeakAble HK" className="h-10 w-10 object-contain" />
         <span className="text-xl font-bold text-foreground">SpeakAble HK</span>
