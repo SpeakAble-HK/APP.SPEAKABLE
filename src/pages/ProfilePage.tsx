@@ -73,6 +73,11 @@ export default function ProfilePage() {
           <p className="text-lg font-bold text-foreground">
             {profile?.display_name || user.email}
           </p>
+          {profile?.username && (
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <AtSign className="h-3.5 w-3.5" />{profile.username}
+            </p>
+          )}
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
       ) : (
