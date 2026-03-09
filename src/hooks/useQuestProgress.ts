@@ -50,7 +50,7 @@ export function useQuestProgress() {
 
     const load = async () => {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('quest_progress')
           .select('*')
           .eq('user_id', user.id)
@@ -78,7 +78,7 @@ export function useQuestProgress() {
     saveLocal(data);
     if (user && !user.is_anonymous) {
       try {
-        await supabase
+        await (supabase as any)
           .from('quest_progress')
           .upsert({
             user_id: user.id,
@@ -95,10 +95,8 @@ export function useQuestProgress() {
 
   const getLessonStatus = useCallback((lessonId: number): LessonStatus => {
     if (progress.completedLessons.has(lessonId)) return "completed";
-    // First lesson is always unlocked
     const idx = allLessons.findIndex(l => l.lesson_id === lessonId);
     if (idx === 0) return "unlocked";
-    // Unlocked if previous lesson completed
     const prevLesson = allLessons[idx - 1];
     if (prevLesson && progress.completedLessons.has(prevLesson.lesson_id)) return "unlocked";
     return "locked";
