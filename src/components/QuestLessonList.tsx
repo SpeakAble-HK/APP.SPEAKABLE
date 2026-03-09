@@ -1,6 +1,6 @@
 import { Lock, CheckCircle, Star, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { QuestWorldData, QuestLessonData } from "@/data/questLessons";
+import { QuestWorldData, QuestLessonData, difficultyConfig } from "@/data/questLessons";
 import { useQuestProgress } from "@/hooks/useQuestProgress";
 import parrot from "@/assets/quest-parrot.png";
 
@@ -21,6 +21,9 @@ export function QuestLessonList({ world, worldIndex, onSelectLesson, onBack, all
   const getTitle = (item: { titleEn: string; titleTW: string; titleCN: string }) =>
     isEn ? item.titleEn : isTW ? item.titleTW : item.titleCN;
 
+  const diff = difficultyConfig[world.difficulty];
+  const getDiffLabel = () => isEn ? diff.labelEn : isTW ? diff.labelTW : diff.labelCN;
+
   return (
     <div>
       <button
@@ -30,7 +33,7 @@ export function QuestLessonList({ world, worldIndex, onSelectLesson, onBack, all
         ← {isEn ? "Back to Worlds" : "返回世界"}
       </button>
 
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-2">
         <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-primary/10">
           {world.emoji}
         </div>
@@ -40,6 +43,11 @@ export function QuestLessonList({ world, worldIndex, onSelectLesson, onBack, all
           </p>
           <h2 className="text-lg font-extrabold text-foreground">{getTitle(world)}</h2>
         </div>
+      </div>
+      <div className="mb-6">
+        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${diff.color}`}>
+          {"⭐".repeat(diff.stars)} {getDiffLabel()}
+        </span>
       </div>
 
       {/* Zigzag lesson nodes */}
