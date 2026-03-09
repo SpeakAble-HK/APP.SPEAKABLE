@@ -125,7 +125,7 @@ const SpeechQuestPage = () => {
 
       const parts = [`+${xpEarned} XP (${accuracy}%)`];
       if (bonusXp > 0) parts.push(`🔥 +${bonusXp} streak bonus!`);
-      if (challengeBonus > 0) parts.push(`⚡ +${challengeBonus} challenge bonus!`);
+      if (newStreak > 1) parts.push(`${newStreak}-day streak!`);
       if (newStreak > 1) parts.push(`${newStreak}-day streak!`);
 
       toast({
