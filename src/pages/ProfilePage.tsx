@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, CreditCard, ChevronRight, Globe, Moon, Sun, Type, LogIn, LogOut, HelpCircle } from 'lucide-react';
+import { User, CreditCard, ChevronRight, Globe, Moon, Sun, Type, LogIn, LogOut, HelpCircle, AlertTriangle, AtSign } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
