@@ -74,6 +74,17 @@ export default function AuthPage() {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
 
+  // Handle URL params for tab switching (?tab=signup, /signup route)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'signup' || window.location.pathname === '/signup') {
+      setView('signup');
+    } else if (tab === 'signin') {
+      setView('login');
+    }
+  }, []);
+
   // Real-time validation for signup fields
   const validateSignUpField = (field: string, value: string) => {
     let error: string | null = null;
