@@ -54,6 +54,8 @@ const SpeechQuestPage = () => {
 
   const { streakDays, bestStreak, recordActivity } = useStreak();
   const { unlockedIds, unlockedCount, totalCount, allAchievements, checkAndUnlock } = useAchievements();
+  const { challenges, completedIds: challengeCompletedIds, recordLessonCompleted, checkAndCompleteChallenges } = useDailyChallenges();
+
 
   const progressPct = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
   const dailyTasks = Math.min(completedCount * 2, 10);
