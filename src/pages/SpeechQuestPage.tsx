@@ -126,7 +126,6 @@ const SpeechQuestPage = () => {
       const parts = [`+${xpEarned} XP (${accuracy}%)`];
       if (bonusXp > 0) parts.push(`🔥 +${bonusXp} streak bonus!`);
       if (newStreak > 1) parts.push(`${newStreak}-day streak!`);
-      if (newStreak > 1) parts.push(`${newStreak}-day streak!`);
 
       toast({
         title: isEn ? "🎉 Lesson Complete!" : isTW ? "🎉 課程完成！" : "🎉 课程完成！",
