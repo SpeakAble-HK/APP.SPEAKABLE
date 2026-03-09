@@ -122,6 +122,36 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_progress: {
+        Row: {
+          completed_lessons: Json
+          created_at: string
+          id: string
+          spent_points: number
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_lessons?: Json
+          created_at?: string
+          id?: string
+          spent_points?: number
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_lessons?: Json
+          created_at?: string
+          id?: string
+          spent_points?: number
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_stats: {
         Row: {
           best_streak: number
