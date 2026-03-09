@@ -1,7 +1,7 @@
 import { Lock, CheckCircle, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { questWorldsData, QuestWorldData } from "@/data/questLessons";
+import { questWorldsData, QuestWorldData, difficultyConfig } from "@/data/questLessons";
 import { useQuestProgress } from "@/hooks/useQuestProgress";
 
 interface QuestWorldListProps {
@@ -18,6 +18,9 @@ export function QuestWorldList({ onSelectWorld, onBack, allLocked }: QuestWorldL
 
   const getTitle = (item: { titleEn: string; titleTW: string; titleCN: string }) =>
     isEn ? item.titleEn : isTW ? item.titleTW : item.titleCN;
+
+  const getDiffLabel = (d: typeof difficultyConfig[keyof typeof difficultyConfig]) =>
+    isEn ? d.labelEn : isTW ? d.labelTW : d.labelCN;
 
   const isWorldUnlocked = (worldIndex: number): boolean => {
     if (allLocked) return false;
@@ -50,6 +53,7 @@ export function QuestWorldList({ onSelectWorld, onBack, allLocked }: QuestWorldL
           const unlocked = isWorldUnlocked(wi);
           const prog = getWorldProgress(wi);
           const done = prog === 100;
+          const diff = difficultyConfig[world.difficulty];
 
           return (
             <button
@@ -71,9 +75,12 @@ export function QuestWorldList({ onSelectWorld, onBack, allLocked }: QuestWorldL
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-bold text-muted-foreground uppercase">
                     {isEn ? `World ${wi + 1}` : `世界 ${wi + 1}`}
+                  </span>
+                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${diff.color}`}>
+                    {"⭐".repeat(diff.stars)} {getDiffLabel(diff)}
                   </span>
                   {done && <CheckCircle className="h-3.5 w-3.5 text-success" />}
                 </div>

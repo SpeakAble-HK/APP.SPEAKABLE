@@ -1,10 +1,58 @@
-import { useState, useRef } from "react";
-import { Play, Square, RotateCcw, ArrowRight, ChevronDown, ChevronUp, Volume2, Trophy } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Play, Square, RotateCcw, ArrowRight, ChevronDown, ChevronUp, Volume2, Trophy, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PhonemeResult } from "@/hooks/usePronunciationAPI";
 import { QuestLessonData } from "@/data/questLessons";
 import mascot from "@/assets/mascot.png";
+
+const CONFETTI_COLORS = [
+  "hsl(38, 95%, 60%)",  // accent gold
+  "hsl(174, 62%, 47%)", // primary teal
+  "hsl(142, 60%, 45%)", // success green
+  "hsl(280, 70%, 60%)", // purple
+  "hsl(0, 72%, 55%)",   // red
+  "hsl(200, 80%, 55%)", // blue
+];
+
+function ConfettiEffect() {
+  const pieces = Array.from({ length: 30 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    delay: `${Math.random() * 0.8}s`,
+    size: `${6 + Math.random() * 8}px`,
+    rotation: Math.random() * 360,
+  }));
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[100]" aria-hidden="true">
+      {pieces.map(p => (
+        <div
+          key={p.id}
+          className="confetti-piece"
+          style={{
+            left: p.left,
+            backgroundColor: p.color,
+            animationDelay: p.delay,
+            width: p.size,
+            height: p.size,
+            transform: `rotate(${p.rotation}deg)`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function XPPopup({ xp }: { xp: number }) {
+  return (
+    <div className="animate-xp-pop text-2xl font-extrabold text-accent flex items-center gap-1 justify-center">
+      <Star className="h-6 w-6" />
+      +{xp} XP
+    </div>
+  );
+}
 
 interface Props {
   lesson: QuestLessonData;
@@ -30,8 +78,59 @@ export function QuestSentenceFeedback({
   const [showDetail, setShowDetail] = useState(false);
   const [playingUser, setPlayingUser] = useState(false);
   const [playingRef, setPlayingRef] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const userAudioRef = useRef<HTMLAudioElement | null>(null);
   const refAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Play celebration sound and confetti on pass
+  const playCelebration = useCallback(() => {
+    if (!passed) return;
+    setShowConfetti(true);
+
+    // Simple celebration chime using Web Audio API
+    try {
+      const ctx = new AudioContext();
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.5);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(ctx.currentTime + i * 0.12);
+        osc.stop(ctx.currentTime + i * 0.12 + 0.5);
+      });
+    } catch {
+      // Audio not available
+    }
+
+    setTimeout(() => setShowConfetti(false), 3000);
+  }, [passed]);
+
+  useEffect(() => {
+    playCelebration();
+  }, [playCelebration]);
+
+  // Play a fail buzzer for < 70%
+  useEffect(() => {
+    if (passed) return;
+    try {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.value = 200;
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } catch {
+      // Audio not available
+    }
+  }, [passed]);
 
   const scoreColor = accuracy >= 80 ? "text-success" : accuracy >= 50 ? "text-accent" : "text-destructive";
   const scoreBg = accuracy >= 80 ? "bg-success/10 border-success/30" : accuracy >= 50 ? "bg-accent/10 border-accent/30" : "bg-destructive/10 border-destructive/30";
@@ -43,13 +142,11 @@ export function QuestSentenceFeedback({
     return isEn ? "Keep practising! Focus on the tones." : isTW ? "繼續練習！注意聲調。" : "继续练习！注意声调。";
   })();
 
-  // Build jyutping string from intended phonemes
   const jyutpingStr = intendedPhonemes
     .filter(p => p.phoneme)
     .map(p => p.phoneme)
     .join(" ");
 
-  // Build recognized text from spoken phonemes
   const recognizedText = spokenPhonemes.map(p => p.character).join("");
 
   const playAudio = (url: string | null, setPlaying: (v: boolean) => void, audioRef: React.MutableRefObject<HTMLAudioElement | null>) => {
@@ -64,22 +161,23 @@ export function QuestSentenceFeedback({
 
   return (
     <div className="min-h-full bg-background flex flex-col items-center justify-center px-4 py-8">
+      {showConfetti && <ConfettiEffect />}
+
       <div className="max-w-md w-full space-y-6 animate-in fade-in duration-300">
         {/* Sentence & Score */}
         <div className="text-center">
           <p className="text-3xl font-extrabold text-foreground mb-1">{lesson.sentence}</p>
           <p className="text-sm text-muted-foreground mb-4">{lesson.english_translation}</p>
 
-          <div className={`inline-flex items-center justify-center w-28 h-28 rounded-full border-4 ${scoreBg}`}>
+          <div className={`inline-flex items-center justify-center w-28 h-28 rounded-full border-4 ${scoreBg} animate-score-count`}>
             <span className={`text-4xl font-extrabold ${scoreColor}`}>{accuracy}%</span>
           </div>
 
           <p className="mt-4 text-base font-bold text-foreground">{feedbackMsg}</p>
 
           {passed && (
-            <div className="mt-2 flex items-center justify-center gap-1 text-accent font-extrabold text-sm">
-              <Trophy className="h-4 w-4" />
-              +{lesson.xp_reward} XP
+            <div className="mt-3">
+              <XPPopup xp={lesson.xp_reward} />
             </div>
           )}
         </div>
