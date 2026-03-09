@@ -1,118 +1,81 @@
-import { useState, useCallback } from "react";
-import { Lock, CheckCircle, Star, Trophy, BookOpen, Sparkles, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { Lock, CheckCircle, Star, Trophy, BookOpen, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/hooks/useAuth";
 import { IPALibraryModal } from "@/components/IPALibraryModal";
 import { RewardsShop } from "@/components/RewardsShop";
-import { QuestExercise } from "@/components/QuestExercise";
-import { questWorlds, QuestLesson } from "@/data/questWorlds";
+import { QuestSentenceExercise } from "@/components/QuestSentenceExercise";
+import { questWorldsData, QuestLessonData } from "@/data/questLessons";
+import { useQuestProgress } from "@/hooks/useQuestProgress";
 import { toast } from "@/hooks/use-toast";
 import mascot from "@/assets/mascot.png";
 
-const QUEST_STORAGE_KEY = "speakable-quest-progress";
-
-interface QuestProgress {
-  completed: Set<string>;
-  spentPoints: number;
-  totalXp: number;
-}
-
-function loadProgress(): QuestProgress {
-  try {
-    const saved = localStorage.getItem(QUEST_STORAGE_KEY);
-    if (saved) {
-      const data = JSON.parse(saved);
-      return {
-        completed: new Set(data.completed || []),
-        spentPoints: data.spentPoints || 0,
-        totalXp: data.totalXp || 0,
-      };
-    }
-  } catch {}
-  return { completed: new Set(), spentPoints: 0, totalXp: 0 };
-}
-
-function saveProgress(progress: QuestProgress) {
-  localStorage.setItem(QUEST_STORAGE_KEY, JSON.stringify({
-    completed: [...progress.completed],
-    spentPoints: progress.spentPoints,
-    totalXp: progress.totalXp,
-  }));
-}
-
 const SpeechQuestPage = () => {
   const { language } = useLanguage();
-  const { user } = useAuth();
   const isEn = language === "en-GB";
   const isTW = language === "zh-TW";
 
   const [ipaOpen, setIpaOpen] = useState(false);
-  const [progress, setProgress] = useState<QuestProgress>(loadProgress);
-  const [activeLesson, setActiveLesson] = useState<QuestLesson | null>(null);
+  const [activeLesson, setActiveLesson] = useState<QuestLessonData | null>(null);
 
-  const { completed, spentPoints, totalXp } = progress;
-  const availablePoints = totalXp - spentPoints;
+  const {
+    getLessonStatus,
+    completeLesson,
+    spendPoints,
+    availablePoints,
+    completedCount,
+    totalLessons,
+  } = useQuestProgress();
 
-  const allLessons = questWorlds.flatMap((w) => w.lessons);
-  const totalLessons = allLessons.length;
-  const completedCount = allLessons.filter((l) => completed.has(l.id)).length;
   const progressPct = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
 
   const getTitle = (item: { titleEn: string; titleTW: string; titleCN: string }) =>
     isEn ? item.titleEn : isTW ? item.titleTW : item.titleCN;
 
-  // A lesson is unlocked if it's the first in its world, or the previous lesson (within or across worlds) is completed
-  const isLessonUnlocked = (lessonId: string): boolean => {
-    const idx = allLessons.findIndex((l) => l.id === lessonId);
-    if (idx === 0) return true;
-    return completed.has(allLessons[idx - 1].id);
-  };
-
   const isWorldUnlocked = (worldIndex: number): boolean => {
     if (worldIndex === 0) return true;
-    const prevWorld = questWorlds[worldIndex - 1];
-    return prevWorld.lessons.every((l) => completed.has(l.id));
+    const prevWorld = questWorldsData[worldIndex - 1];
+    return prevWorld.lessons.every(l => getLessonStatus(l.lesson_id) === "completed");
   };
 
   const getWorldProgress = (worldIndex: number): number => {
-    const world = questWorlds[worldIndex];
-    const done = world.lessons.filter((l) => completed.has(l.id)).length;
+    const world = questWorldsData[worldIndex];
+    const done = world.lessons.filter(l => getLessonStatus(l.lesson_id) === "completed").length;
     return world.lessons.length > 0 ? (done / world.lessons.length) * 100 : 0;
   };
 
-  const handleLessonTap = (lesson: QuestLesson) => {
-    if (completed.has(lesson.id) || !isLessonUnlocked(lesson.id)) return;
+  const handleLessonTap = (lesson: QuestLessonData) => {
+    const status = getLessonStatus(lesson.lesson_id);
+    if (status === "locked") return;
+    // Allow replaying completed lessons too
     setActiveLesson(lesson);
   };
 
-  const handleLessonComplete = useCallback((xpEarned: number, avgAccuracy: number) => {
+  const handleLessonComplete = async (xpEarned: number, accuracy: number) => {
     if (!activeLesson) return;
-    const newCompleted = new Set([...completed, activeLesson.id]);
-    const newTotalXp = totalXp + xpEarned;
-    const newProgress: QuestProgress = { completed: newCompleted, spentPoints, totalXp: newTotalXp };
-    setProgress(newProgress);
-    saveProgress(newProgress);
+    const status = getLessonStatus(activeLesson.lesson_id);
+
+    if (accuracy >= 70 && status !== "completed") {
+      await completeLesson(activeLesson.lesson_id, xpEarned);
+      toast({
+        title: isEn ? "🎉 Lesson Complete!" : isTW ? "🎉 課程完成！" : "🎉 课程完成！",
+        description: `+${xpEarned} XP (${accuracy}%)`,
+      });
+    } else if (accuracy < 70) {
+      toast({
+        title: isEn ? "Keep trying!" : isTW ? "繼續努力！" : "继续努力！",
+        description: isEn ? `${accuracy}% — You need 70% to pass.` : `${accuracy}% — 需要 70% 才能通過。`,
+      });
+    }
+
     setActiveLesson(null);
-
-    const name = getTitle(activeLesson);
-    toast({
-      title: isEn ? "🎉 Lesson Complete!" : isTW ? "🎉 課程完成！" : "🎉 课程完成！",
-      description: `${name} — +${xpEarned} XP (${avgAccuracy}%)`,
-    });
-  }, [activeLesson, completed, spentPoints, totalXp, isEn, isTW]);
-
-  const handleSpendPoints = useCallback((amount: number) => {
-    const newProgress: QuestProgress = { completed, spentPoints: spentPoints + amount, totalXp };
-    setProgress(newProgress);
-    saveProgress(newProgress);
-  }, [completed, spentPoints, totalXp]);
+  };
 
   // ─── EXERCISE MODE ───
   if (activeLesson) {
     return (
-      <QuestExercise
+      <QuestSentenceExercise
         lesson={activeLesson}
         onComplete={handleLessonComplete}
         onExit={() => setActiveLesson(null)}
@@ -158,7 +121,7 @@ const SpeechQuestPage = () => {
 
         {/* World Map */}
         <div className="space-y-10">
-          {questWorlds.map((world, wi) => {
+          {questWorldsData.map((world, wi) => {
             const worldUnlocked = isWorldUnlocked(wi);
             const worldProg = getWorldProgress(wi);
             const worldDone = worldProg === 100;
@@ -188,40 +151,46 @@ const SpeechQuestPage = () => {
 
                 {/* Lesson Nodes — zigzag */}
                 <div className="relative w-[90%] max-w-md mx-auto">
-                  {/* Vertical line */}
                   <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-border rounded-full -translate-x-1/2" aria-hidden="true" />
 
                   <div className="space-y-5 relative">
                     {world.lessons.map((lesson, li) => {
                       const isLeft = li % 2 === 0;
-                      const lessonDone = completed.has(lesson.id);
-                      const unlocked = isLessonUnlocked(lesson.id);
-                      const isCurrent = unlocked && !lessonDone;
+                      const status = getLessonStatus(lesson.lesson_id);
+                      const lessonDone = status === "completed";
+                      const isCurrent = status === "unlocked";
 
                       return (
-                        <div key={lesson.id} className={`flex items-center gap-3 ${isLeft ? "flex-row" : "flex-row-reverse"}`}>
+                        <div key={lesson.lesson_id} className={`flex items-center gap-3 ${isLeft ? "flex-row" : "flex-row-reverse"}`}>
                           {/* Card */}
                           <div className={`flex-1 ${isLeft ? "text-right" : "text-left"}`}>
                             <button
                               onClick={() => handleLessonTap(lesson)}
-                              disabled={lessonDone || !unlocked}
+                              disabled={status === "locked"}
                               className={`inline-block w-full max-w-[240px] text-left border-2 rounded-2xl p-3 transition-all ${
                                 lessonDone
-                                  ? "border-success/30 bg-success/5 cursor-default"
+                                  ? "border-success/30 bg-success/5 cursor-pointer hover:bg-success/10"
                                   : isCurrent
                                   ? "border-primary/40 bg-card hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
                                   : "border-border bg-muted/30 cursor-not-allowed opacity-60"
                               }`}
                             >
-                              <p className="text-sm font-extrabold text-foreground leading-tight">{getTitle(lesson)}</p>
+                              <p className="text-sm font-extrabold text-foreground leading-tight">{lesson.sentence}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{lesson.english_translation}</p>
                               <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                                 <Star className="h-3 w-3 text-accent" aria-hidden="true" />
-                                {lesson.xp} XP
+                                {lesson.xp_reward} XP
                               </div>
                               {isCurrent && (
                                 <div className="flex items-center gap-1 text-xs text-primary mt-1.5 font-extrabold">
                                   <ChevronRight className="h-3 w-3" />
                                   {isEn ? "Start" : "開始"}
+                                </div>
+                              )}
+                              {lessonDone && (
+                                <div className="flex items-center gap-1 text-xs text-success mt-1 font-bold">
+                                  <CheckCircle className="h-3 w-3" />
+                                  {isEn ? "Completed" : "已完成"}
                                 </div>
                               )}
                             </button>
@@ -258,7 +227,7 @@ const SpeechQuestPage = () => {
         </div>
 
         {/* Rewards Shop */}
-        <RewardsShop totalPoints={availablePoints} onSpendPoints={handleSpendPoints} />
+        <RewardsShop totalPoints={availablePoints} onSpendPoints={spendPoints} />
       </div>
 
       <IPALibraryModal open={ipaOpen} onOpenChange={setIpaOpen} />
