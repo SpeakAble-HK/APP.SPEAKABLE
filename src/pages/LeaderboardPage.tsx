@@ -1,22 +1,17 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Trophy, Medal, Lock } from "lucide-react";
+import { ArrowLeft, Trophy, Flame, Medal, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useLeaderboard, LeaderboardEntry } from "@/hooks/useLeaderboard";
+import { useAuth } from "@/hooks/useAuth";
 import mascot from "@/assets/mascot.png";
 
-const mockUsers = [
-  { rank: 1, name: "Player 1", xp: 2450, medal: "🥇" },
-  { rank: 2, name: "Player 2", xp: 2100, medal: "🥈" },
-  { rank: 3, name: "Player 3", xp: 1850, medal: "🥉" },
-  { rank: 4, name: "Player 4", xp: 1600, medal: "" },
-  { rank: 5, name: "Player 5", xp: 1400, medal: "" },
-  { rank: 6, name: "Player 6", xp: 1200, medal: "" },
-  { rank: 7, name: "Player 7", xp: 950, medal: "" },
-  { rank: 8, name: "Player 8", xp: 800, medal: "" },
-];
+const MEDALS = ["🥇", "🥈", "🥉"];
 
 const LeaderboardPage = () => {
   const { language } = useLanguage();
+  const { user } = useAuth();
+  const { entries, loading, userRank } = useLeaderboard();
   const isEn = language === "en-GB";
   const isTW = language === "zh-TW";
 
@@ -35,39 +30,81 @@ const LeaderboardPage = () => {
           <h1 className="text-2xl md:text-3xl font-extrabold text-foreground mb-2">
             {isEn ? "Leaderboard" : isTW ? "排行榜" : "排行榜"}
           </h1>
-          <div className="inline-flex items-center gap-2 bg-accent/10 border-2 border-accent/30 rounded-2xl px-4 py-2 mt-2">
-            <Lock className="h-4 w-4 text-accent" />
-            <p className="text-sm text-muted-foreground font-bold">
-              {isEn
-                ? "Community leaderboards and challenges are coming soon."
-                : isTW ? "社群排行榜和挑戰即將推出。"
-                : "社区排行榜和挑战即将推出。"}
+          {userRank && (
+            <p className="text-sm font-bold text-primary">
+              {isEn ? `Your rank: #${userRank}` : `你的排名：第 ${userRank} 名`}
             </p>
-          </div>
+          )}
         </div>
 
-        {/* Mock leaderboard */}
-        <div className="bg-card border-2 border-border rounded-2xl overflow-hidden opacity-60 pointer-events-none select-none">
-          {mockUsers.map((u) => (
-            <div
-              key={u.rank}
-              className={`flex items-center gap-3 px-4 py-3 ${u.rank < mockUsers.length ? 'border-b border-border' : ''}`}
-            >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-extrabold ${
-                u.rank <= 3 ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground'
-              }`}>
-                {u.medal || u.rank}
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">{u.name}</p>
-              </div>
-              <div className="flex items-center gap-1 text-sm font-extrabold text-muted-foreground">
-                <Trophy className="h-3.5 w-3.5 text-accent" />
-                {u.xp} XP
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : entries.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground font-bold">
+              {isEn ? "No rankings yet. Complete some lessons to get on the board!" : isTW ? "暫無排名。完成課程即可上榜！" : "暂无排名。完成课程即可上榜！"}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-card border-2 border-border rounded-2xl overflow-hidden">
+            {entries.map((entry: LeaderboardEntry, idx: number) => {
+              const isCurrentUser = user?.id === entry.user_id;
+              const rank = idx + 1;
+
+              return (
+                <div
+                  key={entry.user_id}
+                  className={`flex items-center gap-3 px-4 py-3 transition-colors ${
+                    idx < entries.length - 1 ? "border-b border-border" : ""
+                  } ${isCurrentUser ? "bg-primary/5" : ""}`}
+                >
+                  {/* Rank */}
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-extrabold ${
+                    rank <= 3 ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"
+                  }`}>
+                    {rank <= 3 ? MEDALS[rank - 1] : rank}
+                  </div>
+
+                  {/* Avatar */}
+                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                    {entry.avatar_url ? (
+                      <img src={entry.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-sm font-bold text-muted-foreground">
+                        {entry.display_name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Name */}
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-bold truncate ${isCurrentUser ? "text-primary" : "text-foreground"}`}>
+                      {entry.display_name}
+                      {isCurrentUser && <span className="text-xs text-primary ml-1">({isEn ? "You" : "你"})</span>}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{entry.lessons_completed} {isEn ? "lessons" : "課"}</span>
+                      {entry.streak_days > 0 && (
+                        <span className="flex items-center gap-0.5">
+                          <Flame className="h-3 w-3 text-destructive" />
+                          {entry.streak_days}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* XP */}
+                  <div className="flex items-center gap-1 text-sm font-extrabold text-muted-foreground">
+                    <Trophy className="h-3.5 w-3.5 text-accent" />
+                    {entry.total_xp.toLocaleString()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

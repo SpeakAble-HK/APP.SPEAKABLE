@@ -35,6 +35,33 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_challenge_completions: {
+        Row: {
+          bonus_xp: number
+          challenge_date: string
+          challenge_id: string
+          completed_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          bonus_xp?: number
+          challenge_date?: string
+          challenge_id: string
+          completed_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          bonus_xp?: number
+          challenge_date?: string
+          challenge_id?: string
+          completed_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       guest_usage: {
         Row: {
           created_at: string
@@ -238,7 +265,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_view: {
+        Row: {
+          avatar_url: string | null
+          best_streak: number | null
+          display_name: string | null
+          lessons_completed: number | null
+          streak_days: number | null
+          total_xp: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

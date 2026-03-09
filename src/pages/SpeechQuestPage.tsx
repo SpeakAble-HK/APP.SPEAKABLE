@@ -8,9 +8,11 @@ import { useVoiceProfile } from "@/hooks/useVoiceProfile";
 import { useQuestProgress } from "@/hooks/useQuestProgress";
 import { useStreak } from "@/hooks/useStreak";
 import { useAchievements } from "@/hooks/useAchievements";
+import { useDailyChallenges } from "@/hooks/useDailyChallenges";
 import { IPALibraryModal } from "@/components/IPALibraryModal";
 import { RewardsShop } from "@/components/RewardsShop";
 import { AchievementsList } from "@/components/AchievementsList";
+import { DailyChallengesCard } from "@/components/DailyChallengesCard";
 import { QuestSentenceExercise } from "@/components/QuestSentenceExercise";
 import { QuestWorldList } from "@/components/QuestWorldList";
 import { QuestLessonList } from "@/components/QuestLessonList";
@@ -52,6 +54,8 @@ const SpeechQuestPage = () => {
 
   const { streakDays, bestStreak, recordActivity } = useStreak();
   const { unlockedIds, unlockedCount, totalCount, allAchievements, checkAndUnlock } = useAchievements();
+  const { challenges, completedIds: challengeCompletedIds, recordLessonCompleted, checkAndCompleteChallenges } = useDailyChallenges();
+
 
   const progressPct = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
   const dailyTasks = Math.min(completedCount * 2, 10);
@@ -101,8 +105,11 @@ const SpeechQuestPage = () => {
     if (accuracy >= 70 && status !== "completed") {
       // Record streak & get bonus
       const { newStreak, bonusXp } = await recordActivity();
-      const totalXpEarned = xpEarned + bonusXp;
 
+      // Record for daily challenges
+      recordLessonCompleted(activeLesson.lesson_id);
+
+      const totalXpEarned = xpEarned + bonusXp;
       await completeLesson(activeLesson.lesson_id, totalXpEarned);
 
       // Check achievements
@@ -113,8 +120,12 @@ const SpeechQuestPage = () => {
         streakDays: newStreak,
       });
 
+      // Check daily challenges (bonus XP awarded via separate toast only)
+      await checkAndCompleteChallenges(newCompleted);
+
       const parts = [`+${xpEarned} XP (${accuracy}%)`];
       if (bonusXp > 0) parts.push(`🔥 +${bonusXp} streak bonus!`);
+      if (newStreak > 1) parts.push(`${newStreak}-day streak!`);
       if (newStreak > 1) parts.push(`${newStreak}-day streak!`);
 
       toast({
@@ -231,7 +242,12 @@ const SpeechQuestPage = () => {
             <Progress value={dailyTasks * 10} className="h-3 rounded-full" />
           </div>
 
-          {/* Achievements preview */}
+          {/* Daily Challenges */}
+          <div className="mb-4">
+            <DailyChallengesCard challenges={challenges} completedIds={challengeCompletedIds} />
+          </div>
+
+
           <button
             onClick={() => setView("achievements")}
             className="w-full max-w-xs bg-card border-2 border-border rounded-2xl p-4 mb-8 flex items-center gap-3 hover:shadow-md transition-all text-left"
