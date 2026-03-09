@@ -245,7 +245,12 @@ const SpeechQuestPage = () => {
             <Progress value={dailyTasks * 10} className="h-3 rounded-full" />
           </div>
 
-          {/* Achievements preview */}
+          {/* Daily Challenges */}
+          <div className="mb-4">
+            <DailyChallengesCard challenges={challenges} completedIds={challengeCompletedIds} />
+          </div>
+
+
           <button
             onClick={() => setView("achievements")}
             className="w-full max-w-xs bg-card border-2 border-border rounded-2xl p-4 mb-8 flex items-center gap-3 hover:shadow-md transition-all text-left"
