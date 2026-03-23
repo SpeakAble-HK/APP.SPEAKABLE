@@ -128,7 +128,7 @@ export default function AuthPage() {
   };
 
   useEffect(() => {
-    if (!loading && user) navigate('/');
+    if (!loading && user) navigate('/role-select');
   }, [user, loading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
