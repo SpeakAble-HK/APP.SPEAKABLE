@@ -4,24 +4,19 @@ import { Mic, Square, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useExplorerProfile } from "@/hooks/useExplorerProfile";
 import { toast } from "sonner";
 import mascot from "@/assets/mascot.png";
 
 export default function ExplorerOnboardingPage() {
   const navigate = useNavigate();
-  const { createProfile } = useExplorerProfile();
 
   const [step, setStep] = useState<'info' | 'voice'>('info');
   const [nickname, setNickname] = useState('');
-  const [age, setAge] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Voice recording
   const [isRecording, setIsRecording] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
   const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -46,7 +41,6 @@ export default function ExplorerOnboardingPage() {
       mediaRecorder.onstop = () => {
         stream.getTracks().forEach(t => t.stop());
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setAudioBlob(blob);
         setRecordingUrl(URL.createObjectURL(blob));
         setHasRecording(true);
       };
@@ -62,18 +56,9 @@ export default function ExplorerOnboardingPage() {
     setIsRecording(false);
   };
 
-  const handleComplete = async () => {
-    setIsSubmitting(true);
-    const { error } = await createProfile({
-      nickname: nickname.trim(),
-      age: age ? parseInt(age) : undefined,
-    });
-    setIsSubmitting(false);
-
-    if (error) {
-      toast.error('建立檔案失敗');
-      return;
-    }
+  const handleComplete = () => {
+    // Store nickname in sessionStorage for the prototype
+    sessionStorage.setItem('explorer_nickname', nickname.trim());
     toast.success(`歡迎，${nickname}！🎉`);
     navigate('/explorer');
   };
@@ -100,20 +85,6 @@ export default function ExplorerOnboardingPage() {
                 className="h-12 rounded-xl text-lg"
               />
             </div>
-
-            <div>
-              <Label htmlFor="age" className="text-sm font-bold">年齡</Label>
-              <Input
-                id="age"
-                type="number"
-                placeholder="幾歲？"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                className="h-12 rounded-xl text-lg"
-                min="2"
-                max="18"
-              />
-            </div>
           </div>
 
           <Button
@@ -134,13 +105,11 @@ export default function ExplorerOnboardingPage() {
             <p className="text-sm text-muted-foreground">錄製你的聲音，用於未來所有音頻播放</p>
           </div>
 
-          {/* Target sentence */}
           <div className="bg-card border-2 border-primary/20 rounded-2xl p-6 text-center">
             <p className="text-3xl font-extrabold text-foreground mb-2">hello 皮皮</p>
             <p className="text-sm text-muted-foreground">按下錄音鍵，然後大聲讀出來</p>
           </div>
 
-          {/* Record button */}
           <div className="flex flex-col items-center gap-4">
             <button
               onClick={isRecording ? handleStopRecording : handleStartRecording}
@@ -162,7 +131,6 @@ export default function ExplorerOnboardingPage() {
             </p>
           </div>
 
-          {/* Playback */}
           {hasRecording && recordingUrl && (
             <div className="bg-muted/50 rounded-xl p-3 border border-border">
               <audio src={recordingUrl} controls className="w-full h-10" preload="auto" />
@@ -171,11 +139,10 @@ export default function ExplorerOnboardingPage() {
 
           <Button
             onClick={handleComplete}
-            disabled={isSubmitting}
             className="w-full h-14 text-lg font-extrabold rounded-2xl game-btn gap-2"
             style={{ boxShadow: '0 5px 0 hsl(var(--primary-dark))' }}
           >
-            {isSubmitting ? '建立中...' : '完成！開始探險'}
+            完成！開始探險
             <Check className="h-5 w-5" />
           </Button>
 

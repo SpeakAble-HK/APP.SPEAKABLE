@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Lock, CheckCircle2, Star } from "lucide-react";
-import { phonemeCategories, semanticCategories, getLessonsByCategory, type LessonData } from "@/data/lessons";
-import { useLessonProgress } from "@/hooks/useLessonProgress";
+import { phonemeCategories, semanticCategories, getLessonsByCategory } from "@/data/lessons";
 import parrot from "@/assets/quest-parrot.png";
 
 export default function SpeechQuestPage() {
@@ -10,16 +9,25 @@ export default function SpeechQuestPage() {
   const [searchParams] = useSearchParams();
   const island = (searchParams.get('island') as 'phonetic' | 'semantic') || 'phonetic';
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { progress } = useLessonProgress();
 
-  const categories = island === 'phonetic' ? phonemeCategories : semanticCategories;
+  // Local progress from sessionStorage
+  const getProgress = () => {
+    try {
+      return JSON.parse(sessionStorage.getItem('lesson_progress') || '{}');
+    } catch { return {}; }
+  };
+  const progress = getProgress();
+
+  // Only bilabial for phonetic in prototype
+  const categories = island === 'phonetic'
+    ? phonemeCategories.filter(c => c.id === 'bilabial')
+    : semanticCategories;
   const islandTitle = island === 'phonetic' ? '發音小島' : '語義小島';
   const islandEmoji = island === 'phonetic' ? '🗣️' : '📖';
 
-  // If a category is selected, show lessons
   if (selectedCategory) {
     const lessons = getLessonsByCategory(selectedCategory);
-    const cat = categories.find(c => c.id === selectedCategory);
+    const cat = (island === 'phonetic' ? phonemeCategories : semanticCategories).find(c => c.id === selectedCategory);
 
     return (
       <div className="min-h-full bg-background">
@@ -42,9 +50,10 @@ export default function SpeechQuestPage() {
 
           <div className="space-y-3">
             {lessons.map((lesson, i) => {
-              const p = progress.get(lesson.id);
+              const p = progress[lesson.id];
               const isCompleted = p?.completed;
-              const prevCompleted = i === 0 || progress.get(lessons[i - 1]?.id)?.completed;
+              const prevLesson = lessons[i - 1];
+              const prevCompleted = i === 0 || progress[prevLesson?.id]?.completed;
               const isLocked = i > 0 && !prevCompleted;
 
               return (
@@ -90,7 +99,6 @@ export default function SpeechQuestPage() {
     );
   }
 
-  // Category selection view
   return (
     <div className="min-h-full bg-background">
       <div className="max-w-2xl mx-auto px-4 py-6">
@@ -136,7 +144,7 @@ export default function SpeechQuestPage() {
         <div className="grid grid-cols-2 gap-4">
           {categories.map((cat) => {
             const catLessons = getLessonsByCategory(cat.id);
-            const completed = catLessons.filter(l => progress.get(l.id)?.completed).length;
+            const completed = catLessons.filter(l => progress[l.id]?.completed).length;
 
             return (
               <button
