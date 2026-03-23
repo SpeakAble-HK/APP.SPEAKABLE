@@ -1,40 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { useRole } from "@/hooks/useRole";
 import mascot from "@/assets/mascot.png";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { role } = useRole();
-
-  // Redirect logged-in users with a role to their dashboard
-  if (user && role === 'explorer') {
-    navigate('/explorer', { replace: true });
-    return null;
-  }
-  if (user && role === 'therapist') {
-    navigate('/st-dashboard', { replace: true });
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Top bar - login only */}
-      <header className="flex items-center justify-between px-6 py-4">
-        <div /> {/* spacer */}
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/auth')}
-          className="text-sm font-bold text-muted-foreground hover:text-foreground"
-        >
-          登入
-        </Button>
+      {/* Header */}
+      <header className="flex items-center gap-2 px-6 py-4">
+        <img src={mascot} alt="SpeakAble HK" className="h-8 w-8 object-contain" />
+        <span className="text-base font-extrabold text-foreground">SpeakAble HK</span>
       </header>
 
-      {/* Hero - centered */}
+      {/* Hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 -mt-14">
         <img src={mascot} alt="SpeakAble mascot" className="h-32 w-32 object-contain mascot-bounce mb-8" />
 
@@ -55,7 +35,6 @@ const Index = () => {
         </Button>
       </div>
 
-      {/* Bottom spacer */}
       <div className="h-8" />
     </div>
   );

@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { getLessonById } from "@/data/lessons";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
-import { useLessonProgress } from "@/hooks/useLessonProgress";
-import { useStreak } from "@/hooks/useStreak";
 import { toast } from "sonner";
 
 type LessonStep = 'listen' | 'perception' | 'production' | 'feedback';
@@ -16,8 +14,6 @@ export default function LessonPage() {
   const navigate = useNavigate();
   const lesson = getLessonById(lessonId || '');
   const { processRecording, isProcessing } = usePronunciationAPI();
-  const { recordResult } = useLessonProgress();
-  const { recordActivity } = useStreak();
 
   const [step, setStep] = useState<LessonStep>('listen');
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -38,7 +34,7 @@ export default function LessonPage() {
   if (!lesson) {
     return (
       <div className="min-h-full bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Lesson not found</p>
+        <p className="text-muted-foreground">找不到課程</p>
       </div>
     );
   }
@@ -47,7 +43,6 @@ export default function LessonPage() {
   const progressPct = ((stepIndex + 1) / 4) * 100;
 
   const handlePlaySound = () => {
-    // Use speech synthesis for demo (the real API would generate audio)
     const utterance = new SpeechSynthesisUtterance(lesson.exampleWord);
     utterance.lang = 'zh-HK';
     utterance.rate = 0.8;
@@ -58,7 +53,6 @@ export default function LessonPage() {
     setSelectedOption(text);
     const correct = lesson.perceptionOptions.find(o => o.text === text)?.correct || false;
     setPerceptionCorrect(correct);
-    // Auto-advance after a delay
     setTimeout(() => {
       if (correct) {
         setStep('production');
@@ -102,11 +96,10 @@ export default function LessonPage() {
     const result = await processRecording(audioBlob, lesson.productionText);
     if (!result) return;
 
-    // Calculate accuracy from spoken vs intended phonemes
-    const intended = result.intended.filter(p => p.phoneme !== null);
-    const spoken = result.spoken.filter(p => p.phoneme !== null);
+    const intended = result.intended.filter((p: any) => p.phoneme !== null);
+    const spoken = result.spoken.filter((p: any) => p.phoneme !== null);
     let matches = 0;
-    intended.forEach((p, i) => {
+    intended.forEach((p: any, i: number) => {
       if (spoken[i] && spoken[i].phoneme === p.phoneme) matches++;
     });
     const acc = intended.length > 0 ? Math.round((matches / intended.length) * 100) : 0;
@@ -116,10 +109,17 @@ export default function LessonPage() {
     setFeedbackDetails(result);
     setStep('feedback');
 
-    // Record result
+    // Save progress locally
     if (acc >= 70) {
-      await recordResult(lesson.id, acc, lesson.xpReward);
-      await recordActivity();
+      try {
+        const existing = JSON.parse(sessionStorage.getItem('lesson_progress') || '{}');
+        existing[lesson.id] = {
+          completed: true,
+          accuracy_score: Math.max(existing[lesson.id]?.accuracy_score || 0, acc),
+          xp_earned: (existing[lesson.id]?.xp_earned || 0) + (existing[lesson.id]?.completed ? 0 : lesson.xpReward),
+        };
+        sessionStorage.setItem('lesson_progress', JSON.stringify(existing));
+      } catch {}
     }
   };
 
@@ -184,7 +184,7 @@ export default function LessonPage() {
           </div>
         )}
 
-        {/* Step 2: Perception (match) */}
+        {/* Step 2: Perception */}
         {step === 'perception' && (
           <div className="flex flex-col items-center text-center gap-6">
             <h2 className="text-sm font-bold text-primary uppercase tracking-wider">第二步：辨認</h2>
@@ -233,7 +233,7 @@ export default function LessonPage() {
           </div>
         )}
 
-        {/* Step 3: Production (record) */}
+        {/* Step 3: Production */}
         {step === 'production' && (
           <div className="flex flex-col items-center text-center gap-6">
             <h2 className="text-sm font-bold text-primary uppercase tracking-wider">第三步：發音</h2>
@@ -241,9 +241,7 @@ export default function LessonPage() {
             <div className="bg-card border-2 border-primary/20 rounded-2xl p-8 w-full">
               <p className="text-sm text-muted-foreground mb-2">請讀出</p>
               <p className="text-4xl font-extrabold text-foreground mb-4">{lesson.productionText}</p>
-              <p className="text-sm text-muted-foreground">
-                {lesson.articulationInstructionZh}
-              </p>
+              <p className="text-sm text-muted-foreground">{lesson.articulationInstructionZh}</p>
             </div>
 
             <button
@@ -285,7 +283,6 @@ export default function LessonPage() {
           <div className="flex flex-col items-center text-center gap-6">
             <h2 className="text-sm font-bold text-primary uppercase tracking-wider">第四步：反饋</h2>
 
-            {/* 準確度 */}
             <div className={`w-32 h-32 rounded-full flex items-center justify-center ${
               passed ? 'bg-success/10' : 'bg-destructive/10'
             }`}>
@@ -309,9 +306,8 @@ export default function LessonPage() {
             {/* AI Feedback Details */}
             {feedbackDetails && (
               <div className="w-full space-y-3">
-                {/* 識別結果 */}
                 <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
-                  <h4 className="text-xs font-bold text-muted-foreground mb-2">識別結果</h4>
+                  <h4 className="text-xs font-bold text-muted-foreground mb-2">識別文字</h4>
                   <div className="flex flex-wrap gap-1">
                     {feedbackDetails.spoken.filter((p: any) => p.phoneme).map((p: any, i: number) => (
                       <span key={i} className={`px-2 py-1 rounded text-xs font-bold ${
@@ -323,7 +319,6 @@ export default function LessonPage() {
                   </div>
                 </div>
 
-                {/* 拼音 */}
                 <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
                   <h4 className="text-xs font-bold text-muted-foreground mb-2">拼音</h4>
                   <div className="grid grid-cols-2 gap-3">
@@ -352,7 +347,6 @@ export default function LessonPage() {
                   </div>
                 </div>
 
-                {/* 準確度 */}
                 <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
                   <h4 className="text-xs font-bold text-muted-foreground mb-2">準確度</h4>
                   <div className="flex items-center gap-3">
@@ -366,9 +360,8 @@ export default function LessonPage() {
                   </div>
                 </div>
 
-                {/* 建議 */}
                 <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
-                  <h4 className="text-xs font-bold text-muted-foreground mb-2">建議</h4>
+                  <h4 className="text-xs font-bold text-muted-foreground mb-2">簡單建議</h4>
                   <p className="text-sm text-foreground">
                     {passed
                       ? '做得好！繼續保持，嘗試下一課練習。'
