@@ -285,6 +285,7 @@ export default function LessonPage() {
           <div className="flex flex-col items-center text-center gap-6">
             <h2 className="text-sm font-bold text-primary uppercase tracking-wider">第四步：反饋</h2>
 
+            {/* 準確度 */}
             <div className={`w-32 h-32 rounded-full flex items-center justify-center ${
               passed ? 'bg-success/10' : 'bg-destructive/10'
             }`}>
@@ -305,33 +306,75 @@ export default function LessonPage() {
               </p>
             </div>
 
-            {/* Phoneme comparison */}
+            {/* AI Feedback Details */}
             {feedbackDetails && (
-              <div className="w-full bg-card border-2 border-border rounded-2xl p-4 text-left">
-                <h4 className="text-xs font-bold text-muted-foreground mb-3">音素對比</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">目標</p>
-                    <div className="flex flex-wrap gap-1">
-                      {feedbackDetails.intended.filter((p: any) => p.phoneme).map((p: any, i: number) => (
-                        <span key={i} className="px-2 py-1 bg-muted rounded text-xs font-bold">
-                          {p.character} ({p.phoneme})
-                        </span>
-                      ))}
+              <div className="w-full space-y-3">
+                {/* 識別結果 */}
+                <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
+                  <h4 className="text-xs font-bold text-muted-foreground mb-2">識別結果</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {feedbackDetails.spoken.filter((p: any) => p.phoneme).map((p: any, i: number) => (
+                      <span key={i} className={`px-2 py-1 rounded text-xs font-bold ${
+                        p.isLowConfidence ? 'bg-destructive/10 text-destructive' : 'bg-success/10 text-success'
+                      }`}>
+                        {p.character}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 拼音 */}
+                <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
+                  <h4 className="text-xs font-bold text-muted-foreground mb-2">拼音</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground mb-1">目標</p>
+                      <div className="flex flex-wrap gap-1">
+                        {feedbackDetails.intended.filter((p: any) => p.phoneme).map((p: any, i: number) => (
+                          <span key={i} className="px-2 py-1 bg-muted rounded text-xs font-bold">
+                            {p.character} ({p.phoneme})
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground mb-1">你的發音</p>
+                      <div className="flex flex-wrap gap-1">
+                        {feedbackDetails.spoken.filter((p: any) => p.phoneme).map((p: any, i: number) => (
+                          <span key={i} className={`px-2 py-1 rounded text-xs font-bold ${
+                            p.isLowConfidence ? 'bg-destructive/10 text-destructive' : 'bg-success/10 text-success'
+                          }`}>
+                            {p.character} ({p.phoneme})
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">你的發音</p>
-                    <div className="flex flex-wrap gap-1">
-                      {feedbackDetails.spoken.filter((p: any) => p.phoneme).map((p: any, i: number) => (
-                        <span key={i} className={`px-2 py-1 rounded text-xs font-bold ${
-                          p.isLowConfidence ? 'bg-destructive/10 text-destructive' : 'bg-success/10 text-success'
-                        }`}>
-                          {p.character} ({p.phoneme})
-                        </span>
-                      ))}
+                </div>
+
+                {/* 準確度 */}
+                <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
+                  <h4 className="text-xs font-bold text-muted-foreground mb-2">準確度</h4>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 bg-muted rounded-full h-3 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${passed ? 'bg-success' : 'bg-destructive'}`}
+                        style={{ width: `${accuracy}%` }}
+                      />
                     </div>
+                    <span className="text-sm font-extrabold text-foreground">{accuracy}%</span>
                   </div>
+                </div>
+
+                {/* 建議 */}
+                <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
+                  <h4 className="text-xs font-bold text-muted-foreground mb-2">建議</h4>
+                  <p className="text-sm text-foreground">
+                    {passed
+                      ? '做得好！繼續保持，嘗試下一課練習。'
+                      : `留意 ${lesson.targetPhoneme} 的發音位置。${lesson.articulationInstructionZh}。多練習幾次就會進步！`
+                    }
+                  </p>
                 </div>
               </div>
             )}

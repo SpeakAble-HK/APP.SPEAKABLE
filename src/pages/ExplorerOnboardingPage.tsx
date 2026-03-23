@@ -4,8 +4,6 @@ import { Mic, Square, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useExplorerProfile } from "@/hooks/useExplorerProfile";
 import { toast } from "sonner";
 import mascot from "@/assets/mascot.png";
@@ -17,8 +15,6 @@ export default function ExplorerOnboardingPage() {
   const [step, setStep] = useState<'info' | 'voice'>('info');
   const [nickname, setNickname] = useState('');
   const [age, setAge] = useState('');
-  const [gender, setGender] = useState('');
-  const [dailyReminder, setDailyReminder] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Voice recording
@@ -71,8 +67,6 @@ export default function ExplorerOnboardingPage() {
     const { error } = await createProfile({
       nickname: nickname.trim(),
       age: age ? parseInt(age) : undefined,
-      gender: gender || undefined,
-      daily_reminder: dailyReminder,
     });
     setIsSubmitting(false);
 
@@ -85,7 +79,7 @@ export default function ExplorerOnboardingPage() {
   };
 
   return (
-    <div className="min-h-full bg-background flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8">
       <img src={mascot} alt="" className="h-20 w-20 object-contain mascot-bounce mb-6" />
 
       {step === 'info' && (
@@ -120,25 +114,6 @@ export default function ExplorerOnboardingPage() {
                 max="18"
               />
             </div>
-
-            <div>
-              <Label className="text-sm font-bold">性別</Label>
-              <Select value={gender} onValueChange={setGender}>
-                <SelectTrigger className="h-12 rounded-xl">
-                  <SelectValue placeholder="選擇性別" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">男</SelectItem>
-                  <SelectItem value="female">女</SelectItem>
-                  <SelectItem value="other">其他</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between py-2">
-              <Label className="text-sm font-bold">每日提醒</Label>
-              <Switch checked={dailyReminder} onCheckedChange={setDailyReminder} />
-            </div>
           </div>
 
           <Button
@@ -155,8 +130,8 @@ export default function ExplorerOnboardingPage() {
       {step === 'voice' && (
         <div className="w-full max-w-sm space-y-6">
           <div className="text-center">
-            <h1 className="text-2xl font-extrabold text-foreground mb-1">錄音練習</h1>
-            <p className="text-sm text-muted-foreground">請跟著讀下面的句子</p>
+            <h1 className="text-2xl font-extrabold text-foreground mb-1">聲音設定</h1>
+            <p className="text-sm text-muted-foreground">錄製你的聲音，用於未來所有音頻播放</p>
           </div>
 
           {/* Target sentence */}
