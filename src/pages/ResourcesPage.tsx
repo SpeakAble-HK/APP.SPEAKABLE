@@ -1,58 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { MapPin, BookOpen, Languages } from "lucide-react";
+import { MapPin, BookOpen, Languages, Heart, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import mascot from "@/assets/mascot.png";
 
-const ResourcesPage = () => {
+const NGO_RESOURCES = [
+  { name: '香港言語治療師協會', nameEn: 'HKIST', url: 'https://www.hkist.org.hk', desc: '專業言語治療師組織' },
+  { name: '衛生署兒童體能智力測驗服務', nameEn: 'Child Assessment Service', url: 'https://www.dhcas.gov.hk', desc: '政府兒童評估服務' },
+  { name: '協康會', nameEn: 'Heep Hong Society', url: 'https://www.heephong.org', desc: '兒童康復服務' },
+  { name: '明愛社區服務', nameEn: 'Caritas Community Services', url: 'https://www.caritassws.org.hk', desc: '社區言語治療服務' },
+];
+
+export default function ResourcesPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isEn = language === "en-GB";
   const isTW = language === "zh-TW";
-  const t = (en: string, tw: string, cn: string) => (isEn ? en : isTW ? tw : cn);
-
-  const cards = [
-    {
-      icon: MapPin,
-      title: t("Find Speech Therapy", "尋找言語治療", "寻找言语治疗"),
-      desc: t(
-        "Search for the closest speech therapy provider in Hong Kong.",
-        "搜尋香港最近的言語治療服務提供者。",
-        "搜索香港最近的言语治疗服务提供者。"
-      ),
-      path: "/resources/find-provider",
-      color: "bg-primary text-primary-foreground",
-      iconBg: "bg-primary-foreground/20",
-      shadow: "hsl(var(--primary-dark))",
-    },
-    {
-      icon: BookOpen,
-      title: t("Speech Therapy Information", "言語治療資訊", "言语治疗资讯"),
-      desc: t(
-        "Educational information about speech therapy.",
-        "關於言語治療的教育資訊。",
-        "关于言语治疗的教育资讯。"
-      ),
-      path: "/resources/speech-therapy-info",
-      color: "bg-card text-foreground border-2 border-border",
-      iconBg: "bg-accent/15",
-      shadow: "hsl(var(--border))",
-      iconColor: "text-accent",
-    },
-    {
-      icon: Languages,
-      title: t("IPA Library", "IPA 音標庫", "IPA 音标库"),
-      desc: t(
-        "Learn phonetic symbols and pronunciation guides.",
-        "學習音標符號和發音指南。",
-        "学习音标符号和发音指南。"
-      ),
-      path: "/ipa",
-      color: "bg-card text-foreground border-2 border-border",
-      iconBg: "bg-primary/10",
-      shadow: "hsl(var(--border))",
-      iconColor: "text-primary",
-    },
-  ];
 
   return (
     <div className="min-h-full bg-background">
@@ -62,48 +24,121 @@ const ResourcesPage = () => {
             <img src={mascot} alt="" className="h-16 w-16 object-contain mascot-bounce" />
             <div>
               <h1 className="text-2xl font-extrabold text-foreground">
-                {t("Resources", "資源", "资源")}
+                {isEn ? "Public Resources" : "公眾資訊"}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {t(
-                  "Speech therapy tools and learning materials.",
-                  "言語治療工具和學習資源。",
-                  "言语治疗工具和学习资源。"
-                )}
+                {isEn ? "Speech therapy information and resources" : "言語治療介紹及資源"}
               </p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {cards.map((card, i) => (
+          {/* Speech Therapy Introduction */}
+          <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-extrabold text-foreground">
+                  {isEn ? "What is Speech Therapy?" : "什麼是言語治療？"}
+                </h2>
+              </div>
+            </div>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                言語治療是一門專業的醫療服務，旨在幫助有語言、言語、溝通或吞嚥困難的人士。言語治療師（ST）是受過專業訓練的醫療專業人員。
+              </p>
+              <p>
+                兒童言語治療通常涵蓋以下範疇：
+              </p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>發音障礙 — 無法正確發出某些語音</li>
+                <li>語言發展遲緩 — 語言理解或表達能力低於同齡兒童</li>
+                <li>口吃 — 說話不流暢</li>
+                <li>聲線問題 — 聲音沙啞或音量異常</li>
+                <li>社交溝通困難 — 社交互動中的語言使用</li>
+              </ul>
+              <p>
+                如果您的孩子在說話方面有困難，建議儘早尋求專業評估。早期介入可以顯著改善治療效果。
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mt-4">
               <button
-                key={i}
-                onClick={() => navigate(card.path)}
-                className={`w-full rounded-2xl p-5 text-left transition-all duration-200 hover:-translate-y-1 active:translate-y-0.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${card.color}`}
-                style={{ boxShadow: `0 6px 0 ${card.shadow}` }}
+                onClick={() => navigate('/resources/find-provider')}
+                className="bg-primary text-primary-foreground rounded-xl p-4 text-center hover:-translate-y-0.5 transition-all"
+                style={{ boxShadow: '0 4px 0 hsl(var(--primary-dark))' }}
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-14 h-14 min-w-[56px] rounded-xl ${card.iconBg} flex items-center justify-center`}>
-                    <card.icon className={`h-7 w-7 ${card.iconColor || 'text-primary-foreground'}`} aria-hidden="true" />
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-xl font-extrabold block leading-tight">
-                      {card.title}
-                    </span>
-                    <span className={`text-sm font-medium mt-0.5 block leading-snug ${
-                      i === 0 ? 'text-primary-foreground/80' : 'text-muted-foreground'
-                    }`}>
-                      {card.desc}
-                    </span>
-                  </div>
-                </div>
+                <MapPin className="h-5 w-5 mx-auto mb-1" />
+                <span className="text-sm font-bold block">
+                  {isEn ? "Find Provider" : "尋找服務"}
+                </span>
               </button>
-            ))}
+              <button
+                onClick={() => navigate('/resources/speech-therapy-info')}
+                className="bg-card border-2 border-border rounded-xl p-4 text-center hover:-translate-y-0.5 transition-all hover:border-primary/30"
+              >
+                <BookOpen className="h-5 w-5 text-primary mx-auto mb-1" />
+                <span className="text-sm font-bold text-foreground block">
+                  {isEn ? "Learn More" : "了解更多"}
+                </span>
+              </button>
+            </div>
           </div>
+
+          {/* NGO Resources */}
+          <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                <Heart className="h-6 w-6 text-success" />
+              </div>
+              <div>
+                <h2 className="text-lg font-extrabold text-foreground">
+                  {isEn ? "NGO Resources" : "非牟利機構資源"}
+                </h2>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {NGO_RESOURCES.map((ngo, i) => (
+                <a
+                  key={i}
+                  href={ngo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/60 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-foreground">{ngo.name}</p>
+                    <p className="text-xs text-muted-foreground">{ngo.desc}</p>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* IPA Library link */}
+          <button
+            onClick={() => navigate('/ipa')}
+            className="w-full bg-card border-2 border-border rounded-2xl p-5 text-left hover:-translate-y-0.5 transition-all hover:border-primary/30"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+                <Languages className="h-6 w-6 text-accent" />
+              </div>
+              <div>
+                <h3 className="text-lg font-extrabold text-foreground">
+                  {isEn ? "IPA Library" : "IPA 音標庫"}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {isEn ? "Learn phonetic symbols" : "學習音標符號和發音指南"}
+                </p>
+              </div>
+            </div>
+          </button>
         </div>
       </section>
     </div>
   );
-};
-
-export default ResourcesPage;
+}
