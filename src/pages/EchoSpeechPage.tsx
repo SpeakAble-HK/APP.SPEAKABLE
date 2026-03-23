@@ -29,7 +29,7 @@ const TARGET_PHONEMES = [
 export default function EchoSpeechPage() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const { user } = useAuth();
+  
   const { results, isLoading: historyLoading } = usePronunciationResults();
 
   const [selectedPhoneme, setSelectedPhoneme] = useState(TARGET_PHONEMES[0]);
