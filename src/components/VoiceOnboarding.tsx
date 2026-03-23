@@ -36,7 +36,7 @@ export function VoiceOnboarding({ onComplete, onCancel }: VoiceOnboardingProps) 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const startTimeRef = useRef(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const totalSentences = ONBOARDING_SENTENCES.length;
