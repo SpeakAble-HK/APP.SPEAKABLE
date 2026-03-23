@@ -62,6 +62,42 @@ export type Database = {
         }
         Relationships: []
       }
+      explorer_profiles: {
+        Row: {
+          age: number | null
+          created_at: string | null
+          daily_reminder: boolean | null
+          gender: string | null
+          id: string
+          nickname: string
+          onboarding_audio_url: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string | null
+          daily_reminder?: boolean | null
+          gender?: string | null
+          id?: string
+          nickname: string
+          onboarding_audio_url?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string | null
+          daily_reminder?: boolean | null
+          gender?: string | null
+          id?: string
+          nickname?: string
+          onboarding_audio_url?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       guest_usage: {
         Row: {
           created_at: string
@@ -86,6 +122,42 @@ export type Database = {
           updated_at?: string
           usage_date?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          accuracy_score: number | null
+          attempts: number | null
+          completed: boolean | null
+          created_at: string | null
+          id: string
+          lesson_id: string
+          updated_at: string | null
+          user_id: string
+          xp_earned: number | null
+        }
+        Insert: {
+          accuracy_score?: number | null
+          attempts?: number | null
+          completed?: boolean | null
+          created_at?: string | null
+          id?: string
+          lesson_id: string
+          updated_at?: string | null
+          user_id: string
+          xp_earned?: number | null
+        }
+        Update: {
+          accuracy_score?: number | null
+          attempts?: number | null
+          completed?: boolean | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string
+          updated_at?: string | null
+          user_id?: string
+          xp_earned?: number | null
         }
         Relationships: []
       }
@@ -200,6 +272,69 @@ export type Database = {
         }
         Relationships: []
       }
+      st_assignments: {
+        Row: {
+          assigned_at: string | null
+          category: string
+          id: string
+          student_id: string
+          therapist_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          category: string
+          id?: string
+          student_id: string
+          therapist_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          category?: string
+          id?: string
+          student_id?: string
+          therapist_id?: string
+        }
+        Relationships: []
+      }
+      st_students: {
+        Row: {
+          created_at: string | null
+          id: string
+          student_id: string
+          therapist_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          student_id: string
+          therapist_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          student_id?: string
+          therapist_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_stats: {
         Row: {
           best_streak: number
@@ -279,10 +414,16 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "explorer" | "therapist"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -409,6 +550,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["explorer", "therapist"],
+    },
   },
 } as const
