@@ -8,11 +8,16 @@ import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { AppLayout } from "./components/AppLayout";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
+import RoleSelectionPage from "./pages/RoleSelectionPage";
+import ExplorerOnboardingPage from "./pages/ExplorerOnboardingPage";
+import ExplorerDashboardPage from "./pages/ExplorerDashboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import ProfileEditPage from "./pages/ProfileEditPage";
 import EchoSpeechPage from "./pages/EchoSpeechPage";
 import PronunciationResultsPage from "./pages/PronunciationResultsPage";
 import SpeechQuestPage from "./pages/SpeechQuestPage";
+import LessonPage from "./pages/LessonPage";
+import STDashboardPage from "./pages/STDashboardPage";
 import AboutPage from "./pages/AboutPage";
 import SpeechTherapyInfoPage from "./pages/SpeechTherapyInfoPage";
 import AboutSpeechTherapyPage from "./pages/AboutSpeechTherapyPage";
@@ -47,13 +52,18 @@ const App = () => (
               <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
               <Route path="/auth/confirm" element={<ConfirmSignupPage />} />
               <Route path="/auth/invite" element={<InvitePage />} />
+              <Route path="/role-select" element={<RoleSelectionPage />} />
+              <Route path="/explorer/onboarding" element={<ExplorerOnboardingPage />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
+                <Route path="/explorer" element={<ExplorerDashboardPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/edit" element={<ProfileEditPage />} />
                 <Route path="/echo-speech" element={<EchoSpeechPage />} />
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                 <Route path="/speech-quest" element={<SpeechQuestPage />} />
+                <Route path="/lesson/:lessonId" element={<LessonPage />} />
+                <Route path="/st-dashboard" element={<STDashboardPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/resources" element={<ResourcesPage />} />
                 <Route path="/resources/find-provider" element={<SpeechTherapyInfoPage />} />
