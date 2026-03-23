@@ -8,7 +8,7 @@ import { WaveformVisualizer } from "@/components/WaveformVisualizer";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { usePronunciationResults } from "@/hooks/usePronunciationResults";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useAuth } from "@/hooks/useAuth";
+
 import { toast } from "sonner";
 import { format } from "date-fns";
 import mascot from "@/assets/mascot.png";
