@@ -149,7 +149,7 @@ export default function AuthPage() {
       toast.error(error.message.includes('Invalid login credentials') ? (isEn ? 'Invalid email or password' : '電郵或密碼無效') : error.message);
     } else {
       toast.success(isEn ? 'Welcome back!' : '歡迎回來！');
-      navigate('/');
+      navigate('/role-select');
     }
   };
 
