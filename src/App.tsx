@@ -54,8 +54,8 @@ const App = () => (
               <Route path="/auth/invite" element={<InvitePage />} />
               <Route path="/role-select" element={<RoleSelectionPage />} />
               <Route path="/explorer/onboarding" element={<ExplorerOnboardingPage />} />
+              <Route path="/" element={<Index />} />
               <Route element={<AppLayout />}>
-                <Route path="/" element={<Index />} />
                 <Route path="/explorer" element={<ExplorerDashboardPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/profile/edit" element={<ProfileEditPage />} />
