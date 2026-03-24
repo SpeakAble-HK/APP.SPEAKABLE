@@ -157,6 +157,7 @@ export default function ExplorerOnboardingPage() {
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }
