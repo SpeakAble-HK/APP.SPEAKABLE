@@ -9,6 +9,29 @@ import { toast } from "sonner";
 
 type LessonStep = 'listen' | 'perception' | 'production' | 'feedback';
 
+// Mouth demo video URLs mapped by production text
+const MOUTH_DEMOS: Record<string, string> = {
+  '爸爸': 'https://shuhmvmdkjspgawygqyf.supabase.co/storage/v1/object/public/mouth-demos/baba.mp4',
+  '波波': 'https://shuhmvmdkjspgawygqyf.supabase.co/storage/v1/object/public/mouth-demos/bobo.mp4',
+  '婆婆': 'https://shuhmvmdkjspgawygqyf.supabase.co/storage/v1/object/public/mouth-demos/popo.mp4',
+  '媽媽': 'https://shuhmvmdkjspgawygqyf.supabase.co/storage/v1/object/public/mouth-demos/mama.mp4',
+};
+
+// Helper to parse jyutping into initial/final/tone
+function parseJyutping(jp: string): { initial: string; final: string; tone: string } {
+  const toneMatch = jp.match(/(\d)$/);
+  const tone = toneMatch ? toneMatch[1] : '';
+  const body = jp.replace(/\d$/, '');
+  // Common Cantonese initials
+  const initials = ['ng','gw','kw','b','p','m','f','d','t','n','l','g','k','h','z','c','s','j','w'];
+  let initial = '';
+  for (const ini of initials) {
+    if (body.startsWith(ini)) { initial = ini; break; }
+  }
+  const final = body.slice(initial.length);
+  return { initial, final, tone };
+}
+
 export default function LessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>();
   const navigate = useNavigate();
@@ -134,6 +157,37 @@ export default function LessonPage() {
     setPerceptionCorrect(null);
   };
 
+  // Build detailed accuracy table from feedback
+  const buildAccuracyTable = () => {
+    if (!feedbackDetails) return null;
+    const intended = feedbackDetails.intended.filter((p: any) => p.phoneme);
+    const spoken = feedbackDetails.spoken.filter((p: any) => p.phoneme);
+
+    return intended.map((ip: any, i: number) => {
+      const sp = spoken[i];
+      const expectedParsed = ip.phoneme ? parseJyutping(ip.phoneme) : { initial: '', final: '', tone: '' };
+      const spokenParsed = sp?.phoneme ? parseJyutping(sp.phoneme) : { initial: '', final: '', tone: '' };
+
+      return {
+        character: ip.character,
+        expectedPhoneme: ip.phoneme || '',
+        spokenPhoneme: sp?.phoneme || '',
+        initialMatch: expectedParsed.initial === spokenParsed.initial,
+        finalMatch: expectedParsed.final === spokenParsed.final,
+        toneMatch: expectedParsed.tone === spokenParsed.tone,
+        expectedInitial: expectedParsed.initial,
+        spokenInitial: spokenParsed.initial,
+        expectedFinal: expectedParsed.final,
+        spokenFinal: spokenParsed.final,
+        expectedTone: expectedParsed.tone,
+        spokenTone: spokenParsed.tone,
+        isLowConfidence: sp?.isLowConfidence || false,
+      };
+    });
+  };
+
+  const mouthDemoUrl = MOUTH_DEMOS[lesson.productionText];
+
   return (
     <div className="min-h-full bg-background">
       {/* Top bar */}
@@ -151,12 +205,11 @@ export default function LessonPage() {
         {/* Step 1: Listen */}
         {step === 'listen' && (
           <div className="flex flex-col items-center text-center gap-6">
-            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">第一步：聆聽</h2>
+            <h2 className="text-sm font-bold text-primary tracking-wider">第一步：聆聽</h2>
             <div className="bg-card border-2 border-primary/20 rounded-2xl p-8 w-full">
               <p className="text-sm text-muted-foreground mb-2">目標音素</p>
               <p className="text-5xl font-extrabold text-primary mb-4">{lesson.targetPhoneme}</p>
-              <p className="text-xl font-bold text-foreground mb-1">{lesson.exampleWord}</p>
-              <p className="text-sm text-muted-foreground mb-4">{lesson.exampleWordEn}</p>
+              <p className="text-xl font-bold text-foreground mb-4">{lesson.exampleWord}</p>
 
               <div className="bg-muted/50 rounded-xl p-4 mb-6 text-left">
                 <p className="text-xs font-bold text-muted-foreground mb-1">發音提示</p>
@@ -187,7 +240,7 @@ export default function LessonPage() {
         {/* Step 2: Perception */}
         {step === 'perception' && (
           <div className="flex flex-col items-center text-center gap-6">
-            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">第二步：辨認</h2>
+            <h2 className="text-sm font-bold text-primary tracking-wider">第二步：辨認</h2>
             <p className="text-xl font-extrabold text-foreground">
               邊個詞語包含 {lesson.targetPhoneme}？
             </p>
@@ -236,11 +289,37 @@ export default function LessonPage() {
         {/* Step 3: Production */}
         {step === 'production' && (
           <div className="flex flex-col items-center text-center gap-6">
-            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">第三步：發音</h2>
+            <h2 className="text-sm font-bold text-primary tracking-wider">第三步：發音</h2>
 
             <div className="bg-card border-2 border-primary/20 rounded-2xl p-8 w-full">
               <p className="text-sm text-muted-foreground mb-2">請讀出</p>
               <p className="text-4xl font-extrabold text-foreground mb-4">{lesson.productionText}</p>
+
+              {/* Mouth Animation Demo */}
+              {mouthDemoUrl ? (
+                <div className="mb-4">
+                  <p className="text-xs font-bold text-muted-foreground mb-2">👄 嘴型示範</p>
+                  <div className="rounded-xl overflow-hidden border-2 border-border bg-muted">
+                    <video
+                      src={mouthDemoUrl}
+                      className="w-full max-h-48 object-contain"
+                      controls
+                      playsInline
+                      preload="metadata"
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1">觀察嘴型後，嘗試跟著讀</p>
+                </div>
+              ) : (
+                <div className="mb-4 bg-muted/50 rounded-xl p-4 border border-border">
+                  <p className="text-xs font-bold text-muted-foreground mb-1">👄 嘴型示範</p>
+                  <div className="flex items-center justify-center py-6">
+                    <div className="text-6xl animate-pulse">👄</div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{lesson.articulationInstructionZh}</p>
+                </div>
+              )}
+
               <p className="text-sm text-muted-foreground">{lesson.articulationInstructionZh}</p>
             </div>
 
@@ -281,7 +360,7 @@ export default function LessonPage() {
         {/* Step 4: Feedback */}
         {step === 'feedback' && (
           <div className="flex flex-col items-center text-center gap-6">
-            <h2 className="text-sm font-bold text-primary uppercase tracking-wider">第四步：反饋</h2>
+            <h2 className="text-sm font-bold text-primary tracking-wider">第四步：反饋</h2>
 
             <div className={`w-32 h-32 rounded-full flex items-center justify-center ${
               passed ? 'bg-success/10' : 'bg-destructive/10'
@@ -297,80 +376,98 @@ export default function LessonPage() {
               </h3>
               <p className="text-sm text-muted-foreground">
                 {passed
-                  ? `+${lesson.xpReward} XP！課程已完成。`
+                  ? `+${lesson.xpReward} 經驗值！課程已完成。`
                   : `需要 70% 才能通過。你獲得了 ${accuracy}%。`
                 }
               </p>
             </div>
 
-            {/* AI Feedback Details */}
-            {feedbackDetails && (
-              <div className="w-full space-y-3">
-                <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
-                  <h4 className="text-xs font-bold text-muted-foreground mb-2">識別文字</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {feedbackDetails.spoken.filter((p: any) => p.phoneme).map((p: any, i: number) => (
-                      <span key={i} className={`px-2 py-1 rounded text-xs font-bold ${
-                        p.isLowConfidence ? 'bg-destructive/10 text-destructive' : 'bg-success/10 text-success'
-                      }`}>
-                        {p.character}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+            {/* Detailed Accuracy Table */}
+            {feedbackDetails && (() => {
+              const tableData = buildAccuracyTable();
+              if (!tableData || tableData.length === 0) return null;
 
-                <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
-                  <h4 className="text-xs font-bold text-muted-foreground mb-2">拼音</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-[10px] font-bold text-muted-foreground mb-1">目標</p>
-                      <div className="flex flex-wrap gap-1">
-                        {feedbackDetails.intended.filter((p: any) => p.phoneme).map((p: any, i: number) => (
-                          <span key={i} className="px-2 py-1 bg-muted rounded text-xs font-bold">
-                            {p.character} ({p.phoneme})
-                          </span>
+              return (
+                <div className="w-full space-y-3">
+                  {/* Per-character accuracy table */}
+                  <div className="bg-card border-2 border-border rounded-2xl p-4 text-left overflow-x-auto">
+                    <h4 className="text-xs font-bold text-muted-foreground mb-3">📊 逐字準確度分析</h4>
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-border">
+                          <th className="py-2 px-2 text-left font-bold text-muted-foreground">字</th>
+                          <th className="py-2 px-2 text-center font-bold text-muted-foreground">聲母</th>
+                          <th className="py-2 px-2 text-center font-bold text-muted-foreground">韻母</th>
+                          <th className="py-2 px-2 text-center font-bold text-muted-foreground">聲調</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tableData.map((row: any, i: number) => (
+                          <tr key={i} className="border-b border-border/50">
+                            <td className="py-2 px-2 font-extrabold text-foreground text-base">{row.character}</td>
+                            <td className="py-2 px-2 text-center">
+                              <div className={`inline-flex flex-col items-center px-2 py-1 rounded-lg ${row.initialMatch ? 'bg-success/10' : 'bg-destructive/10'}`}>
+                                <span className={`font-bold ${row.initialMatch ? 'text-success' : 'text-destructive'}`}>
+                                  {row.spokenInitial || '—'}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  目標：{row.expectedInitial || '—'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <div className={`inline-flex flex-col items-center px-2 py-1 rounded-lg ${row.finalMatch ? 'bg-success/10' : 'bg-destructive/10'}`}>
+                                <span className={`font-bold ${row.finalMatch ? 'text-success' : 'text-destructive'}`}>
+                                  {row.spokenFinal || '—'}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  目標：{row.expectedFinal || '—'}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <div className={`inline-flex flex-col items-center px-2 py-1 rounded-lg ${row.toneMatch ? 'bg-success/10' : 'bg-destructive/10'}`}>
+                                <span className={`font-bold ${row.toneMatch ? 'text-success' : 'text-destructive'}`}>
+                                  {row.spokenTone || '—'}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  目標：{row.expectedTone || '—'}
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
                         ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Overall accuracy bar */}
+                  <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
+                    <h4 className="text-xs font-bold text-muted-foreground mb-2">準確度</h4>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 bg-muted rounded-full h-3 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${passed ? 'bg-success' : 'bg-destructive'}`}
+                          style={{ width: `${accuracy}%` }}
+                        />
                       </div>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-muted-foreground mb-1">你的發音</p>
-                      <div className="flex flex-wrap gap-1">
-                        {feedbackDetails.spoken.filter((p: any) => p.phoneme).map((p: any, i: number) => (
-                          <span key={i} className={`px-2 py-1 rounded text-xs font-bold ${
-                            p.isLowConfidence ? 'bg-destructive/10 text-destructive' : 'bg-success/10 text-success'
-                          }`}>
-                            {p.character} ({p.phoneme})
-                          </span>
-                        ))}
-                      </div>
+                      <span className="text-sm font-extrabold text-foreground">{accuracy}%</span>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
-                  <h4 className="text-xs font-bold text-muted-foreground mb-2">準確度</h4>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 bg-muted rounded-full h-3 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${passed ? 'bg-success' : 'bg-destructive'}`}
-                        style={{ width: `${accuracy}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-extrabold text-foreground">{accuracy}%</span>
+                  {/* Suggestion */}
+                  <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
+                    <h4 className="text-xs font-bold text-muted-foreground mb-2">簡單建議</h4>
+                    <p className="text-sm text-foreground">
+                      {passed
+                        ? '做得好！繼續保持，嘗試下一課練習。'
+                        : `留意 ${lesson.targetPhoneme} 的發音位置。${lesson.articulationInstructionZh}。多練習幾次就會進步！`
+                      }
+                    </p>
                   </div>
                 </div>
-
-                <div className="bg-card border-2 border-border rounded-2xl p-4 text-left">
-                  <h4 className="text-xs font-bold text-muted-foreground mb-2">簡單建議</h4>
-                  <p className="text-sm text-foreground">
-                    {passed
-                      ? '做得好！繼續保持，嘗試下一課練習。'
-                      : `留意 ${lesson.targetPhoneme} 的發音位置。${lesson.articulationInstructionZh}。多練習幾次就會進步！`
-                    }
-                  </p>
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             <div className="flex gap-3 w-full">
               <Button
