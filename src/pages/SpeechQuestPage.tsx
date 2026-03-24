@@ -10,15 +10,18 @@ export default function SpeechQuestPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const getProgress = () => {
-    try { return JSON.parse(sessionStorage.getItem("lesson_progress") || "{}"); }
-    catch { return {}; }
+    try {
+      return JSON.parse(sessionStorage.getItem("lesson_progress") || "{}");
+    } catch {
+      return {};
+    }
   };
   const progress = getProgress();
 
   // ─── Lesson Map (Vertical Nodes) ───
   if (selectedCategory) {
     const lessons = getLessonsByCategory(selectedCategory);
-    const cat = phonemeCategories.find(c => c.id === selectedCategory);
+    const cat = phonemeCategories.find((c) => c.id === selectedCategory);
 
     return (
       <div className="min-h-full bg-background">
@@ -49,9 +52,11 @@ export default function SpeechQuestPage() {
               return (
                 <div key={lesson.id} className="flex flex-col items-center">
                   {i > 0 && (
-                    <div className={`w-1 h-10 rounded-full ${
-                      isCompleted ? "bg-success" : isLocked ? "bg-muted" : "bg-success/30"
-                    }`} />
+                    <div
+                      className={`w-1 h-10 rounded-full ${
+                        isCompleted ? "bg-success" : isLocked ? "bg-muted" : "bg-success/30"
+                      }`}
+                    />
                   )}
                   <button
                     onClick={() => !isLocked && navigate(`/lesson/${lesson.id}`)}
@@ -60,8 +65,8 @@ export default function SpeechQuestPage() {
                       isCompleted
                         ? "bg-success text-success-foreground shadow-[0_4px_0_hsl(var(--success)/0.7)]"
                         : isLocked
-                        ? "bg-muted text-muted-foreground cursor-not-allowed"
-                        : "bg-accent text-accent-foreground shadow-[0_4px_0_hsl(var(--accent)/0.7)] hover:shadow-[0_2px_0_hsl(var(--accent)/0.7)] active:translate-y-[2px]"
+                          ? "bg-muted text-muted-foreground cursor-not-allowed"
+                          : "bg-accent text-accent-foreground shadow-[0_4px_0_hsl(var(--accent)/0.7)] hover:shadow-[0_2px_0_hsl(var(--accent)/0.7)] active:translate-y-[2px]"
                     }`}
                   >
                     {isCompleted ? (
@@ -72,9 +77,11 @@ export default function SpeechQuestPage() {
                       <span>{i + 1}</span>
                     )}
                   </button>
-                  <p className={`mt-2 text-xs font-bold text-center max-w-[120px] ${
-                    isLocked ? "text-muted-foreground" : "text-foreground"
-                  }`}>
+                  <p
+                    className={`mt-2 text-xs font-bold text-center max-w-[120px] ${
+                      isLocked ? "text-muted-foreground" : "text-foreground"
+                    }`}
+                  >
                     {lesson.titleZh}
                   </p>
                 </div>
@@ -95,10 +102,18 @@ export default function SpeechQuestPage() {
           <img src={islandBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           <div className="relative flex items-end p-4 gap-3">
-            <img src={pipiIsland} alt="皮皮" className="h-28 w-28 object-contain drop-shadow-lg" loading="lazy" width={1024} height={1024} />
+            <img
+              src={pipiIsland}
+              alt="皮皮"
+              className="h-28 w-28 object-contain drop-shadow-lg"
+              loading="lazy"
+              width={1024}
+              height={1024}
+            />
             <div className="bg-card/95 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm mb-4">
               <p className="text-sm font-bold text-foreground">
-                發音小島用粵語中，<br />到簡啲存克跳錢！
+                練習加油！
+                <br />
               </p>
             </div>
           </div>
@@ -107,10 +122,7 @@ export default function SpeechQuestPage() {
         {/* Island Selection */}
         <div className="grid grid-cols-2 gap-3">
           {/* Phonetic Island */}
-          <button
-            onClick={() => {}}
-            className="bg-card rounded-2xl p-4 border-2 border-primary shadow-sm text-center"
-          >
+          <button onClick={() => {}} className="bg-card rounded-2xl p-4 border-2 border-primary shadow-sm text-center">
             <span className="text-3xl block mb-2">🗣️</span>
             <p className="text-sm font-extrabold text-foreground">發音小島</p>
             <span className="text-[10px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-full mt-1 inline-block">
@@ -128,15 +140,13 @@ export default function SpeechQuestPage() {
         </div>
 
         {/* Section title */}
-        <h2 className="text-lg font-extrabold text-foreground flex items-center gap-2">
-          🗣️ 發音小島
-        </h2>
+        <h2 className="text-lg font-extrabold text-foreground flex items-center gap-2">🗣️ 發音小島</h2>
 
         {/* 4 Categories */}
         <div className="grid grid-cols-2 gap-3">
           {phonemeCategories.map((cat) => {
             const catLessons = getLessonsByCategory(cat.id);
-            const completed = catLessons.filter(l => progress[l.id]?.completed).length;
+            const completed = catLessons.filter((l) => progress[l.id]?.completed).length;
             const allDone = completed === catLessons.length && catLessons.length > 0;
 
             return (
@@ -148,11 +158,11 @@ export default function SpeechQuestPage() {
                 <span className="text-3xl block mb-2">{cat.emoji}</span>
                 <p className="text-sm font-extrabold text-foreground mb-1">{cat.labelZh}</p>
                 <div className="flex items-center justify-center gap-1 mb-2">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                    allDone
-                      ? "bg-success/10 text-success"
-                      : "bg-accent/10 text-accent"
-                  }`}>
+                  <span
+                    className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                      allDone ? "bg-success/10 text-success" : "bg-accent/10 text-accent"
+                    }`}
+                  >
                     {completed}/{catLessons.length}
                   </span>
                 </div>
