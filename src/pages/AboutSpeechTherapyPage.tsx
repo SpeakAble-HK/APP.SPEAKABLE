@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Heart, AlertTriangle, BookOpen, HelpCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 const AboutSpeechTherapyPage = () => {
   const { language } = useLanguage();

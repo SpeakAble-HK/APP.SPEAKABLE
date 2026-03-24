@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Mic, Stethoscope, Users } from "lucide-react";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 import { GlobalHeader } from "@/components/GlobalHeader";
 
 export default function RoleSelectionPage() {

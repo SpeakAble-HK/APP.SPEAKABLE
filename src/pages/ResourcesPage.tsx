@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { MapPin, BookOpen, Languages, Heart, ExternalLink } from "lucide-react";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 const NGO_RESOURCES = [
   { name: '香港言語治療師協會', url: 'https://www.hkist.org.hk', desc: '專業言語治療師組織' },

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useLeaderboard, LeaderboardEntry } from "@/hooks/useLeaderboard";
 import { useAuth } from "@/hooks/useAuth";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 

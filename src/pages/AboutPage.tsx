@@ -2,7 +2,7 @@ import { AudioLines, Headphones, BookOpen, BarChart3, Sparkles, ArrowRight, Swor
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 const AboutPage = () => {
   const { language } = useLanguage();

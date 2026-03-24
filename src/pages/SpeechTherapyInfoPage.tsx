@@ -4,7 +4,7 @@ import { Search, MapPin, Phone, Globe, X, AlertTriangle, Heart, BookOpen, HelpCi
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { providers, districts, SpeechTherapyProvider } from "@/data/speechTherapyProviders";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 type RegionKey = 'all' | 'hk-island' | 'kowloon' | 'new-territories';
 

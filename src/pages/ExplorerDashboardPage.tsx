@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Flame, Trophy, Star } from "lucide-react";
-import pipiIsland from "@/assets/pipi-island.png";
+import pipiIsland from "@/assets/pipi-mascot.png";
 import islandBg from "@/assets/island-bg.jpg";
 
 export default function ExplorerDashboardPage() {

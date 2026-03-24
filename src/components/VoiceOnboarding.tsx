@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { useAuth } from "@/hooks/useAuth";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 const ONBOARDING_SENTENCES = [
   { zh: "你今日食咗飯未啊", en: "Have you eaten today?" },

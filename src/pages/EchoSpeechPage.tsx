@@ -10,7 +10,7 @@ import { usePronunciationResults } from "@/hooks/usePronunciationResults";
 
 import { toast } from "sonner";
 import { format } from "date-fns";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 const ALLOWED_AUDIO_TYPES = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/webm', 'audio/ogg', 'audio/m4a', 'audio/x-m4a'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
