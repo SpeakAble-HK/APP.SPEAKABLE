@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Home, Gamepad2, Bird, Settings } from "lucide-react";
+import { GlobalHeader } from "./GlobalHeader";
 
 interface AppLayoutProps {
   children?: ReactNode;
@@ -25,11 +26,11 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-background">
+      <GlobalHeader />
       <main id="main-content" className="flex-1 overflow-auto pb-20">
         {children || <Outlet />}
       </main>
 
-      {/* Bottom Tab Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t-2 border-border safe-area-bottom" aria-label="導航">
         <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
           {tabs.map((tab) => {

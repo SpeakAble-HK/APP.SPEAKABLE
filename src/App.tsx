@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { AppLayout } from "./components/AppLayout";
+import { STLayout } from "./components/STLayout";
 import Index from "./pages/Index";
 import RoleSelectionPage from "./pages/RoleSelectionPage";
 import ExplorerOnboardingPage from "./pages/ExplorerOnboardingPage";
@@ -15,6 +16,8 @@ import PronunciationResultsPage from "./pages/PronunciationResultsPage";
 import SpeechQuestPage from "./pages/SpeechQuestPage";
 import LessonPage from "./pages/LessonPage";
 import STDashboardPage from "./pages/STDashboardPage";
+import STAccountsPage from "./pages/STAccountsPage";
+import STSettingsPage from "./pages/STSettingsPage";
 import PiPiPage from "./pages/PiPiPage";
 import SettingsPage from "./pages/SettingsPage";
 import ResourcesPage from "./pages/ResourcesPage";
@@ -43,9 +46,15 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/role-select" element={<RoleSelectionPage />} />
               <Route path="/explorer/onboarding" element={<ExplorerOnboardingPage />} />
-              <Route path="/st-dashboard" element={<STDashboardPage />} />
 
-              {/* Pages with bottom nav */}
+              {/* ST pages with ST bottom nav */}
+              <Route element={<STLayout />}>
+                <Route path="/st-dashboard" element={<STDashboardPage />} />
+                <Route path="/st-accounts" element={<STAccountsPage />} />
+                <Route path="/st-settings" element={<STSettingsPage />} />
+              </Route>
+
+              {/* Explorer pages with bottom nav */}
               <Route element={<AppLayout />}>
                 <Route path="/explorer" element={<ExplorerDashboardPage />} />
                 <Route path="/echo-speech" element={<EchoSpeechPage />} />
