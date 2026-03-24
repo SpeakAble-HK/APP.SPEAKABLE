@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import mascot from "@/assets/mascot.png";
+import { GlobalHeader } from "@/components/GlobalHeader";
 
 export default function ExplorerOnboardingPage() {
   const navigate = useNavigate();
@@ -64,7 +65,9 @@ export default function ExplorerOnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-background flex flex-col">
+      <GlobalHeader />
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
       <img src={mascot} alt="" className="h-20 w-20 object-contain mascot-bounce mb-6" />
 
       {step === 'info' && (
@@ -154,6 +157,7 @@ export default function ExplorerOnboardingPage() {
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }
