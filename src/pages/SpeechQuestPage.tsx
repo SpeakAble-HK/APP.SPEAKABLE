@@ -1,96 +1,84 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Lock, CheckCircle2, Star } from "lucide-react";
-import { phonemeCategories, semanticCategories, getLessonsByCategory } from "@/data/lessons";
-import parrot from "@/assets/quest-parrot.png";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Lock, CheckCircle2, ChevronRight } from "lucide-react";
+import { phonemeCategories, getLessonsByCategory } from "@/data/lessons";
+import pipiIsland from "@/assets/pipi-island.png";
+import islandBg from "@/assets/island-bg.jpg";
 
 export default function SpeechQuestPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const island = (searchParams.get('island') as 'phonetic' | 'semantic') || 'phonetic';
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Local progress from sessionStorage
   const getProgress = () => {
-    try {
-      return JSON.parse(sessionStorage.getItem('lesson_progress') || '{}');
-    } catch { return {}; }
+    try { return JSON.parse(sessionStorage.getItem("lesson_progress") || "{}"); }
+    catch { return {}; }
   };
   const progress = getProgress();
 
-  // Only bilabial for phonetic in prototype
-  const categories = island === 'phonetic'
-    ? phonemeCategories.filter(c => c.id === 'bilabial')
-    : semanticCategories;
-  const islandTitle = island === 'phonetic' ? '發音小島' : '語義小島';
-  const islandEmoji = island === 'phonetic' ? '🗣️' : '📖';
-
+  // ─── Lesson Map (Vertical Nodes) ───
   if (selectedCategory) {
     const lessons = getLessonsByCategory(selectedCategory);
-    const cat = (island === 'phonetic' ? phonemeCategories : semanticCategories).find(c => c.id === selectedCategory);
+    const cat = phonemeCategories.find(c => c.id === selectedCategory);
 
     return (
-      <div className="min-h-full bg-background">
-        <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="min-h-full bg-[hsl(200,30%,96%)]">
+        <div className="max-w-lg mx-auto px-4 py-6">
           <button
             onClick={() => setSelectedCategory(null)}
-            className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground mb-6"
+            className="flex items-center gap-2 text-sm font-bold text-[hsl(200,10%,50%)] hover:text-[hsl(200,10%,30%)] mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
             返回
           </button>
 
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-8">
             <span className="text-3xl">{cat?.emoji}</span>
             <div>
-              <h1 className="text-2xl font-extrabold text-foreground">{cat?.labelZh}</h1>
-              <p className="text-sm text-muted-foreground">{cat?.label}</p>
+              <h1 className="text-xl font-extrabold text-[hsl(200,15%,20%)]">{cat?.labelZh}</h1>
+              <p className="text-xs text-[hsl(200,10%,50%)]">{cat?.label}</p>
             </div>
           </div>
 
-          <div className="space-y-3">
+          {/* Vertical Path */}
+          <div className="flex flex-col items-center">
             {lessons.map((lesson, i) => {
               const p = progress[lesson.id];
               const isCompleted = p?.completed;
-              const prevLesson = lessons[i - 1];
-              const prevCompleted = i === 0 || progress[prevLesson?.id]?.completed;
+              const prevCompleted = i === 0 || progress[lessons[i - 1]?.id]?.completed;
               const isLocked = i > 0 && !prevCompleted;
 
               return (
-                <button
-                  key={lesson.id}
-                  onClick={() => !isLocked && navigate(`/lesson/${lesson.id}`)}
-                  disabled={isLocked}
-                  className={`w-full flex items-center gap-4 rounded-2xl p-4 border-2 transition-all text-left ${
-                    isCompleted
-                      ? 'bg-success/10 border-success/30'
-                      : isLocked
-                      ? 'bg-muted/50 border-border opacity-60 cursor-not-allowed'
-                      : 'bg-card border-border hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md'
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                    isCompleted ? 'bg-success/20' : isLocked ? 'bg-muted' : 'bg-primary/10'
-                  }`}>
+                <div key={lesson.id} className="flex flex-col items-center">
+                  {i > 0 && (
+                    <div className={`w-1 h-10 rounded-full ${
+                      isCompleted ? "bg-[hsl(152,60%,45%)]" : isLocked ? "bg-[hsl(200,20%,85%)]" : "bg-[hsl(152,60%,45%)/0.3]"
+                    }`} />
+                  )}
+                  <button
+                    onClick={() => !isLocked && navigate(`/lesson/${lesson.id}`)}
+                    disabled={isLocked}
+                    className={`w-20 h-20 rounded-full flex items-center justify-center text-xl font-extrabold shadow-lg transition-all ${
+                      isCompleted
+                        ? "bg-[hsl(152,60%,45%)] text-white shadow-[0_4px_0_hsl(152,60%,32%)]"
+                        : isLocked
+                        ? "bg-[hsl(200,20%,85%)] text-[hsl(200,10%,60%)] cursor-not-allowed"
+                        : "bg-[hsl(45,95%,55%)] text-white shadow-[0_4px_0_hsl(45,80%,40%)] hover:shadow-[0_2px_0_hsl(45,80%,40%)] active:translate-y-[2px]"
+                    }`}
+                  >
                     {isCompleted ? (
-                      <CheckCircle2 className="h-6 w-6 text-success" />
+                      <CheckCircle2 className="h-8 w-8" />
                     ) : isLocked ? (
-                      <Lock className="h-5 w-5 text-muted-foreground" />
+                      <Lock className="h-7 w-7" />
                     ) : (
-                      <span className="text-lg font-extrabold text-primary">{i + 1}</span>
+                      <span>{i + 1}</span>
                     )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-extrabold text-foreground">{lesson.titleZh}</p>
-                    <p className="text-xs text-muted-foreground">
-                      目標: {lesson.targetPhoneme} · {lesson.exampleWord}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs font-bold text-accent">
-                    <Star className="h-3.5 w-3.5" />
-                    {p?.xp_earned || 0}/{lesson.xpReward}
-                  </div>
-                </button>
+                  </button>
+                  <p className={`mt-2 text-xs font-bold text-center max-w-[120px] ${
+                    isLocked ? "text-[hsl(200,10%,65%)]" : "text-[hsl(200,15%,30%)]"
+                  }`}>
+                    {lesson.titleZh}
+                  </p>
+                </div>
               );
             })}
           </div>
@@ -99,71 +87,83 @@ export default function SpeechQuestPage() {
     );
   }
 
+  // ─── Islands + Categories ───
   return (
-    <div className="min-h-full bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <button
-          onClick={() => navigate('/explorer')}
-          className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          返回
-        </button>
-
-        <div className="flex flex-col items-center text-center mb-8">
-          <img src={parrot} alt="" className="h-32 w-32 object-contain mascot-bounce mb-4" />
-          <h1 className="text-3xl font-extrabold text-foreground mb-1">
-            {islandEmoji} {islandTitle}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            選擇一個類別開始練習
-          </p>
+    <div className="min-h-full bg-[hsl(200,30%,96%)]">
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
+        {/* Mascot + Speech Bubble */}
+        <div className="relative rounded-3xl overflow-hidden" style={{ minHeight: 200 }}>
+          <img src={islandBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          <div className="relative flex items-end p-4 gap-3">
+            <img src={pipiIsland} alt="皮皮" className="h-28 w-28 object-contain drop-shadow-lg" loading="lazy" width={1024} height={1024} />
+            <div className="bg-white/95 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm mb-4">
+              <p className="text-sm font-bold text-[hsl(200,15%,25%)]">
+                發音小島用粵語中，<br />到簡啲存克跳錢！
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Island toggle */}
-        <div className="flex bg-muted rounded-xl p-1 mb-6">
+        {/* Island Selection */}
+        <div className="grid grid-cols-2 gap-3">
+          {/* Phonetic Island */}
           <button
-            onClick={() => navigate('/speech-quest?island=phonetic')}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors ${
-              island === 'phonetic' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
-            }`}
+            onClick={() => {}} // already on this page
+            className="bg-white rounded-2xl p-4 border-2 border-[hsl(152,60%,45%)] shadow-sm text-center"
           >
-            🗣️ 發音小島
+            <span className="text-3xl block mb-2">🗣️</span>
+            <p className="text-sm font-extrabold text-[hsl(200,15%,20%)]">發音小島</p>
+            <span className="text-[10px] font-bold text-[hsl(152,50%,40%)] bg-[hsl(152,50%,92%)] px-2 py-0.5 rounded-full mt-1 inline-block">
+              可進入
+            </span>
           </button>
-          <button
-            onClick={() => navigate('/speech-quest?island=semantic')}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-colors ${
-              island === 'semantic' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
-            }`}
-          >
-            📖 語義小島
-          </button>
+          {/* Semantic Island (locked) */}
+          <div className="bg-white/60 rounded-2xl p-4 border-2 border-[hsl(200,20%,85%)] text-center opacity-60">
+            <span className="text-3xl block mb-2">📖</span>
+            <p className="text-sm font-extrabold text-[hsl(200,15%,40%)]">語義小島</p>
+            <span className="text-[10px] font-bold text-[hsl(200,10%,55%)] bg-[hsl(200,20%,90%)] px-2 py-0.5 rounded-full mt-1 inline-block">
+              🔒 開發中
+            </span>
+          </div>
         </div>
 
-        {/* Category cards */}
-        <div className="grid grid-cols-2 gap-4">
-          {categories.map((cat) => {
+        {/* Section title */}
+        <h2 className="text-lg font-extrabold text-[hsl(200,15%,20%)] flex items-center gap-2">
+          🗣️ 發音小島
+          <span className="text-[10px] font-bold text-[hsl(200,10%,55%)] bg-[hsl(200,20%,90%)] px-2 py-0.5 rounded-full">
+            未開放
+          </span>
+        </h2>
+
+        {/* 4 Categories */}
+        <div className="grid grid-cols-2 gap-3">
+          {phonemeCategories.map((cat) => {
             const catLessons = getLessonsByCategory(cat.id);
             const completed = catLessons.filter(l => progress[l.id]?.completed).length;
+            const allDone = completed === catLessons.length && catLessons.length > 0;
 
             return (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className="bg-card border-2 border-border rounded-2xl p-5 text-center hover:-translate-y-1 transition-all hover:shadow-lg hover:border-primary/30 active:translate-y-0"
+                className="bg-white rounded-2xl p-4 border-2 border-[hsl(200,20%,88%)] hover:border-[hsl(152,60%,45%)] shadow-sm text-center transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
-                <span className="text-4xl block mb-3">{cat.emoji}</span>
-                <h3 className="text-base font-extrabold text-foreground mb-1">{cat.labelZh}</h3>
-                <p className="text-xs text-muted-foreground mb-2">{cat.label}</p>
-                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: catLessons.length > 0 ? `${(completed / catLessons.length) * 100}%` : '0%' }}
-                  />
+                <span className="text-3xl block mb-2">{cat.emoji}</span>
+                <p className="text-sm font-extrabold text-[hsl(200,15%,20%)] mb-1">{cat.labelZh}</p>
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                    allDone
+                      ? "bg-[hsl(152,50%,90%)] text-[hsl(152,50%,35%)]"
+                      : "bg-[hsl(45,90%,90%)] text-[hsl(45,70%,35%)]"
+                  }`}>
+                    {completed}/{catLessons.length}
+                  </span>
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-1 font-bold">
-                  {completed}/{catLessons.length}
-                </p>
+                <div className="flex items-center justify-center gap-1 text-xs font-bold text-[hsl(152,50%,40%)]">
+                  {allDone ? "已完成" : "開始"}
+                  <ChevronRight className="h-3 w-3" />
+                </div>
               </button>
             );
           })}
