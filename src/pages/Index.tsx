@@ -16,7 +16,7 @@ const Index = () => {
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-[hsl(220,20%,8%/0.85)] border-b border-[hsl(220,14%,18%)]">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <img src={heroMascot} alt="SpeakAble HK" className="h-9 w-9 object-contain" />
+            <img src={logoImg} alt="SpeakAble HK" className="h-9 w-9 object-contain" />
             <span className="text-lg font-extrabold tracking-tight">SpeakAble HK</span>
           </div>
           <Button
