@@ -31,7 +31,6 @@ const Index = () => {
 
       {/* ─── Hero ─── */}
       <section className="relative flex flex-col items-center pt-20 pb-28 px-4">
-        {/* Glow orbs */}
         <div className="absolute top-10 left-1/4 w-72 h-72 rounded-full bg-[hsl(174,62%,47%/0.12)] blur-[100px] pointer-events-none" />
         <div className="absolute top-20 right-1/4 w-60 h-60 rounded-full bg-[hsl(38,95%,60%/0.08)] blur-[80px] pointer-events-none" />
 
@@ -49,7 +48,7 @@ const Index = () => {
           </span>
         </h1>
         <p className="text-xl sm:text-2xl text-[hsl(220,10%,60%)] text-center mb-4 max-w-lg">
-          個人化言語訓練 · AI 驅動 · 遊戲化學習
+          個人化言語訓練 · 人工智能驅動 · 遊戲化學習
         </p>
         <p className="text-sm text-[hsl(220,10%,45%)] text-center mb-10 max-w-md">
           專為粵語設計嘅語音訓練平台，結合聲音克隆技術同互動遊戲，令學習更加有趣
@@ -75,7 +74,7 @@ const Index = () => {
             <div key={i} className="flex gap-10 items-center text-sm text-[hsl(220,10%,45%)] font-semibold">
               <span className="flex items-center gap-2"><Mic className="h-4 w-4 text-[hsl(174,62%,55%)]" /> 語音識別</span>
               <span>·</span>
-              <span className="flex items-center gap-2"><Brain className="h-4 w-4 text-[hsl(38,95%,60%)]" /> AI 反饋</span>
+              <span className="flex items-center gap-2"><Brain className="h-4 w-4 text-[hsl(38,95%,60%)]" /> 人工智能反饋</span>
               <span>·</span>
               <span className="flex items-center gap-2"><Volume2 className="h-4 w-4 text-[hsl(174,62%,55%)]" /> 聲音克隆</span>
               <span>·</span>
@@ -100,27 +99,24 @@ const Index = () => {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Card 1 */}
           <div className="group relative rounded-3xl border-2 border-[hsl(220,14%,18%)] bg-[hsl(220,18%,11%)] p-8 hover:border-[hsl(174,62%,47%/0.4)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-[hsl(174,62%,47%/0.05)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <img src={featureSpeak} alt="語音訓練" className="h-32 w-32 object-contain mx-auto mb-6 drop-shadow-lg" loading="lazy" width={512} height={512} />
             <h3 className="text-xl font-bold mb-2 text-center">🎙️ 語音訓練</h3>
             <p className="text-sm text-[hsl(220,10%,50%)] text-center leading-relaxed">
-              錄低你嘅聲音，AI 即時分析發音準確度，提供個人化建議
+              錄低你嘅聲音，人工智能即時分析發音準確度，提供個人化建議
             </p>
           </div>
 
-          {/* Card 2 */}
           <div className="group relative rounded-3xl border-2 border-[hsl(220,14%,18%)] bg-[hsl(220,18%,11%)] p-8 hover:border-[hsl(38,95%,60%/0.4)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-[hsl(38,95%,60%/0.05)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <img src={featureAI} alt="AI 反饋" className="h-32 w-32 object-contain mx-auto mb-6 drop-shadow-lg" loading="lazy" width={512} height={512} />
-            <h3 className="text-xl font-bold mb-2 text-center">🤖 AI 分析</h3>
+            <img src={featureAI} alt="人工智能反饋" className="h-32 w-32 object-contain mx-auto mb-6 drop-shadow-lg" loading="lazy" width={512} height={512} />
+            <h3 className="text-xl font-bold mb-2 text-center">🤖 人工智能分析</h3>
             <p className="text-sm text-[hsl(220,10%,50%)] text-center leading-relaxed">
               智能語音辨識結合粵語拼音分析，即時回饋發音表現
             </p>
           </div>
 
-          {/* Card 3 */}
           <div className="group relative rounded-3xl border-2 border-[hsl(220,14%,18%)] bg-[hsl(220,18%,11%)] p-8 hover:border-[hsl(174,62%,47%/0.4)] transition-all duration-300 hover:-translate-y-1 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-[hsl(174,62%,47%/0.05)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <img src={featureQuest} alt="冒險模式" className="h-32 w-32 object-contain mx-auto mb-6 drop-shadow-lg" loading="lazy" width={512} height={512} />
@@ -143,11 +139,11 @@ const Index = () => {
             {[
               { step: "01", icon: "🎯", title: "選擇角色", desc: "語音探險家、言語治療師、或公眾人士" },
               { step: "02", icon: "🎤", title: "錄製聲音", desc: "用你嘅聲音建立個人語音模型" },
-              { step: "03", icon: "🚀", title: "開始訓練", desc: "透過互動遊戲同AI反饋提升發音" },
+              { step: "03", icon: "🚀", title: "開始訓練", desc: "透過互動遊戲同人工智能反饋提升發音" },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <span className="text-xs font-bold text-[hsl(174,62%,55%)] tracking-widest mb-3 block">
-                  STEP {item.step}
+                  第 {item.step} 步
                 </span>
                 <div className="text-4xl mb-4">{item.icon}</div>
                 <h3 className="text-lg font-bold mb-2">{item.title}</h3>

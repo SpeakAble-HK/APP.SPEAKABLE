@@ -23,31 +23,31 @@ export default function ExplorerDashboardPage() {
   const totalXp = Object.values(progress).reduce((sum: number, p: any) => sum + (p.xp_earned || 0), 0) as number;
 
   return (
-    <div className="min-h-full">
+    <div className="min-h-full bg-background">
       {/* Stats Bar */}
-      <div className="bg-white px-4 py-3 flex items-center justify-between">
+      <div className="bg-card px-4 py-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-2">
           <span className="text-lg">🦜</span>
-          <span className="font-extrabold text-[hsl(200,15%,25%)]">{nickname}</span>
+          <span className="font-extrabold text-foreground">{nickname}</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
-            <div className="w-7 h-7 rounded-full bg-[hsl(45,95%,55%)] flex items-center justify-center">
-              <Star className="h-3.5 w-3.5 text-white" />
+            <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center">
+              <Star className="h-3.5 w-3.5 text-accent-foreground" />
             </div>
-            <span className="text-sm font-extrabold text-[hsl(45,80%,35%)]">{totalXp}</span>
+            <span className="text-sm font-extrabold text-foreground">{totalXp}</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-7 h-7 rounded-full bg-[hsl(15,90%,55%)] flex items-center justify-center">
-              <Flame className="h-3.5 w-3.5 text-white" />
+            <div className="w-7 h-7 rounded-full bg-destructive flex items-center justify-center">
+              <Flame className="h-3.5 w-3.5 text-destructive-foreground" />
             </div>
-            <span className="text-sm font-extrabold text-[hsl(15,70%,40%)]">0</span>
+            <span className="text-sm font-extrabold text-foreground">0</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-7 h-7 rounded-full bg-[hsl(152,60%,42%)] flex items-center justify-center">
-              <Trophy className="h-3.5 w-3.5 text-white" />
+            <div className="w-7 h-7 rounded-full bg-success flex items-center justify-center">
+              <Trophy className="h-3.5 w-3.5 text-success-foreground" />
             </div>
-            <span className="text-sm font-extrabold text-[hsl(152,50%,30%)]">{completedCount}</span>
+            <span className="text-sm font-extrabold text-foreground">{completedCount}</span>
           </div>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function ExplorerDashboardPage() {
             <img src={pipiIsland} alt="皮皮" className="h-40 w-40 object-contain mascot-bounce drop-shadow-lg" width={1024} height={1024} />
             <button
               onClick={() => navigate("/speech-quest")}
-              className="mt-4 w-full max-w-xs h-14 rounded-2xl bg-[hsl(152,60%,45%)] text-white text-lg font-extrabold shadow-[0_5px_0_hsl(152,60%,32%)] hover:shadow-[0_3px_0_hsl(152,60%,32%)] active:shadow-[0_1px_0_hsl(152,60%,32%)] active:translate-y-[2px] transition-all"
+              className="mt-4 w-full max-w-xs h-14 rounded-2xl bg-primary text-primary-foreground text-lg font-extrabold shadow-[0_5px_0_hsl(var(--primary-dark))] hover:shadow-[0_3px_0_hsl(var(--primary-dark))] active:shadow-[0_1px_0_hsl(var(--primary-dark))] active:translate-y-[2px] transition-all"
             >
               開始今日練習
             </button>
@@ -72,24 +72,24 @@ export default function ExplorerDashboardPage() {
         </div>
 
         {/* Progress */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-[hsl(200,20%,90%)]">
+        <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-bold text-[hsl(200,15%,35%)]">📊 整體進度</span>
-            <span className="text-xs font-bold text-[hsl(200,10%,55%)]">{completedCount}/11 課</span>
+            <span className="text-sm font-bold text-foreground">📊 整體進度</span>
+            <span className="text-xs font-bold text-muted-foreground">{completedCount}/11 課</span>
           </div>
-          <div className="w-full bg-[hsl(200,20%,92%)] rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
             <div
-              className="h-full bg-[hsl(152,60%,45%)] rounded-full transition-all"
+              className="h-full bg-primary rounded-full transition-all"
               style={{ width: `${(completedCount / 11) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Recent Practice */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-[hsl(200,20%,90%)]">
-          <h3 className="text-sm font-bold text-[hsl(200,15%,35%)] mb-3">📝 最近練習</h3>
+        <div className="bg-card rounded-2xl p-4 shadow-sm border border-border">
+          <h3 className="text-sm font-bold text-foreground mb-3">📝 最近練習</h3>
           {completedCount === 0 ? (
-            <p className="text-sm text-[hsl(200,10%,55%)] text-center py-4">
+            <p className="text-sm text-muted-foreground text-center py-4">
               仲未開始練習，快啲去語音冒險開始啦！
             </p>
           ) : (
@@ -98,9 +98,9 @@ export default function ExplorerDashboardPage() {
                 .filter(([, v]: any) => v.completed)
                 .slice(-3)
                 .map(([id, v]: any) => (
-                  <div key={id} className="flex items-center justify-between py-2 px-3 bg-[hsl(152,40%,95%)] rounded-xl">
-                    <span className="text-sm font-bold text-[hsl(200,15%,30%)]">✅ {id}</span>
-                    <span className="text-xs font-bold text-[hsl(152,50%,35%)]">{v.accuracy_score}%</span>
+                  <div key={id} className="flex items-center justify-between py-2 px-3 bg-success/10 rounded-xl">
+                    <span className="text-sm font-bold text-foreground">✅ {id}</span>
+                    <span className="text-xs font-bold text-success">{v.accuracy_score}%</span>
                   </div>
                 ))}
             </div>

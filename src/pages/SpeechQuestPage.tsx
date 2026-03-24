@@ -21,11 +21,11 @@ export default function SpeechQuestPage() {
     const cat = phonemeCategories.find(c => c.id === selectedCategory);
 
     return (
-      <div className="min-h-full bg-[hsl(200,30%,96%)]">
+      <div className="min-h-full bg-background">
         <div className="max-w-lg mx-auto px-4 py-6">
           <button
             onClick={() => setSelectedCategory(null)}
-            className="flex items-center gap-2 text-sm font-bold text-[hsl(200,10%,50%)] hover:text-[hsl(200,10%,30%)] mb-6"
+            className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground mb-6"
           >
             <ArrowLeft className="h-4 w-4" />
             返回
@@ -34,8 +34,7 @@ export default function SpeechQuestPage() {
           <div className="flex items-center gap-3 mb-8">
             <span className="text-3xl">{cat?.emoji}</span>
             <div>
-              <h1 className="text-xl font-extrabold text-[hsl(200,15%,20%)]">{cat?.labelZh}</h1>
-              <p className="text-xs text-[hsl(200,10%,50%)]">{cat?.label}</p>
+              <h1 className="text-xl font-extrabold text-foreground">{cat?.labelZh}</h1>
             </div>
           </div>
 
@@ -51,7 +50,7 @@ export default function SpeechQuestPage() {
                 <div key={lesson.id} className="flex flex-col items-center">
                   {i > 0 && (
                     <div className={`w-1 h-10 rounded-full ${
-                      isCompleted ? "bg-[hsl(152,60%,45%)]" : isLocked ? "bg-[hsl(200,20%,85%)]" : "bg-[hsl(152,60%,45%)/0.3]"
+                      isCompleted ? "bg-success" : isLocked ? "bg-muted" : "bg-success/30"
                     }`} />
                   )}
                   <button
@@ -59,10 +58,10 @@ export default function SpeechQuestPage() {
                     disabled={isLocked}
                     className={`w-20 h-20 rounded-full flex items-center justify-center text-xl font-extrabold shadow-lg transition-all ${
                       isCompleted
-                        ? "bg-[hsl(152,60%,45%)] text-white shadow-[0_4px_0_hsl(152,60%,32%)]"
+                        ? "bg-success text-success-foreground shadow-[0_4px_0_hsl(var(--success)/0.7)]"
                         : isLocked
-                        ? "bg-[hsl(200,20%,85%)] text-[hsl(200,10%,60%)] cursor-not-allowed"
-                        : "bg-[hsl(45,95%,55%)] text-white shadow-[0_4px_0_hsl(45,80%,40%)] hover:shadow-[0_2px_0_hsl(45,80%,40%)] active:translate-y-[2px]"
+                        ? "bg-muted text-muted-foreground cursor-not-allowed"
+                        : "bg-accent text-accent-foreground shadow-[0_4px_0_hsl(var(--accent)/0.7)] hover:shadow-[0_2px_0_hsl(var(--accent)/0.7)] active:translate-y-[2px]"
                     }`}
                   >
                     {isCompleted ? (
@@ -74,7 +73,7 @@ export default function SpeechQuestPage() {
                     )}
                   </button>
                   <p className={`mt-2 text-xs font-bold text-center max-w-[120px] ${
-                    isLocked ? "text-[hsl(200,10%,65%)]" : "text-[hsl(200,15%,30%)]"
+                    isLocked ? "text-muted-foreground" : "text-foreground"
                   }`}>
                     {lesson.titleZh}
                   </p>
@@ -89,7 +88,7 @@ export default function SpeechQuestPage() {
 
   // ─── Islands + Categories ───
   return (
-    <div className="min-h-full bg-[hsl(200,30%,96%)]">
+    <div className="min-h-full bg-background">
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
         {/* Mascot + Speech Bubble */}
         <div className="relative rounded-3xl overflow-hidden" style={{ minHeight: 200 }}>
@@ -97,8 +96,8 @@ export default function SpeechQuestPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           <div className="relative flex items-end p-4 gap-3">
             <img src={pipiIsland} alt="皮皮" className="h-28 w-28 object-contain drop-shadow-lg" loading="lazy" width={1024} height={1024} />
-            <div className="bg-white/95 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm mb-4">
-              <p className="text-sm font-bold text-[hsl(200,15%,25%)]">
+            <div className="bg-card/95 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm mb-4">
+              <p className="text-sm font-bold text-foreground">
                 發音小島用粵語中，<br />到簡啲存克跳錢！
               </p>
             </div>
@@ -109,31 +108,28 @@ export default function SpeechQuestPage() {
         <div className="grid grid-cols-2 gap-3">
           {/* Phonetic Island */}
           <button
-            onClick={() => {}} // already on this page
-            className="bg-white rounded-2xl p-4 border-2 border-[hsl(152,60%,45%)] shadow-sm text-center"
+            onClick={() => {}}
+            className="bg-card rounded-2xl p-4 border-2 border-primary shadow-sm text-center"
           >
             <span className="text-3xl block mb-2">🗣️</span>
-            <p className="text-sm font-extrabold text-[hsl(200,15%,20%)]">發音小島</p>
-            <span className="text-[10px] font-bold text-[hsl(152,50%,40%)] bg-[hsl(152,50%,92%)] px-2 py-0.5 rounded-full mt-1 inline-block">
+            <p className="text-sm font-extrabold text-foreground">發音小島</p>
+            <span className="text-[10px] font-bold text-success bg-success/10 px-2 py-0.5 rounded-full mt-1 inline-block">
               可進入
             </span>
           </button>
           {/* Semantic Island (locked) */}
-          <div className="bg-white/60 rounded-2xl p-4 border-2 border-[hsl(200,20%,85%)] text-center opacity-60">
+          <div className="bg-card/60 rounded-2xl p-4 border-2 border-muted text-center opacity-60">
             <span className="text-3xl block mb-2">📖</span>
-            <p className="text-sm font-extrabold text-[hsl(200,15%,40%)]">語義小島</p>
-            <span className="text-[10px] font-bold text-[hsl(200,10%,55%)] bg-[hsl(200,20%,90%)] px-2 py-0.5 rounded-full mt-1 inline-block">
-              🔒 開發中
+            <p className="text-sm font-extrabold text-muted-foreground">語義小島</p>
+            <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full mt-1 inline-block">
+              🔒 鎖定
             </span>
           </div>
         </div>
 
         {/* Section title */}
-        <h2 className="text-lg font-extrabold text-[hsl(200,15%,20%)] flex items-center gap-2">
+        <h2 className="text-lg font-extrabold text-foreground flex items-center gap-2">
           🗣️ 發音小島
-          <span className="text-[10px] font-bold text-[hsl(200,10%,55%)] bg-[hsl(200,20%,90%)] px-2 py-0.5 rounded-full">
-            未開放
-          </span>
         </h2>
 
         {/* 4 Categories */}
@@ -147,20 +143,20 @@ export default function SpeechQuestPage() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className="bg-white rounded-2xl p-4 border-2 border-[hsl(200,20%,88%)] hover:border-[hsl(152,60%,45%)] shadow-sm text-center transition-all hover:-translate-y-0.5 active:translate-y-0"
+                className="bg-card rounded-2xl p-4 border-2 border-border hover:border-primary/30 shadow-sm text-center transition-all hover:-translate-y-0.5 active:translate-y-0"
               >
                 <span className="text-3xl block mb-2">{cat.emoji}</span>
-                <p className="text-sm font-extrabold text-[hsl(200,15%,20%)] mb-1">{cat.labelZh}</p>
+                <p className="text-sm font-extrabold text-foreground mb-1">{cat.labelZh}</p>
                 <div className="flex items-center justify-center gap-1 mb-2">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     allDone
-                      ? "bg-[hsl(152,50%,90%)] text-[hsl(152,50%,35%)]"
-                      : "bg-[hsl(45,90%,90%)] text-[hsl(45,70%,35%)]"
+                      ? "bg-success/10 text-success"
+                      : "bg-accent/10 text-accent"
                   }`}>
                     {completed}/{catLessons.length}
                   </span>
                 </div>
-                <div className="flex items-center justify-center gap-1 text-xs font-bold text-[hsl(152,50%,40%)]">
+                <div className="flex items-center justify-center gap-1 text-xs font-bold text-primary">
                   {allDone ? "已完成" : "開始"}
                   <ChevronRight className="h-3 w-3" />
                 </div>

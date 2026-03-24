@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WaveformVisualizer } from "@/components/WaveformVisualizer";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import { usePronunciationResults } from "@/hooks/usePronunciationResults";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -16,7 +15,6 @@ import mascot from "@/assets/mascot.png";
 const ALLOWED_AUDIO_TYPES = ['audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/webm', 'audio/ogg', 'audio/m4a', 'audio/x-m4a'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-// Target phonemes for quick practice
 const TARGET_PHONEMES = [
   { phoneme: '/b/', instruction: '雙唇緊閉然後釋放', example: '爸爸' },
   { phoneme: '/p/', instruction: '雙唇緊閉，用力釋放氣流', example: '婆婆' },
@@ -28,8 +26,6 @@ const TARGET_PHONEMES = [
 
 export default function EchoSpeechPage() {
   const navigate = useNavigate();
-  const { t, language } = useLanguage();
-  
   const { results, isLoading: historyLoading } = usePronunciationResults();
 
   const [selectedPhoneme, setSelectedPhoneme] = useState(TARGET_PHONEMES[0]);
@@ -51,9 +47,6 @@ export default function EchoSpeechPage() {
   const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const { processRecording, isProcessing, error } = usePronunciationAPI();
-
-  const isEn = language === 'en-GB';
-  const isTW = language === 'zh-TW';
 
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -100,7 +93,7 @@ export default function EchoSpeechPage() {
       setIsRecording(true);
     } catch (error) {
       console.error("Error accessing microphone:", error);
-      toast.error("Failed to access microphone");
+      toast.error("無法使用麥克風");
     }
   };
 
@@ -116,11 +109,11 @@ export default function EchoSpeechPage() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!ALLOWED_AUDIO_TYPES.includes(file.type) && !file.name.endsWith('.mp3')) {
-      toast.error("Invalid audio format");
+      toast.error("音頻格式不支援");
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-      toast.error("File too large. Max 10MB.");
+      toast.error("檔案太大，最多 10MB");
       return;
     }
     const url = URL.createObjectURL(file);
@@ -180,7 +173,7 @@ export default function EchoSpeechPage() {
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <img src={mascot} alt="" className="h-12 w-12 object-contain" />
           <div>
-            <h1 className="text-xl font-extrabold text-foreground">Echo Speech</h1>
+            <h1 className="text-xl font-extrabold text-foreground">語音回響</h1>
             <p className="text-xs text-muted-foreground">測試並提升你的發音準確度</p>
           </div>
         </div>
@@ -191,7 +184,7 @@ export default function EchoSpeechPage() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-card border-2 border-primary/20 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold text-muted-foreground uppercase">目標音素</p>
+              <p className="text-xs font-bold text-muted-foreground">目標音素</p>
               <Button onClick={handlePlayPhoneme} size="sm" variant="outline" className="gap-1 rounded-xl">
                 <Volume2 className="h-3.5 w-3.5" />
                 播放
@@ -225,9 +218,8 @@ export default function EchoSpeechPage() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-card border-2 border-border rounded-2xl overflow-hidden">
             <div className="p-4 space-y-4">
-              {/* Text input */}
               <div>
-                <label htmlFor="practice-text" className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                <label htmlFor="practice-text" className="text-xs font-bold text-muted-foreground tracking-wider mb-1.5 block">
                   你要說什麼？
                 </label>
                 <Textarea
@@ -239,7 +231,6 @@ export default function EchoSpeechPage() {
                 />
               </div>
 
-              {/* Audio input tabs */}
               <Tabs value={audioSource} onValueChange={v => setAudioSource(v as 'record' | 'upload')}>
                 <TabsList className="h-10 bg-muted p-1 gap-1 rounded-xl w-full">
                   <TabsTrigger value="record" className="gap-1.5 text-xs px-3 h-8 rounded-lg font-bold flex-1 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm">
@@ -277,12 +268,11 @@ export default function EchoSpeechPage() {
                   >
                     <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
                     <p className="text-xs font-bold text-muted-foreground">選擇音頻檔案</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">MP3, WAV, WebM, OGG, M4A (max 10MB)</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">支援格式：MP3、WAV、WebM、OGG、M4A（最大 10MB）</p>
                   </div>
                 </TabsContent>
               </Tabs>
 
-              {/* Audio Preview */}
               {hasRecording && (
                 <div className="p-3 bg-muted/50 rounded-xl border-2 border-border">
                   <div className="flex items-center gap-3">

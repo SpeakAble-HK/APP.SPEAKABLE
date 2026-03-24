@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Star, Check, Lock, ShoppingBag } from "lucide-react";
+import { Star, Check } from "lucide-react";
 import pipiRoom from "@/assets/pipi-room.png";
 import { toast } from "sonner";
 
@@ -73,34 +73,34 @@ export default function PiPiPage() {
   ];
 
   return (
-    <div className="min-h-full bg-[hsl(200,30%,96%)]">
+    <div className="min-h-full bg-background">
       <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-extrabold text-[hsl(200,15%,20%)] flex items-center gap-2">
+          <h1 className="text-xl font-extrabold text-foreground flex items-center gap-2">
             🦜 皮皮
           </h1>
-          <div className="flex items-center gap-1.5 bg-[hsl(45,95%,55%)] px-3 py-1.5 rounded-full shadow-sm">
-            <Star className="h-4 w-4 text-white" />
-            <span className="text-sm font-extrabold text-white">{points}</span>
+          <div className="flex items-center gap-1.5 bg-accent px-3 py-1.5 rounded-full shadow-sm">
+            <Star className="h-4 w-4 text-accent-foreground" />
+            <span className="text-sm font-extrabold text-accent-foreground">{points}</span>
           </div>
         </div>
 
         {/* Character Display */}
-        <div className="bg-white rounded-3xl p-6 flex items-center justify-center shadow-sm border border-[hsl(200,20%,90%)]">
+        <div className="bg-card rounded-3xl p-6 flex items-center justify-center shadow-sm border border-border">
           <img src={pipiRoom} alt="皮皮" className="h-48 w-48 object-contain" loading="lazy" width={1024} height={1024} />
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-white rounded-xl p-1 shadow-sm border border-[hsl(200,20%,90%)]">
+        <div className="flex bg-card rounded-xl p-1 shadow-sm border border-border">
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
                 activeTab === t.id
-                  ? "bg-[hsl(152,60%,45%)] text-white shadow-sm"
-                  : "text-[hsl(200,10%,50%)]"
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "text-muted-foreground"
               }`}
             >
               {t.emoji} {t.label}
@@ -118,22 +118,22 @@ export default function PiPiPage() {
                 key={item.id}
                 onClick={() => !owned && canAfford && handleBuy(item)}
                 disabled={owned || !canAfford}
-                className={`bg-white rounded-2xl p-3 border-2 text-center transition-all ${
+                className={`bg-card rounded-2xl p-3 border-2 text-center transition-all ${
                   owned
-                    ? "border-[hsl(152,50%,70%)] bg-[hsl(152,50%,97%)]"
+                    ? "border-success/50 bg-success/5"
                     : canAfford
-                    ? "border-[hsl(200,20%,88%)] hover:border-[hsl(45,90%,55%)] hover:-translate-y-0.5 active:translate-y-0"
-                    : "border-[hsl(200,20%,90%)] opacity-50"
+                    ? "border-border hover:border-accent hover:-translate-y-0.5 active:translate-y-0"
+                    : "border-border opacity-50"
                 }`}
               >
                 <span className="text-3xl block mb-1">{item.emoji}</span>
-                <p className="text-[11px] font-bold text-[hsl(200,15%,25%)] mb-1">{item.name}</p>
+                <p className="text-[11px] font-bold text-foreground mb-1">{item.name}</p>
                 {owned ? (
-                  <span className="text-[10px] font-bold text-[hsl(152,50%,40%)] flex items-center justify-center gap-0.5">
+                  <span className="text-[10px] font-bold text-success flex items-center justify-center gap-0.5">
                     <Check className="h-3 w-3" /> 已擁有
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[hsl(45,70%,35%)] bg-[hsl(45,90%,90%)] px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-full">
                     <Star className="h-2.5 w-2.5" /> {item.cost}
                   </span>
                 )}
