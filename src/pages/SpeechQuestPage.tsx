@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Lock, CheckCircle2, ChevronRight } from "lucide-react";
 import { phonemeCategories, getLessonsByCategory } from "@/data/lessons";
-import pipiIsland from "@/assets/pipi-island.png";
+import pipiIsland from "@/assets/pipi-mascot.png";
 import islandBg from "@/assets/island-bg.jpg";
 
 export default function SpeechQuestPage() {

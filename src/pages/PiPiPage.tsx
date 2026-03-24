@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Star, Check } from "lucide-react";
-import pipiRoom from "@/assets/pipi-room.png";
+import pipiRoom from "@/assets/pipi-mascot.png";
 import { toast } from "sonner";
 
 interface ShopItem {

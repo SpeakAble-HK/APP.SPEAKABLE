@@ -5,7 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePronunciationAPI, PhonemeResult } from "@/hooks/usePronunciationAPI";
 import { QuestLessonData } from "@/data/questLessons";
 import { QuestSentenceFeedback } from "./QuestSentenceFeedback";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 type Step = "listen" | "record" | "analyzing" | "result";
 

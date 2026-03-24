@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PhonemeResult } from "@/hooks/usePronunciationAPI";
 import { QuestLessonData } from "@/data/questLessons";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 const CONFETTI_COLORS = [
   "hsl(38, 95%, 60%)",  // accent gold

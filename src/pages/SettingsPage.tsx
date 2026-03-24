@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { User, Mic, Bell, Volume2, ChevronRight, LogOut, Sun, Moon, Globe } from "lucide-react";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import pipiRoom from "@/assets/pipi-room.png";
+import pipiRoom from "@/assets/pipi-mascot.png";
 
 export default function SettingsPage() {
   const navigate = useNavigate();

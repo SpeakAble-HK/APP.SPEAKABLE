@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SecurityStatus } from "@/components/SecurityStatus";
 import { SettingsModal } from "@/components/SettingsModal";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 interface AppSidebarProps {
   user: any;

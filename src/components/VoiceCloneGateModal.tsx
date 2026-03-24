@@ -1,7 +1,7 @@
 import { Mic, ArrowRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import parrot from "@/assets/quest-parrot.png";
+import parrot from "@/assets/pipi-mascot.png";
 
 interface VoiceCloneGateModalProps {
   onStartClone: () => void;

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PhonemeResult } from "@/hooks/usePronunciationAPI";
 import { PracticeWord } from "@/data/practiceTopics";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 interface QuestFeedbackProps {
   word: PracticeWord;

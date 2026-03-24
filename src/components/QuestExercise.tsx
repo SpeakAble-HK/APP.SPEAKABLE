@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { QuestFeedback } from "./QuestFeedback";
 import { QuestLesson } from "@/data/questWorlds";
 import { PracticeWord } from "@/data/practiceTopics";
-import mascot from "@/assets/mascot.png";
+import mascot from "@/assets/pipi-mascot.png";
 
 type ExerciseStep = "listen" | "record" | "analyzing" | "result";
 

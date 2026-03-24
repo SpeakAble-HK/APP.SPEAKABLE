@@ -2,7 +2,7 @@ import { Lock, CheckCircle, Star, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { QuestWorldData, QuestLessonData, difficultyConfig } from "@/data/questLessons";
 import { useQuestProgress } from "@/hooks/useQuestProgress";
-import parrot from "@/assets/quest-parrot.png";
+import parrot from "@/assets/pipi-mascot.png";
 
 interface QuestLessonListProps {
   world: QuestWorldData;
