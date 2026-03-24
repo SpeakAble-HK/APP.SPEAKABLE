@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Mic, Brain, Map, Sparkles, Volume2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroMascot from "@/assets/pipi-mascot.png";
+import logoImg from "@/assets/logo.png";
 import featureSpeak from "@/assets/feature-speak.png";
 import featureAI from "@/assets/feature-ai.png";
 import featureQuest from "@/assets/feature-quest.png";
