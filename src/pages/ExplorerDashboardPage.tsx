@@ -1,108 +1,112 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, Flame, MapPin, BookOpen } from "lucide-react";
-import mascot from "@/assets/mascot.png";
+import { Flame, Trophy, Star } from "lucide-react";
+import pipiIsland from "@/assets/pipi-island.png";
+import islandBg from "@/assets/island-bg.jpg";
 
 export default function ExplorerDashboardPage() {
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState('探險家');
+  const [nickname, setNickname] = useState("探險家");
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('explorer_nickname');
+    const stored = sessionStorage.getItem("explorer_nickname");
     if (stored) setNickname(stored);
   }, []);
 
-  // Local progress from sessionStorage
-  const getLocalProgress = () => {
-    try {
-      return JSON.parse(sessionStorage.getItem('lesson_progress') || '{}');
-    } catch { return {}; }
+  const getProgress = () => {
+    try { return JSON.parse(sessionStorage.getItem("lesson_progress") || "{}"); }
+    catch { return {}; }
   };
 
-  const progress = getLocalProgress();
+  const progress = getProgress();
   const completedCount = Object.values(progress).filter((p: any) => p.completed).length;
   const totalXp = Object.values(progress).reduce((sum: number, p: any) => sum + (p.xp_earned || 0), 0) as number;
 
   return (
-    <div className="min-h-full bg-background">
-      {/* Header greeting */}
-      <section className="px-4 pt-8 pb-4">
-        <div className="max-w-2xl mx-auto flex items-center gap-4">
-          <img src={mascot} alt="" className="h-16 w-16 object-contain mascot-bounce" />
-          <div>
-            <h1 className="text-2xl font-extrabold text-foreground">
-              你好，{nickname}！👋
-            </h1>
-            <p className="text-sm text-muted-foreground">今日想練習咩？</p>
+    <div className="min-h-full">
+      {/* Stats Bar */}
+      <div className="bg-white px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🦜</span>
+          <span className="font-extrabold text-[hsl(200,15%,25%)]">{nickname}</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <div className="w-7 h-7 rounded-full bg-[hsl(45,95%,55%)] flex items-center justify-center">
+              <Star className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="text-sm font-extrabold text-[hsl(45,80%,35%)]">{totalXp}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-7 h-7 rounded-full bg-[hsl(15,90%,55%)] flex items-center justify-center">
+              <Flame className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="text-sm font-extrabold text-[hsl(15,70%,40%)]">0</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-7 h-7 rounded-full bg-[hsl(152,60%,42%)] flex items-center justify-center">
+              <Trophy className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="text-sm font-extrabold text-[hsl(152,50%,30%)]">{completedCount}</span>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Stats Row */}
-      <section className="px-4 pb-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center">
-              <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center mx-auto mb-2">
-                <Star className="h-5 w-5 text-accent" />
-              </div>
-              <p className="text-2xl font-extrabold text-foreground">{totalXp}</p>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase">XP</p>
-            </div>
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center">
-              <div className="w-10 h-10 rounded-xl bg-destructive/15 flex items-center justify-center mx-auto mb-2">
-                <Flame className="h-5 w-5 text-destructive" />
-              </div>
-              <p className="text-2xl font-extrabold text-foreground">0</p>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase">連續天數</p>
-            </div>
-            <div className="bg-card border-2 border-border rounded-2xl p-4 text-center">
-              <div className="w-10 h-10 rounded-xl bg-success/15 flex items-center justify-center mx-auto mb-2">
-                <BookOpen className="h-5 w-5 text-success" />
-              </div>
-              <p className="text-2xl font-extrabold text-foreground">{completedCount}</p>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase">已完成</p>
-            </div>
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
+        {/* Hero Card */}
+        <div
+          className="relative rounded-3xl overflow-hidden shadow-lg"
+          style={{ minHeight: 260 }}
+        >
+          <img src={islandBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          <div className="relative flex flex-col items-center justify-end h-full p-6 pt-4">
+            <img src={pipiIsland} alt="皮皮" className="h-40 w-40 object-contain mascot-bounce drop-shadow-lg" width={1024} height={1024} />
+            <button
+              onClick={() => navigate("/speech-quest")}
+              className="mt-4 w-full max-w-xs h-14 rounded-2xl bg-[hsl(152,60%,45%)] text-white text-lg font-extrabold shadow-[0_5px_0_hsl(152,60%,32%)] hover:shadow-[0_3px_0_hsl(152,60%,32%)] active:shadow-[0_1px_0_hsl(152,60%,32%)] active:translate-y-[2px] transition-all"
+            >
+              開始今日練習
+            </button>
           </div>
         </div>
-      </section>
 
-      {/* Island Buttons */}
-      <section className="px-4 pb-8">
-        <div className="max-w-2xl mx-auto grid grid-cols-1 gap-4">
-          <button
-            onClick={() => navigate('/speech-quest?island=phonetic')}
-            className="bg-primary text-primary-foreground rounded-2xl p-6 text-left hover:-translate-y-1 transition-all active:translate-y-0.5"
-            style={{ boxShadow: '0 6px 0 hsl(var(--primary-dark))' }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 min-w-[64px] rounded-2xl bg-primary-foreground/20 flex items-center justify-center">
-                <MapPin className="h-8 w-8 text-primary-foreground" />
-              </div>
-              <div>
-                <span className="text-2xl font-extrabold block">發音小島</span>
-                <span className="text-sm font-medium text-primary-foreground/80">練習聲母和韻母發音</span>
-              </div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => navigate('/speech-quest?island=semantic')}
-            className="bg-accent text-accent-foreground rounded-2xl p-6 text-left hover:-translate-y-1 transition-all active:translate-y-0.5"
-            style={{ boxShadow: '0 6px 0 hsl(38 95% 48%)' }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 min-w-[64px] rounded-2xl bg-accent-foreground/10 flex items-center justify-center">
-                <BookOpen className="h-8 w-8 text-accent-foreground" />
-              </div>
-              <div>
-                <span className="text-2xl font-extrabold block">語義小島</span>
-                <span className="text-sm font-medium text-accent-foreground/80">學習詞彙和句子</span>
-              </div>
-            </div>
-          </button>
+        {/* Progress */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-[hsl(200,20%,90%)]">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-bold text-[hsl(200,15%,35%)]">📊 整體進度</span>
+            <span className="text-xs font-bold text-[hsl(200,10%,55%)]">{completedCount}/11 課</span>
+          </div>
+          <div className="w-full bg-[hsl(200,20%,92%)] rounded-full h-3 overflow-hidden">
+            <div
+              className="h-full bg-[hsl(152,60%,45%)] rounded-full transition-all"
+              style={{ width: `${(completedCount / 11) * 100}%` }}
+            />
+          </div>
         </div>
-      </section>
+
+        {/* Recent Practice */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-[hsl(200,20%,90%)]">
+          <h3 className="text-sm font-bold text-[hsl(200,15%,35%)] mb-3">📝 最近練習</h3>
+          {completedCount === 0 ? (
+            <p className="text-sm text-[hsl(200,10%,55%)] text-center py-4">
+              仲未開始練習，快啲去語音冒險開始啦！
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {Object.entries(progress)
+                .filter(([, v]: any) => v.completed)
+                .slice(-3)
+                .map(([id, v]: any) => (
+                  <div key={id} className="flex items-center justify-between py-2 px-3 bg-[hsl(152,40%,95%)] rounded-xl">
+                    <span className="text-sm font-bold text-[hsl(200,15%,30%)]">✅ {id}</span>
+                    <span className="text-xs font-bold text-[hsl(152,50%,35%)]">{v.accuracy_score}%</span>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

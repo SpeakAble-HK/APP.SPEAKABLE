@@ -15,6 +15,8 @@ import PronunciationResultsPage from "./pages/PronunciationResultsPage";
 import SpeechQuestPage from "./pages/SpeechQuestPage";
 import LessonPage from "./pages/LessonPage";
 import STDashboardPage from "./pages/STDashboardPage";
+import PiPiPage from "./pages/PiPiPage";
+import SettingsPage from "./pages/SettingsPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import SpeechTherapyInfoPage from "./pages/SpeechTherapyInfoPage";
 import AboutSpeechTherapyPage from "./pages/AboutSpeechTherapyPage";
@@ -50,6 +52,8 @@ const App = () => (
                 <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                 <Route path="/speech-quest" element={<SpeechQuestPage />} />
                 <Route path="/lesson/:lessonId" element={<LessonPage />} />
+                <Route path="/pipi" element={<PiPiPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/resources" element={<ResourcesPage />} />
                 <Route path="/resources/find-provider" element={<SpeechTherapyInfoPage />} />
                 <Route path="/resources/speech-therapy-info" element={<AboutSpeechTherapyPage />} />
