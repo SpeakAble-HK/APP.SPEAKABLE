@@ -51,6 +51,7 @@ export default function RoleSelectionPage() {
           <p className="text-sm text-muted-foreground">瀏覽言語訓練資訊</p>
         </button>
       </div>
+      </div>
     </div>
   );
 }
