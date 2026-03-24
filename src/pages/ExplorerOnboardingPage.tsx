@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import mascot from "@/assets/mascot.png";
+import { GlobalHeader } from "@/components/GlobalHeader";
 
 export default function ExplorerOnboardingPage() {
   const navigate = useNavigate();
