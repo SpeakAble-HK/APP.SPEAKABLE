@@ -25,11 +25,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import SpeechTherapyInfoPage from "./pages/SpeechTherapyInfoPage";
 import AboutSpeechTherapyPage from "./pages/AboutSpeechTherapyPage";
-import IPALibraryPage from "./pages/IPALibraryPage";
-import IPAPage from "./pages/IPAPage";
-import VisualizationPage from "./pages/VisualizationPage";
 import NotFound from "./pages/NotFound";
-import ComingSoonPage from "./pages/ComingSoonPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 
@@ -63,6 +59,7 @@ const App = () => (
                 <Route path="/explorer/onboarding" element={<ExplorerOnboardingPage />} />
                 <Route path="/adventure-start" element={<AdventureStartPage />} />
                 <Route path="/ngo" element={<ResourcesPage />} />
+                <Route path="/resources/find-provider" element={<SpeechTherapyInfoPage />} />
 
                 {/* ST pages with therapist nav */}
                 <Route element={<STLayout />}>
@@ -82,13 +79,8 @@ const App = () => (
                   <Route path="/pipi" element={<PiPiPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/resources" element={<ResourcesPage />} />
-                  <Route path="/resources/find-provider" element={<SpeechTherapyInfoPage />} />
                   <Route path="/resources/speech-therapy-info" element={<AboutSpeechTherapyPage />} />
                   <Route path="/red-flags" element={<RedFlagsPage />} />
-                  <Route path="/ipa" element={<IPAPage />} />
-                  <Route path="/learning/library" element={<IPALibraryPage />} />
-                  <Route path="/learning/progress" element={<VisualizationPage />} />
-                  <Route path="/ipa-transcription" element={<ComingSoonPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
                 </Route>

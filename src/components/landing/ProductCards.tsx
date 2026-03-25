@@ -19,12 +19,12 @@ const PRODUCTS = [
     path: "/role-select",
   },
   {
-    icon: "library_books",
+    icon: "family_restroom",
     iconBg: "bg-tertiary-container/50",
     iconColor: "text-tertiary",
-    title: "IPA 學習中心",
-    description: "全面的國際音標資源庫，配有互動式發音指南、舌位圖及真人示範音頻。",
-    path: "/role-select",
+    title: "言語資源中心",
+    description: "言語發展里程碑、警示信號清單，以及全港言語治療服務搜尋引擎，幫助家長及照顧者。",
+    path: "/ngo",
   },
 ] as const;
 

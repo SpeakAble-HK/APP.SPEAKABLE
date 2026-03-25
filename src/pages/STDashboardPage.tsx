@@ -19,7 +19,6 @@ const STATS = [
 const SIDEBAR_NAV = [
   { icon: "dashboard", label: "儀表板", active: true, path: "/st-dashboard" },
   { icon: "monitoring", label: "個案進度", active: false, path: "/st-accounts" },
-  { icon: "record_voice_over", label: "語音工具", active: false, path: "/ipa" },
   { icon: "groups", label: "社區", active: false, path: "/ngo" },
   { icon: "analytics", label: "數據分析", active: false, path: "/st-dashboard" },
 ];

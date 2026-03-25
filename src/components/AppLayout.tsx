@@ -11,7 +11,6 @@ const TABS = [
   { id: "map", icon: "map", label: "地圖", path: "/explorer" },
   { id: "practice", icon: "exercise", label: "練習", path: "/speech-quest" },
   { id: "nest", icon: "home_max", label: "小窩", path: "/pipi" },
-  { id: "progress", icon: "leaderboard", label: "進度", path: "/learning/progress" },
   { id: "profile", icon: "person", label: "我的", path: "/settings" },
 ] as const;
 
@@ -30,13 +29,10 @@ export function AppLayout({ children }: AppLayoutProps) {
         location.pathname.startsWith("/semantic-island")
       );
     if (id === "nest") return location.pathname === "/pipi";
-    if (id === "progress")
-      return location.pathname.startsWith("/learning");
     if (id === "profile")
       return (
         location.pathname === "/settings" ||
-        location.pathname.startsWith("/resources") ||
-        location.pathname === "/ipa"
+        location.pathname.startsWith("/resources")
       );
     return false;
   };

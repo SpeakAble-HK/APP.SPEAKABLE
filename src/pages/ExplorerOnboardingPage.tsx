@@ -1,35 +1,88 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { MaterialIcon } from "@/components/MaterialIcon";
 import { BrandHeader } from "@/components/BrandHeader";
+import { MaterialIcon } from "@/components/MaterialIcon";
 import { toast } from "sonner";
+import mascot from "@/assets/pipi-mascot.png";
 
-const ROLE_OPTIONS = [
-  { value: "learner", icon: "explore", label: "語音冒險家" },
-  { value: "therapist", icon: "medical_services", label: "言語治療師" },
-  { value: "public", icon: "groups", label: "一般市民" },
-] as const;
+const PROMPT_TEXT = "你好，早晨啊皮皮";
+const STEPS = ["暱稱", "聲音複製"] as const;
 
 export default function ExplorerOnboardingPage() {
   const navigate = useNavigate();
+  const [step, setStep] = useState(0);
   const [nickname, setNickname] = useState("");
-  const [role, setRole] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [recording, setRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [seconds, setSeconds] = useState(0);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const chunks = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handleNicknameNext = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nickname.trim() || !role) {
-      toast.error("請填寫所有必填欄位。");
+    if (!nickname.trim()) {
+      toast.error("請輸入你的暱稱。");
+      return;
+    }
+    setStep(1);
+  };
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      chunks.current = [];
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.current.push(e.data);
+      };
+      mr.onstop = () => {
+        const blob = new Blob(chunks.current, { type: "audio/webm" });
+        setAudioURL(URL.createObjectURL(blob));
+        stream.getTracks().forEach((t) => t.stop());
+      };
+      mediaRecorder.current = mr;
+      mr.start();
+      setRecording(true);
+      setAudioURL(null);
+      setSeconds(0);
+      timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+    } catch {
+      toast.error("無法存取麥克風，請檢查權限設定。");
+    }
+  }, []);
+
+  const stopRecording = useCallback(() => {
+    mediaRecorder.current?.stop();
+    setRecording(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const resetRecording = () => {
+    setAudioURL(null);
+    setSeconds(0);
+  };
+
+  const handleFinish = () => {
+    if (!audioURL) {
+      toast.error("請先錄製你的聲音。");
       return;
     }
     localStorage.setItem(
       "speakable_user",
-      JSON.stringify({ nickname: nickname.trim(), role })
+      JSON.stringify({ nickname: nickname.trim(), role: "learner", voiceCloned: true })
     );
-
-    if (role === "learner") navigate("/adventure-start");
-    else if (role === "therapist") navigate("/st-dashboard");
-    else navigate("/ngo");
+    navigate("/adventure-start");
   };
+
+  const fmt = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  const progress = ((step + 1) / STEPS.length) * 100;
 
   return (
     <div className="font-body text-on-surface min-h-screen relative overflow-x-hidden bg-background">
@@ -41,65 +94,173 @@ export default function ExplorerOnboardingPage() {
       <div className="fixed bottom-0 right-1/3 h-64 w-64 rounded-full bg-primary-fixed/30 blur-[70px] -z-10" aria-hidden="true" />
       <div className="fixed top-40 left-1/3 h-40 w-56 rounded-[60%] bg-white/40 blur-3xl -z-10 rotate-12" aria-hidden="true" />
 
-      <BrandHeader />
+      <BrandHeader showBack />
 
-      <div className="relative z-10 mx-auto max-w-lg px-4 pt-20 pb-32 sm:pt-24">
-        <header className="mb-8 flex flex-col items-center text-center sm:mb-10">
-          <p className="font-headline text-xl font-bold text-on-surface sm:text-2xl">開始你的語言旅程</p>
-        </header>
-
-        <form
-          onSubmit={handleSubmit}
-          className="glass-card rounded-xl border border-white/60 p-6 shadow-xl shadow-primary/10 sm:p-8"
-        >
-          <div className="space-y-5">
-            <div>
-              <label htmlFor="nickname" className="font-label mb-1.5 block text-sm font-semibold text-on-surface">
-                暱稱
-              </label>
-              <input
-                type="text"
-                id="nickname"
-                required
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest/80 px-4 py-3 font-body text-on-surface shadow-sm focus:border-primary focus:ring-primary focus:outline-none"
-                placeholder="你希望怎樣稱呼"
-              />
-            </div>
-            <fieldset>
-              <legend className="font-label mb-3 block text-sm font-semibold text-on-surface">
-                我是⋯
-              </legend>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {ROLE_OPTIONS.map((opt) => (
-                  <label key={opt.value} className="group relative cursor-pointer">
-                    <input
-                      type="radio"
-                      name="role"
-                      value={opt.value}
-                      checked={role === opt.value}
-                      onChange={() => setRole(opt.value)}
-                      className="peer sr-only"
-                      required
-                    />
-                    <span className="flex h-full flex-col items-center gap-2 rounded-lg border-2 border-outline-variant bg-surface-container-low/80 p-4 text-center transition peer-checked:border-primary peer-checked:bg-primary-container/50 peer-checked:shadow-md peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
-                      <MaterialIcon icon={opt.icon} className="text-primary" />
-                      <span className="font-label text-sm font-bold text-on-surface">{opt.label}</span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+      {/* Progress bar */}
+      <div className="fixed top-14 left-0 w-full z-40 px-0">
+        <div className="mx-auto max-w-lg px-4 pt-3 pb-2">
+          <div className="flex items-center justify-between mb-1.5">
+            {STEPS.map((label, i) => (
+              <span
+                key={label}
+                className={`text-xs font-bold transition-colors ${
+                  i <= step ? "text-primary" : "text-on-surface-variant/50"
+                }`}
+              >
+                {i + 1}. {label}
+              </span>
+            ))}
           </div>
+          <div className="h-2 w-full rounded-full bg-surface-container overflow-hidden">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      </div>
 
-          <button
-            type="submit"
-            className="font-label mt-8 w-full rounded-lg bg-primary py-4 text-base font-bold text-on-primary shadow-lg shadow-primary/30 transition hover:bg-primary-dim focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-[0.98]"
-          >
-            開始旅程
-          </button>
-        </form>
+      <div className="relative z-10 mx-auto max-w-lg px-4 pt-32 pb-32 sm:pt-36">
+        {/* Step 1: Nickname */}
+        {step === 0 && (
+          <>
+            <header className="mb-8 flex flex-col items-center text-center">
+              <p className="font-headline text-xl font-bold text-on-surface sm:text-2xl">
+                開始你的語言旅程
+              </p>
+            </header>
+
+            <form
+              onSubmit={handleNicknameNext}
+              className="glass-card rounded-xl border border-white/60 p-6 shadow-xl shadow-primary/10 sm:p-8"
+            >
+              <div>
+                <label
+                  htmlFor="nickname"
+                  className="font-label mb-1.5 block text-sm font-semibold text-on-surface"
+                >
+                  暱稱
+                </label>
+                <input
+                  type="text"
+                  id="nickname"
+                  required
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest/80 px-4 py-3 font-body text-on-surface shadow-sm focus:border-primary focus:ring-primary focus:outline-none"
+                  placeholder="你希望怎樣稱呼"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="font-label mt-8 w-full rounded-lg bg-primary py-4 text-base font-bold text-on-primary shadow-lg shadow-primary/30 transition hover:bg-primary-dim focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-[0.98]"
+              >
+                下一步
+              </button>
+            </form>
+          </>
+        )}
+
+        {/* Step 2: Voice clone */}
+        {step === 1 && (
+          <>
+            <header className="mb-8 flex flex-col items-center text-center gap-3">
+              <img
+                src={mascot}
+                alt=""
+                className="w-20 h-20 object-contain drop-shadow-xl animate-pipi-bob"
+              />
+              <p className="font-headline text-xl font-bold text-on-surface sm:text-2xl">
+                讓皮皮認識你的聲音
+              </p>
+              <p className="text-sm text-on-surface-variant max-w-sm leading-relaxed">
+                請朗讀以下句子，我們會用你的聲音來建立個人化的練習體驗。
+              </p>
+            </header>
+
+            <div className="glass-card rounded-xl border border-white/60 p-6 shadow-xl shadow-primary/10 sm:p-8 space-y-6">
+              {/* Prompt card */}
+              <div className="bg-primary-container/30 rounded-xl p-5 text-center border border-primary/10">
+                <p className="text-xs text-on-surface-variant mb-2 font-medium">請朗讀：</p>
+                <p className="font-headline text-2xl sm:text-3xl font-bold text-primary tracking-wide">
+                  「{PROMPT_TEXT}」
+                </p>
+              </div>
+
+              {/* Recording controls */}
+              <div className="flex flex-col items-center gap-4">
+                {/* Timer */}
+                <span className="font-mono text-2xl font-bold text-on-surface tabular-nums">
+                  {fmt(seconds)}
+                </span>
+
+                {/* Record / Stop button */}
+                {!recording && !audioURL && (
+                  <button
+                    onClick={startRecording}
+                    className="w-20 h-20 rounded-full bg-error text-on-error shadow-lg shadow-error/30 flex items-center justify-center hover:bg-error/90 active:scale-95 transition-all"
+                    aria-label="開始錄音"
+                  >
+                    <MaterialIcon icon="mic" className="text-3xl" />
+                  </button>
+                )}
+
+                {recording && (
+                  <button
+                    onClick={stopRecording}
+                    className="w-20 h-20 rounded-full bg-error text-on-error shadow-lg shadow-error/30 flex items-center justify-center hover:bg-error/90 active:scale-95 transition-all animate-pulse"
+                    aria-label="停止錄音"
+                  >
+                    <MaterialIcon icon="stop" className="text-3xl" />
+                  </button>
+                )}
+
+                {!recording && audioURL && (
+                  <div className="flex flex-col items-center gap-3 w-full">
+                    {/* Playback */}
+                    <audio src={audioURL} controls className="w-full max-w-xs" />
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={resetRecording}
+                        className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-outline-variant text-on-surface font-bold text-sm hover:bg-surface-container active:scale-95 transition-all"
+                      >
+                        <MaterialIcon icon="refresh" className="text-lg" />
+                        重新錄製
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {!recording && !audioURL && (
+                  <p className="text-xs text-on-surface-variant">點擊按鈕開始錄音</p>
+                )}
+
+                {recording && (
+                  <p className="text-xs text-error font-bold animate-pulse">錄音中⋯ 點擊停止</p>
+                )}
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setStep(0)}
+                  className="flex-1 rounded-lg border border-outline-variant py-3.5 text-sm font-bold text-on-surface hover:bg-surface-container active:scale-[0.98] transition-all"
+                >
+                  上一步
+                </button>
+                <button
+                  onClick={handleFinish}
+                  disabled={!audioURL}
+                  className="flex-1 rounded-lg bg-primary py-3.5 text-base font-bold text-on-primary shadow-lg shadow-primary/30 transition hover:bg-primary-dim active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  開始旅程
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Wave SVG footer */}

@@ -59,11 +59,16 @@ export default function RoleSelectionPage() {
         <div className="absolute w-1 h-1 rounded-full bg-white opacity-60 blur-[1px] top-[25%] left-[60%]" />
       </div>
 
-      <BrandHeader />
+      <BrandHeader showBack />
 
       {/* Main content */}
       <main className="relative z-10 flex-grow flex flex-col items-center justify-center px-6 pt-20 pb-32">
         <div className="text-center mb-12 max-w-2xl">
+          <img
+            alt="皮皮鸚鵡"
+            src={mascot}
+            className="w-28 h-28 md:w-36 md:h-36 mx-auto mb-4 drop-shadow-2xl animate-pipi-bob"
+          />
           <h1 className="font-headline text-5xl md:text-6xl font-bold tracking-tight text-primary mb-4">
             歡迎來到群島
           </h1>
@@ -76,7 +81,10 @@ export default function RoleSelectionPage() {
           {ROLES.map((role) => (
             <button
               key={role.id}
-              onClick={() => navigate(role.path)}
+              onClick={() => {
+                localStorage.setItem("speakable_role", role.id);
+                navigate(role.path);
+              }}
               className="glass-card group flex flex-col items-center p-8 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(0,180,216,0.05)] text-center border-2 border-transparent hover:border-primary-container/50"
             >
               <div className={`w-24 h-24 ${role.bg} rounded-full flex items-center justify-center mb-6 shadow-inner ${role.hoverBg} transition-colors`}>
@@ -95,20 +103,6 @@ export default function RoleSelectionPage() {
           ))}
         </div>
       </main>
-
-      {/* PiPi mascot at bottom */}
-      <div className="fixed bottom-0 left-0 w-full flex justify-center items-end pointer-events-none z-20">
-        <div className="relative group pointer-events-auto">
-          <div className="absolute -top-24 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg text-sm font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-            嗨！我是皮皮！選擇你喜歡的角色吧！
-          </div>
-          <img
-            alt="PiPi Mascot"
-            src={mascot}
-            className="w-32 h-32 md:w-48 md:h-48 drop-shadow-2xl translate-y-4 animate-pipi-bob"
-          />
-        </div>
-      </div>
 
       {/* Wave decoration at bottom */}
       <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-primary-container/30 to-transparent pointer-events-none" aria-hidden="true" />
