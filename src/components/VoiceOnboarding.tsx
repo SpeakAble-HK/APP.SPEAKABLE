@@ -1,335 +1,294 @@
-import { useState, useRef } from "react";
-import { Mic, Square, Check, Loader2, ArrowRight, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { MaterialIcon } from "@/components/MaterialIcon";
+import { useCurrency } from "@/hooks/useCurrency";
+import logo from "@/assets/logo.png";
 import mascot from "@/assets/pipi-mascot.png";
 
-const ONBOARDING_SENTENCES = [
-  { zh: "你今日食咗飯未啊", en: "Have you eaten today?" },
-  { zh: "我哋一齊去行街", en: "Let's go shopping together." },
-  { zh: "今日天氣好好啊", en: "The weather is great today." },
-];
+type Stage = "record" | "playback" | "uploading" | "demo";
 
 interface VoiceOnboardingProps {
-  onComplete: () => void;
-  onCancel: () => void;
+  onComplete?: () => void;
+  onCancel?: () => void;
 }
 
-type Step = "intro" | "recording" | "processing" | "done";
-
 export function VoiceOnboarding({ onComplete, onCancel }: VoiceOnboardingProps) {
-  const { language } = useLanguage();
-  const { user } = useAuth();
-  const { processRecording, isProcessing } = usePronunciationAPI();
+  const navigate = useNavigate();
+  const { coins, xp } = useCurrency();
 
-  const isEn = language === "en-GB";
-  const isTW = language === "zh-TW";
-
-  const [step, setStep] = useState<Step>("intro");
-  const [currentSentence, setCurrentSentence] = useState(0);
+  const [stage, setStage] = useState<Stage>("record");
   const [isRecording, setIsRecording] = useState(false);
-  const [recordings, setRecordings] = useState<Blob[]>([]);
-  const [audioDuration, setAudioDuration] = useState(0);
+  const [seconds, setSeconds] = useState(0);
+  const [hasRecording, setHasRecording] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState("");
+  const [demoText, setDemoText] = useState("你好，我正在學習說話！");
+  const [demoResult, setDemoResult] = useState<string | null>(null);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const startTimeRef = useRef(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const blobRef = useRef<Blob | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const totalSentences = ONBOARDING_SENTENCES.length;
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
-  const handleStartRecording = async () => {
+  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+
+  const handleRecord = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = recorder;
-      audioChunksRef.current = [];
-      startTimeRef.current = Date.now();
-      setAudioDuration(0);
-
-      intervalRef.current = setInterval(() => {
-        setAudioDuration((Date.now() - startTimeRef.current) / 1000);
-      }, 100);
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
-      recorder.onstop = () => {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      chunksRef.current = [];
+      const mr = new MediaRecorder(stream);
+      mediaRecorderRef.current = mr;
+      mr.ondataavailable = (e) => { if (e.data.size) chunksRef.current.push(e.data); };
+      mr.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
-
-        setRecordings((prev) => [...prev, blob]);
-
-        if (currentSentence < totalSentences - 1) {
-          setCurrentSentence((prev) => prev + 1);
-          setAudioDuration(0);
-        } else {
-          // All sentences recorded — process with voice-clone API
-          handleProcessVoiceModel(blob);
-        }
+        blobRef.current = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+        setIsRecording(false);
+        setHasRecording(true);
+        setStage("playback");
+        if (timerRef.current) clearInterval(timerRef.current);
       };
-
-      recorder.start();
+      setSeconds(0);
+      timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
+      mr.start();
       setIsRecording(true);
     } catch {
-      setError(isEn ? "Could not access microphone." : "無法存取麥克風。");
+      setUploadStatus("無法存取麥克風。");
     }
   };
 
-  const handleStopRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    }
+  const handlePlayback = () => {
+    if (!blobRef.current) return;
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    const url = URL.createObjectURL(blobRef.current);
+    const a = new Audio(url);
+    audioRef.current = a;
+    a.onended = () => URL.revokeObjectURL(url);
+    a.play().catch(() => {});
   };
 
-  const handleProcessVoiceModel = async (lastBlob: Blob) => {
-    setStep("processing");
-    setError(null);
-
+  const handleUpload = async () => {
+    if (!blobRef.current) return;
+    setUploadStatus("上傳中⋯");
+    setStage("uploading");
+    const fd = new FormData();
+    fd.append("audio", blobRef.current, "voice-sample.webm");
     try {
-      
+      const res = await fetch("/api/voice/clone", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
+      setUploadStatus(data.message || "語音模型已準備好！");
+    } catch {
+      setUploadStatus("無法連接伺服器。已啟用示範模式。");
+    }
+    setStage("demo");
+  };
 
-      // Use the last recording + its sentence with the existing voice-clone API
-      const sentence = ONBOARDING_SENTENCES[totalSentences - 1].zh;
-      const result = await processRecording(lastBlob, sentence);
-
-      if (result && "spoken" in result) {
-        setStep("done");
+  const handleGenerate = async () => {
+    if (!demoText.trim()) { setDemoResult("請輸入文字。"); return; }
+    setDemoResult("生成中⋯");
+    try {
+      const res = await fetch("/api/voice/demo-tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: demoText }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data.audioUrl) {
+        const a = new Audio(data.audioUrl);
+        a.play().catch(() => {});
+        setDemoResult("正在播放你的複製語音！");
       } else {
-        // Still mark as done even if the API had issues — the profile recording itself succeeded
-        setStep("done");
+        setDemoResult("語音複製功能即將推出，敬請期待！");
       }
     } catch {
-      setStep("done"); // Be lenient — mark done even on error
+      setDemoResult("語音複製功能即將推出，敬請期待！");
     }
   };
 
-  const formatDuration = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return `${m}:${sec.toString().padStart(2, "0")}`;
+  const handleContinue = () => {
+    if (onComplete) onComplete();
+    else navigate("/adventure-start");
   };
 
-  // ─── INTRO SCREEN ───
-  if (step === "intro") {
-    return (
-      <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-6 animate-in fade-in duration-500">
-          <img
-            src={mascot}
-            alt="SpeakAble mascot"
-            className="h-32 w-32 mx-auto mascot-bounce"
-          />
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-foreground">
-              {isEn ? "Create Your Voice Model" : isTW ? "建立你的語音模型" : "建立你的语音模型"}
-            </h1>
-            <p className="text-muted-foreground mt-3 text-base md:text-lg leading-relaxed">
-              {isEn
-                ? "To personalise your pronunciation practice,\nplease read a few sentences aloud."
-                : isTW
-                ? "為了個人化你的發音練習，\n請朗讀幾句句子。"
-                : "为了个性化你的发音练习，\n请朗读几句句子。"}
-            </p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <Button
-              onClick={() => setStep("recording")}
-              className="w-full h-14 text-lg font-extrabold rounded-2xl game-btn gap-2"
-              style={{ boxShadow: "0 4px 0 hsl(var(--primary-dark))" }}
-            >
-              {isEn ? "Let's Go" : "開始"}
-              <ArrowRight className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={onCancel}
-              className="text-muted-foreground font-bold"
-            >
-              {isEn ? "Maybe Later" : isTW ? "稍後再說" : "稍后再说"}
-            </Button>
-          </div>
+  return (
+    <div className="min-h-screen overflow-x-hidden relative bg-surface font-body text-on-surface">
+      {/* Ocean blobs */}
+      <div className="absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full bg-primary-container blur-[80px] opacity-45 pointer-events-none animate-float-blob" aria-hidden="true" />
+      <div className="absolute top-1/3 -right-20 w-[380px] h-[380px] rounded-full bg-secondary-container blur-[80px] opacity-45 pointer-events-none animate-float-blob" style={{ animationDelay: "-6s" }} aria-hidden="true" />
+      <div className="absolute bottom-20 left-1/4 w-[300px] h-[300px] rounded-full bg-tertiary-container blur-[80px] opacity-45 pointer-events-none animate-float-blob" style={{ animationDelay: "-10s" }} aria-hidden="true" />
+
+      {/* Header */}
+      <header className="relative z-20 px-4 sm:px-8 py-5 flex flex-wrap items-center justify-between gap-4 max-w-6xl mx-auto">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity active:scale-95"
+          aria-label="返回首頁"
+        >
+          <img src={logo} alt="" className="h-9 w-9 object-contain" />
+          <span className="font-headline text-xl sm:text-2xl font-bold text-primary tracking-tight">SpeakAble HK</span>
+        </button>
+        <div className="glass-card rounded-full px-4 py-2 flex items-center gap-4 text-sm font-medium text-on-surface">
+          <span className="flex items-center gap-1.5">
+            <MaterialIcon icon="monetization_on" filled className="text-tertiary text-lg" />
+            <span>{coins}</span>
+          </span>
+          <span className="w-px h-5 bg-surface-variant/80" />
+          <span className="flex items-center gap-1.5">
+            <MaterialIcon icon="auto_awesome" filled className="text-primary text-lg" />
+            <span>{xp}</span>
+          </span>
         </div>
-      </div>
-    );
-  }
+      </header>
 
-  // ─── RECORDING SCREEN ───
-  if (step === "recording") {
-    const sentence = ONBOARDING_SENTENCES[currentSentence];
-    const progress = ((currentSentence + (isRecording ? 0.5 : 0)) / totalSentences) * 100;
-    const completedCount = recordings.length;
-
-    return (
-      <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="max-w-md w-full space-y-6 animate-in fade-in duration-300">
-          {/* Progress */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-bold text-muted-foreground">
-                {isEn ? "Recording" : "錄音"} {currentSentence + 1}/{totalSentences}
-              </span>
-              <span className="font-extrabold text-primary">{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} className="h-3" />
-          </div>
-
-          {/* Sentence cards */}
-          <div className="space-y-2">
-            {ONBOARDING_SENTENCES.map((s, i) => (
+      <main className="relative z-10 max-w-3xl mx-auto px-4 pb-40 pt-2">
+        {/* Hero spectrogram */}
+        <section className="text-center mb-8">
+          <div className="flex items-end justify-center gap-[3px] h-16 max-w-md mx-auto mb-6" aria-hidden="true">
+            {Array.from({ length: 28 }, (_, i) => (
               <div
                 key={i}
-                className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
-                  i < completedCount
-                    ? "border-primary/30 bg-primary/5"
-                    : i === currentSentence
-                    ? "border-primary bg-card shadow-md"
-                    : "border-border bg-muted/30 opacity-50"
-                }`}
-              >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                    i < completedCount
-                      ? "bg-primary text-primary-foreground"
-                      : i === currentSentence
-                      ? "bg-primary/15 text-primary"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {i < completedCount ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <span className="text-sm font-bold">{i + 1}</span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-extrabold text-foreground leading-tight">{s.zh}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{s.en}</p>
-                </div>
-                {i === currentSentence && (
-                  <ChevronRight className="h-4 w-4 text-primary shrink-0" />
-                )}
-              </div>
+                className="w-1 min-h-[8px] rounded-full bg-gradient-to-b from-primary-container to-primary animate-spec-bar"
+                style={{ animationDelay: `${i * 0.05}s` }}
+              />
             ))}
           </div>
+          <h1 className="font-headline text-3xl sm:text-4xl font-extrabold text-primary mb-2">
+            從你自己的聲音中學習
+          </h1>
+          <p className="text-on-surface/90 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
+            錄製一段簡短的語音樣本。我們會建立你的個人語音模型，讓你聽到自己正確發音的效果！
+          </p>
+        </section>
 
-          {/* Record button */}
-          <div className="flex flex-col items-center gap-3">
+        {/* Recording card */}
+        <section className="glass-card rounded-3xl p-6 sm:p-8 mb-8">
+          <div className="flex flex-col items-center">
+            {isRecording && (
+              <div className="mb-4 text-lg font-semibold text-secondary tabular-nums" aria-live="polite">
+                {formatTime(seconds)}
+              </div>
+            )}
             <button
-              onClick={isRecording ? handleStopRecording : handleStartRecording}
-              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-ring ${
-                isRecording
-                  ? "bg-destructive animate-pulse shadow-lg"
-                  : "bg-primary hover:bg-primary/90 shadow-md game-btn"
-              }`}
-              style={
-                !isRecording
-                  ? { boxShadow: "0 5px 0 hsl(var(--primary-dark))" }
-                  : {}
-              }
+              onClick={handleRecord}
+              className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-xl shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-transform focus:outline-none focus:ring-4 focus:ring-primary-container"
               aria-label={isRecording ? "Stop recording" : "Start recording"}
             >
-              {isRecording ? (
-                <Square className="h-8 w-8 text-primary-foreground" />
-              ) : (
-                <Mic className="h-9 w-9 text-primary-foreground" />
+              <MaterialIcon icon={isRecording ? "stop" : "mic"} className="text-5xl sm:text-6xl" />
+              {isRecording && (
+                <span className="absolute inset-0 rounded-full pointer-events-none border-4 border-red-500/90 animate-pulse-ring" />
               )}
             </button>
-            <p className="text-sm text-muted-foreground font-bold" aria-live="polite">
-              {isRecording
-                ? `🔴 ${isEn ? "Recording..." : "錄音中..."} ${formatDuration(audioDuration)}`
-                : isEn
-                ? "Tap to read aloud"
-                : isTW
-                ? "點擊開始朗讀"
-                : "点击开始朗读"}
+            <p className="mt-4 text-sm text-on-surface/70">
+              {isRecording ? "點擊停止" : hasRecording ? "錄音完成！" : "點擊開始錄音"}
             </p>
           </div>
 
-          {error && (
-            <p className="text-sm text-destructive text-center font-bold">{error}</p>
+          {/* Waveform playback */}
+          {hasRecording && (stage === "playback" || stage === "demo") && (
+            <div className="mt-8">
+              <p className="text-center text-sm font-medium text-primary mb-3">你的錄音</p>
+              <div className="flex items-end justify-center gap-1 h-14 mx-auto max-w-xs" aria-hidden="true">
+                {Array.from({ length: 12 }, (_, i) => (
+                  <div
+                    key={i}
+                    className="w-1.5 rounded bg-gradient-to-b from-secondary-container to-secondary animate-wave-bar"
+                    style={{
+                      height: `${18 + (i * 7) % 32}%`,
+                      animationDelay: `${i * 0.08}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           )}
 
-          <Button
-            variant="ghost"
-            onClick={onCancel}
-            className="w-full text-muted-foreground font-bold"
-          >
-            {isEn ? "Cancel" : "取消"}
-          </Button>
-        </div>
-      </div>
-    );
-  }
+          {hasRecording && stage === "playback" && (
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={handlePlayback}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 bg-secondary-container text-secondary font-semibold hover:opacity-90 transition-opacity"
+              >
+                <MaterialIcon icon="play_arrow" />
+                播放
+              </button>
+              <button
+                onClick={handleUpload}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl px-6 py-3 bg-primary text-on-primary font-semibold hover:opacity-90 transition-opacity"
+              >
+                <MaterialIcon icon="cloud_upload" />
+                上傳及複製
+              </button>
+            </div>
+          )}
 
-  // ─── PROCESSING SCREEN ───
-  if (step === "processing") {
-    return (
-      <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-6 animate-in fade-in duration-300">
-          <img
-            src={mascot}
-            alt=""
-            className="h-24 w-24 mx-auto mascot-bounce"
-          />
-          <div>
-            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
-            <h2 className="text-xl font-extrabold text-foreground">
-              {isEn ? "Creating your voice model..." : isTW ? "正在建立語音模型..." : "正在建立语音模型..."}
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              {isEn ? "This may take a moment." : isTW ? "請稍候片刻。" : "请稍候片刻。"}
+          {uploadStatus && (
+            <p className="mt-4 text-center text-sm" role="status">{uploadStatus}</p>
+          )}
+        </section>
+
+        {/* Demo section */}
+        {stage === "demo" && (
+          <section className="glass-card rounded-3xl p-6 sm:p-8 mb-8">
+            <h2 className="font-headline text-xl font-bold text-primary mb-2 text-center">示範你的聲音</h2>
+            <p className="text-center text-sm text-on-surface/75 mb-6">
+              輸入一段文字，用你的語音模型聽聽效果。
             </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+            <textarea
+              rows={3}
+              value={demoText}
+              onChange={(e) => setDemoText(e.target.value)}
+              className="w-full rounded-2xl border border-surface-variant bg-white/80 px-4 py-3 text-on-surface placeholder:text-outline/70 focus:border-primary focus:ring-primary focus:outline-none mb-4"
+              placeholder="輸入要朗讀的文字⋯"
+            />
+            <div className="flex justify-center mb-4">
+              <button
+                onClick={handleGenerate}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-3 bg-tertiary-container text-tertiary font-bold hover:opacity-90 transition-opacity"
+              >
+                <MaterialIcon icon="graphic_eq" />
+                生成
+              </button>
+            </div>
+            {demoResult && (
+              <div className="rounded-2xl bg-surface-container-low/90 p-4 text-center text-sm" role="region" aria-live="polite">
+                {demoResult}
+              </div>
+            )}
+          </section>
+        )}
 
-  // ─── DONE SCREEN ───
-  return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="max-w-md w-full text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
-        <div className="relative">
-          <img
-            src={mascot}
-            alt="SpeakAble mascot celebrating"
-            className="h-32 w-32 mx-auto mascot-bounce"
-          />
-          <div className="absolute -top-2 -right-2 w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
-            <Check className="h-6 w-6 text-primary-foreground" />
-          </div>
+        <div className="flex justify-center">
+          <button
+            onClick={handleContinue}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 bg-primary text-on-primary font-bold shadow-lg shadow-primary/25 hover:opacity-95 transition-opacity active:scale-[0.98]"
+          >
+            繼續冒險
+            <MaterialIcon icon="arrow_forward" />
+          </button>
+          {onCancel && (
+            <button onClick={onCancel} className="ml-4 text-sm text-on-surface-variant hover:text-primary transition-colors">
+              稍後再說
+            </button>
+          )}
         </div>
-        <div>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-foreground">
-            {isEn
-              ? "Your voice model has been created."
-              : isTW
-              ? "你的語音模型已建立。"
-              : "你的语音模型已建立。"}
-          </h2>
-          <p className="text-muted-foreground mt-3 text-base md:text-lg">
-            {isEn
-              ? "Great! Now let's start practising."
-              : isTW
-              ? "太好了！現在開始練習吧。"
-              : "太好了！现在开始练习吧。"}
-          </p>
+      </main>
+
+      {/* PiPi corner widget */}
+      <div className="fixed bottom-6 right-4 sm:right-8 z-50 flex items-end gap-3 max-w-[min(100%,320px)]">
+        <div className="glass-card rounded-2xl rounded-br-sm px-4 py-3 text-sm text-on-surface shadow-lg max-w-[220px]">
+          你的聲音獨一無二！一起學習吧！
         </div>
-        <Button
-          onClick={onComplete}
-          className="w-full h-14 text-lg font-extrabold rounded-2xl game-btn gap-2"
-          style={{ boxShadow: "0 4px 0 hsl(var(--primary-dark))" }}
-        >
-          {isEn ? "Start Practice" : isTW ? "開始練習" : "开始练习"}
-          <ArrowRight className="h-5 w-5" />
-        </Button>
+        <img
+          src={mascot}
+          alt=""
+          role="presentation"
+          className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover shadow-lg border-2 border-white/60 animate-pipi-bob"
+        />
       </div>
     </div>
   );

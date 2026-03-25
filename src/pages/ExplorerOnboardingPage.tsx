@@ -1,162 +1,113 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mic, Square, ArrowRight, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { MaterialIcon } from "@/components/MaterialIcon";
+import { BrandHeader } from "@/components/BrandHeader";
 import { toast } from "sonner";
-import mascot from "@/assets/pipi-mascot.png";
-import { GlobalHeader } from "@/components/GlobalHeader";
+
+const ROLE_OPTIONS = [
+  { value: "learner", icon: "explore", label: "語音冒險家" },
+  { value: "therapist", icon: "medical_services", label: "言語治療師" },
+  { value: "public", icon: "groups", label: "一般市民" },
+] as const;
 
 export default function ExplorerOnboardingPage() {
   const navigate = useNavigate();
+  const [nickname, setNickname] = useState("");
+  const [role, setRole] = useState("");
 
-  const [step, setStep] = useState<'info' | 'voice'>('info');
-  const [nickname, setNickname] = useState('');
-
-  // Voice recording
-  const [isRecording, setIsRecording] = useState(false);
-  const [hasRecording, setHasRecording] = useState(false);
-  const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-
-  const handleInfoNext = () => {
-    if (!nickname.trim()) {
-      toast.error('請輸入你的暱稱');
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nickname.trim() || !role) {
+      toast.error("請填寫所有必填欄位。");
       return;
     }
-    setStep('voice');
-  };
+    localStorage.setItem(
+      "speakable_user",
+      JSON.stringify({ nickname: nickname.trim(), role })
+    );
 
-  const handleStartRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-      mediaRecorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setRecordingUrl(URL.createObjectURL(blob));
-        setHasRecording(true);
-      };
-      mediaRecorder.start();
-      setIsRecording(true);
-    } catch {
-      toast.error('無法使用麥克風');
-    }
-  };
-
-  const handleStopRecording = () => {
-    mediaRecorderRef.current?.stop();
-    setIsRecording(false);
-  };
-
-  const handleComplete = () => {
-    // Store nickname in sessionStorage for the prototype
-    sessionStorage.setItem('explorer_nickname', nickname.trim());
-    toast.success(`歡迎，${nickname}！🎉`);
-    navigate('/explorer');
+    if (role === "learner") navigate("/adventure-start");
+    else if (role === "therapist") navigate("/st-dashboard");
+    else navigate("/ngo");
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <GlobalHeader />
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-      <img src={mascot} alt="" className="h-20 w-20 object-contain mascot-bounce mb-6" />
+    <div className="font-body text-on-surface min-h-screen relative overflow-x-hidden bg-background">
+      {/* Gradient background + blobs */}
+      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-[#c8e8f2] via-surface to-[#a8d4e8]" aria-hidden="true" />
+      <div className="fixed -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-primary/25 blur-[100px] -z-10" aria-hidden="true" />
+      <div className="fixed top-1/4 -right-16 h-[22rem] w-[22rem] rounded-full bg-secondary-container/40 blur-[90px] -z-10" aria-hidden="true" />
+      <div className="fixed bottom-20 left-1/4 h-[18rem] w-[18rem] rounded-full bg-tertiary-container/35 blur-[80px] -z-10" aria-hidden="true" />
+      <div className="fixed bottom-0 right-1/3 h-64 w-64 rounded-full bg-primary-fixed/30 blur-[70px] -z-10" aria-hidden="true" />
+      <div className="fixed top-40 left-1/3 h-40 w-56 rounded-[60%] bg-white/40 blur-3xl -z-10 rotate-12" aria-hidden="true" />
 
-      {step === 'info' && (
-        <div className="w-full max-w-sm space-y-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-extrabold text-foreground mb-1">歡迎，探險家！</h1>
-            <p className="text-sm text-muted-foreground">告訴我們一些關於你的事情</p>
-          </div>
+      <BrandHeader />
 
-          <div className="space-y-4">
+      <div className="relative z-10 mx-auto max-w-lg px-4 pt-20 pb-32 sm:pt-24">
+        <header className="mb-8 flex flex-col items-center text-center sm:mb-10">
+          <p className="font-headline text-xl font-bold text-on-surface sm:text-2xl">開始你的語言旅程</p>
+        </header>
+
+        <form
+          onSubmit={handleSubmit}
+          className="glass-card rounded-xl border border-white/60 p-6 shadow-xl shadow-primary/10 sm:p-8"
+        >
+          <div className="space-y-5">
             <div>
-              <Label htmlFor="nickname" className="text-sm font-bold">暱稱 <span className="text-destructive">*</span></Label>
-              <Input
+              <label htmlFor="nickname" className="font-label mb-1.5 block text-sm font-semibold text-on-surface">
+                暱稱
+              </label>
+              <input
+                type="text"
                 id="nickname"
-                placeholder="你的暱稱"
+                required
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
-                className="h-12 rounded-xl text-lg"
+                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest/80 px-4 py-3 font-body text-on-surface shadow-sm focus:border-primary focus:ring-primary focus:outline-none"
+                placeholder="你希望怎樣稱呼"
               />
             </div>
+            <fieldset>
+              <legend className="font-label mb-3 block text-sm font-semibold text-on-surface">
+                我是⋯
+              </legend>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {ROLE_OPTIONS.map((opt) => (
+                  <label key={opt.value} className="group relative cursor-pointer">
+                    <input
+                      type="radio"
+                      name="role"
+                      value={opt.value}
+                      checked={role === opt.value}
+                      onChange={() => setRole(opt.value)}
+                      className="peer sr-only"
+                      required
+                    />
+                    <span className="flex h-full flex-col items-center gap-2 rounded-lg border-2 border-outline-variant bg-surface-container-low/80 p-4 text-center transition peer-checked:border-primary peer-checked:bg-primary-container/50 peer-checked:shadow-md peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
+                      <MaterialIcon icon={opt.icon} className="text-primary" />
+                      <span className="font-label text-sm font-bold text-on-surface">{opt.label}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </div>
-
-          <Button
-            onClick={handleInfoNext}
-            className="w-full h-14 text-lg font-extrabold rounded-2xl game-btn gap-2"
-            style={{ boxShadow: '0 5px 0 hsl(var(--primary-dark))' }}
-          >
-            下一步
-            <ArrowRight className="h-5 w-5" />
-          </Button>
-        </div>
-      )}
-
-      {step === 'voice' && (
-        <div className="w-full max-w-sm space-y-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-extrabold text-foreground mb-1">聲音設定</h1>
-            <p className="text-sm text-muted-foreground">錄製你的聲音，用於未來所有音頻播放</p>
-          </div>
-
-          <div className="bg-card border-2 border-primary/20 rounded-2xl p-6 text-center">
-            <p className="text-3xl font-extrabold text-foreground mb-2">hello 皮皮</p>
-            <p className="text-sm text-muted-foreground">按下錄音鍵，然後大聲讀出來</p>
-          </div>
-
-          <div className="flex flex-col items-center gap-4">
-            <button
-              onClick={isRecording ? handleStopRecording : handleStartRecording}
-              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all ${
-                isRecording
-                  ? 'bg-destructive animate-pulse shadow-lg'
-                  : 'bg-primary hover:bg-primary/90 shadow-md game-btn'
-              }`}
-              style={!isRecording ? { boxShadow: '0 5px 0 hsl(var(--primary-dark))' } : {}}
-            >
-              {isRecording ? (
-                <Square className="h-8 w-8 text-primary-foreground" />
-              ) : (
-                <Mic className="h-10 w-10 text-primary-foreground" />
-              )}
-            </button>
-            <p className="text-sm text-muted-foreground font-bold">
-              {isRecording ? '🔴 錄音中...' : hasRecording ? '✅ 錄音完成！' : '點擊開始錄音'}
-            </p>
-          </div>
-
-          {hasRecording && recordingUrl && (
-            <div className="bg-muted/50 rounded-xl p-3 border border-border">
-              <audio src={recordingUrl} controls className="w-full h-10" preload="auto" />
-            </div>
-          )}
-
-          <Button
-            onClick={handleComplete}
-            className="w-full h-14 text-lg font-extrabold rounded-2xl game-btn gap-2"
-            style={{ boxShadow: '0 5px 0 hsl(var(--primary-dark))' }}
-          >
-            完成！開始探險
-            <Check className="h-5 w-5" />
-          </Button>
 
           <button
-            onClick={handleComplete}
-            className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
+            type="submit"
+            className="font-label mt-8 w-full rounded-lg bg-primary py-4 text-base font-bold text-on-primary shadow-lg shadow-primary/30 transition hover:bg-primary-dim focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-[0.98]"
           >
-            跳過錄音
+            開始旅程
           </button>
-        </div>
-      )}
+        </form>
+      </div>
+
+      {/* Wave SVG footer */}
+      <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-0 overflow-hidden leading-none text-primary/20" aria-hidden="true">
+        <svg className="relative block w-full h-[120px] sm:h-[160px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
+          <path fill="currentColor" d="M0,64L48,58.7C96,53,192,43,288,48C384,53,480,75,576,74.7C672,75,768,53,864,48C960,43,1056,53,1152,58.7C1248,64,1344,64,1392,64L1440,64L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z" />
+          <path fill="currentColor" fillOpacity="0.45" d="M0,90L60,85.3C120,81,240,71,360,74.7C480,79,600,95,720,90.7C840,85,960,59,1080,53.3C1200,47,1320,61,1380,68L1440,75L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z" />
+        </svg>
       </div>
     </div>
   );

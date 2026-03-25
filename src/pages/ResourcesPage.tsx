@@ -1,122 +1,189 @@
 import { useNavigate } from "react-router-dom";
-import { MapPin, BookOpen, Languages, Heart, ExternalLink } from "lucide-react";
+import { MaterialIcon } from "@/components/MaterialIcon";
 import mascot from "@/assets/pipi-mascot.png";
 
-const NGO_RESOURCES = [
-  { name: '香港言語治療師協會', url: 'https://www.hkist.org.hk', desc: '專業言語治療師組織' },
-  { name: '衛生署兒童體能智力測驗服務', url: 'https://www.dhcas.gov.hk', desc: '政府兒童評估服務' },
-  { name: '協康會', url: 'https://www.heephong.org', desc: '兒童康復服務' },
-  { name: '明愛社區服務', url: 'https://www.caritassws.org.hk', desc: '社區言語治療服務' },
+const NGO_DIRECTORY = [
+  { name: "HKIST", full: "Hong Kong Institute of Speech Therapists", url: "https://www.hkist.org.hk", icon: "medical_services" },
+  { name: "DHCAS", full: "Child Assessment Service", url: "https://www.dhcas.gov.hk", icon: "health_and_safety" },
+  { name: "Heep Hong", full: "Heep Hong Society", url: "https://www.heephong.org", icon: "diversity_3" },
+  { name: "Caritas", full: "Caritas Community Services", url: "https://www.caritassws.org.hk", icon: "volunteer_activism" },
+];
+
+const RED_FLAGS = [
+  "12 個月仍未牙牙學語",
+  "18 個月仍未說出第一個字",
+  "24 個月仍不能組合兩個字詞",
+  "陌生人無法理解其說話（3 歲以上）",
+  "口吃或說話困難",
+];
+
+const PIPI_TIPS = [
+  { title: "每天交談", desc: "透過描述日常生活自然地建立詞彙。" },
+  { title: "一起閱讀", desc: "親子共讀能提升理解和表達能力。" },
+  { title: "先聆聽", desc: "給孩子時間回應——避免替他們說完句子。" },
 ];
 
 export default function ResourcesPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-full bg-background">
-      <section className="px-4 pt-8 pb-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex flex-col items-center text-center gap-3 mb-8">
-            <img src={mascot} alt="" className="h-16 w-16 object-contain mascot-bounce" />
-            <div>
-              <h1 className="text-2xl font-extrabold text-foreground">公眾資訊</h1>
-              <p className="text-sm text-muted-foreground mt-1">言語治療介紹及資源</p>
-            </div>
-          </div>
-
-          {/* Speech Therapy Introduction */}
-          <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg font-extrabold text-foreground">什麼是言語治療？</h2>
-              </div>
-            </div>
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <p>
-                言語治療是一門專業的醫療服務，旨在幫助有語言、言語、溝通或吞嚥困難的人士。言語治療師是受過專業訓練的醫療專業人員。
-              </p>
-              <p>兒童言語治療通常涵蓋以下範疇：</p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>發音障礙 — 無法正確發出某些語音</li>
-                <li>語言發展遲緩 — 語言理解或表達能力低於同齡兒童</li>
-                <li>口吃 — 說話不流暢</li>
-                <li>聲線問題 — 聲音沙啞或音量異常</li>
-                <li>社交溝通困難 — 社交互動中的語言使用</li>
-              </ul>
-              <p>
-                如果您的孩子在說話方面有困難，建議儘早尋求專業評估。早期介入可以顯著改善治療效果。
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mt-4">
+    <div className="min-h-full bg-surface text-on-surface font-body">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary to-primary-dim text-on-primary py-16 px-6">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8">
+          <div className="flex-1 text-center md:text-left">
+            <h1 className="font-headline text-4xl sm:text-5xl font-extrabold mb-4">
+              言語資源中心
+            </h1>
+            <p className="text-on-primary/80 text-lg mb-6 max-w-lg">
+              為家長、照顧者及社區提供的免費資源。了解言語發展、尋找專業協助及探索活動。
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center md:justify-start">
               <button
-                onClick={() => navigate('/resources/find-provider')}
-                className="bg-primary text-primary-foreground rounded-xl p-4 text-center hover:-translate-y-0.5 transition-all"
-                style={{ boxShadow: '0 4px 0 hsl(var(--primary-dark))' }}
+                onClick={() => navigate("/red-flags")}
+                className="bg-error text-on-error font-bold px-6 py-3 rounded-xl shadow-lg shadow-error/20 hover:brightness-110 active:scale-95 transition-all"
               >
-                <MapPin className="h-5 w-5 mx-auto mb-1" />
-                <span className="text-sm font-bold block">尋找服務</span>
+                <MaterialIcon icon="warning" className="mr-2" />
+                警示清單
               </button>
               <button
-                onClick={() => navigate('/resources/speech-therapy-info')}
-                className="bg-card border-2 border-border rounded-xl p-4 text-center hover:-translate-y-0.5 transition-all hover:border-primary/30"
+                onClick={() => navigate("/ipa")}
+                className="bg-white/20 backdrop-blur-md text-white font-bold px-6 py-3 rounded-xl border border-white/30 hover:bg-white/30 active:scale-95 transition-all"
               >
-                <BookOpen className="h-5 w-5 text-primary mx-auto mb-1" />
-                <span className="text-sm font-bold text-foreground block">了解更多</span>
+                <MaterialIcon icon="record_voice_over" className="mr-2" />
+                試用 IPA 瀏覽器
               </button>
             </div>
           </div>
-
-          {/* NGO Resources */}
-          <div className="bg-card border-2 border-border rounded-2xl p-6 mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-                <Heart className="h-6 w-6 text-success" />
-              </div>
-              <div>
-                <h2 className="text-lg font-extrabold text-foreground">非牟利機構資源</h2>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {NGO_RESOURCES.map((ngo, i) => (
-                <a
-                  key={i}
-                  href={ngo.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/60 transition-colors"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-foreground">{ngo.name}</p>
-                    <p className="text-xs text-muted-foreground">{ngo.desc}</p>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* IPA Library link */}
-          <button
-            onClick={() => navigate('/ipa')}
-            className="w-full bg-card border-2 border-border rounded-2xl p-5 text-left hover:-translate-y-0.5 transition-all hover:border-primary/30"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                <Languages className="h-6 w-6 text-accent" />
-              </div>
-              <div>
-                <h3 className="text-lg font-extrabold text-foreground">音標庫</h3>
-                <p className="text-sm text-muted-foreground">學習音標符號和發音指南</p>
-              </div>
-            </div>
-          </button>
+          <img
+            src={mascot}
+            alt=""
+            role="presentation"
+            className="w-40 h-40 md:w-52 md:h-52 object-contain drop-shadow-2xl animate-pipi-bob"
+          />
         </div>
+        <div className="absolute -bottom-8 left-0 right-0 h-16 bg-surface rounded-t-[3rem]" />
       </section>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+        {/* PiPi Tips */}
+        <section>
+          <h2 className="font-headline text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
+            <MaterialIcon icon="tips_and_updates" filled className="text-tertiary" />
+            皮皮給家長的小貼士
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {PIPI_TIPS.map((tip) => (
+              <div key={tip.title} className="glass-card rounded-xl p-5 shadow-card border border-white/40">
+                <h3 className="font-headline font-bold text-on-surface mb-1">{tip.title}</h3>
+                <p className="text-sm text-on-surface-variant leading-relaxed">{tip.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Milestones */}
+        <section className="bg-tertiary-container/20 rounded-2xl p-6">
+          <h2 className="font-headline text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
+            <MaterialIcon icon="timeline" filled className="text-tertiary" />
+            言語發展里程碑
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { age: "12 個月", milestone: "第一個字（媽媽、爸爸），能理解「不」" },
+              { age: "18 個月", milestone: "10-20 個字，會指向物品，能跟從簡單指令" },
+              { age: "24 個月", milestone: "50 個以上字詞，雙字詞組，陌生人能理解 50%" },
+            ].map((m) => (
+              <div key={m.age} className="bg-white/60 rounded-xl p-4 shadow-sm">
+                <span className="font-headline font-extrabold text-tertiary text-lg">{m.age}</span>
+                <p className="text-sm text-on-surface-variant mt-1 leading-relaxed">{m.milestone}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* NGO Directory */}
+        <section>
+          <h2 className="font-headline text-xl font-bold text-on-surface mb-4 flex items-center gap-2">
+            <MaterialIcon icon="apartment" filled className="text-primary" />
+            NGO 及專業機構目錄
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {NGO_DIRECTORY.map((ngo) => (
+              <a
+                key={ngo.name}
+                href={ngo.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass-card rounded-xl p-5 shadow-card border border-white/40 hover:scale-[1.02] active:scale-95 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-full bg-primary-container/40 flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                  <MaterialIcon icon={ngo.icon} filled className="text-primary group-hover:text-on-primary" />
+                </div>
+                <h3 className="font-headline font-bold text-on-surface mb-1">{ngo.name}</h3>
+                <p className="text-xs text-on-surface-variant leading-relaxed">{ngo.full}</p>
+                <div className="mt-2 flex items-center gap-1 text-primary text-xs font-medium">
+                  瀏覽 <MaterialIcon icon="open_in_new" className="text-sm" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* Red Flags Preview */}
+        <section className="bg-error/5 rounded-2xl p-6 border border-error/10">
+          <h2 className="font-headline text-xl font-bold text-error mb-4 flex items-center gap-2">
+            <MaterialIcon icon="flag" filled className="text-error" />
+            警示信號 — 何時尋求協助
+          </h2>
+          <div className="space-y-2 mb-4">
+            {RED_FLAGS.slice(0, 3).map((flag) => (
+              <div key={flag} className="flex items-center gap-3 bg-white/60 rounded-lg p-3">
+                <MaterialIcon icon="warning" className="text-error text-lg shrink-0" />
+                <span className="text-sm text-on-surface">{flag}</span>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={() => navigate("/red-flags")}
+            className="text-error font-bold text-sm hover:text-error-dim transition-colors flex items-center gap-1"
+          >
+            查看完整清單 <MaterialIcon icon="arrow_forward" className="text-lg" />
+          </button>
+        </section>
+
+        {/* IPA Demo Strip */}
+        <section className="bg-inverse-surface rounded-2xl p-6 text-inverse-on-surface">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-headline text-xl font-bold">IPA 語音瀏覽器</h2>
+              <p className="text-sm opacity-70">探索粵語輔音</p>
+            </div>
+            <button
+              onClick={() => navigate("/ipa")}
+              className="bg-inverse-primary text-on-primary-fixed px-4 py-2 rounded-xl font-bold text-sm active:scale-95 transition-transform"
+            >
+              開啟瀏覽器
+            </button>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2">
+            {["/b/", "/p/", "/m/", "/f/", "/d/", "/t/", "/n/", "/l/"].map((s) => (
+              <div key={s} className="shrink-0 w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center">
+                <span className="font-headline font-bold text-inverse-primary">{s}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t border-outline-variant/20 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-on-surface-variant">
+          <div className="flex items-center gap-2">
+            <img src={mascot} alt="" className="h-6 w-6 object-contain" />
+            <span className="font-bold">SpeakAble HK</span>
+          </div>
+          <p>© 2026 SpeakAble HK · 輔助言語訓練工具（非醫療用途）</p>
+        </footer>
+      </div>
     </div>
   );
 }

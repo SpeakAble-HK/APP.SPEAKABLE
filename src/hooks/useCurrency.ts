@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export type Currency = "USD" | "HKD" | "RMB" | "GBP";
 
@@ -26,9 +26,25 @@ function detectCurrencyFromTimezone(): Currency {
   return "USD";
 }
 
+function readGameCurrency(): { coins: number; xp: number } {
+  try {
+    const raw = localStorage.getItem("speakable_game_currency");
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { coins: 0, xp: 0 };
+}
+
+function saveGameCurrency(coins: number, xp: number) {
+  localStorage.setItem("speakable_game_currency", JSON.stringify({ coins, xp }));
+}
+
 export function useCurrency() {
   const [currency, setCurrency] = useState<Currency>("USD");
   const [detected, setDetected] = useState(false);
+
+  const initial = readGameCurrency();
+  const [coins, setCoins] = useState(initial.coins);
+  const [xp, setXP] = useState(initial.xp);
 
   useEffect(() => {
     if (detected) return;
@@ -36,7 +52,6 @@ export function useCurrency() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        // Rough geolocation-to-currency mapping
         if (latitude > 22.1 && latitude < 22.6 && longitude > 113.8 && longitude < 114.4) {
           setCurrency("HKD");
         } else if (latitude > 18 && latitude < 54 && longitude > 73 && longitude < 135) {
@@ -53,6 +68,22 @@ export function useCurrency() {
     );
   }, [detected]);
 
+  const addCoins = useCallback((amount: number) => {
+    setCoins((prev) => {
+      const next = prev + amount;
+      saveGameCurrency(next, xp);
+      return next;
+    });
+  }, [xp]);
+
+  const addXP = useCallback((amount: number) => {
+    setXP((prev) => {
+      const next = prev + amount;
+      saveGameCurrency(coins, next);
+      return next;
+    });
+  }, [coins]);
+
   const convert = (usdAmount: number): string => {
     const rate = EXCHANGE_RATES[currency];
     const converted = Math.round(usdAmount * rate);
@@ -63,5 +94,9 @@ export function useCurrency() {
     return `${CURRENCY_SYMBOLS[cur]}${amount.toLocaleString()}`;
   };
 
-  return { currency, setCurrency, convert, formatFixed, symbol: CURRENCY_SYMBOLS[currency] };
+  return {
+    currency, setCurrency, convert, formatFixed,
+    symbol: CURRENCY_SYMBOLS[currency],
+    coins, xp, addCoins, addXP,
+  };
 }
