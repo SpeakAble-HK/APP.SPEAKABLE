@@ -4,8 +4,16 @@ import { MaterialIcon } from "@/components/MaterialIcon";
 import { phonemeCategories, getLessonsByCategory } from "@/data/lessons";
 import { BilabialStation1 } from "@/components/BilabialStation1";
 import { BilabialStation2 } from "@/components/BilabialStation2";
+import { BilabialStation3 } from "@/components/BilabialStation3";
 
-type QuestView = "islands" | "phonetic-categories" | "bilabial-station-select" | "bilabial-s1" | "bilabial-s2" | "lesson-map";
+type QuestView =
+  | "islands"
+  | "phonetic-categories"
+  | "bilabial-station-select"
+  | "bilabial-s1"
+  | "bilabial-s2"
+  | "bilabial-s3"
+  | "lesson-map";
 
 export default function SpeechQuestPage() {
   const navigate = useNavigate();
@@ -30,6 +38,15 @@ export default function SpeechQuestPage() {
   if (view === "bilabial-s2") {
     return (
       <BilabialStation2
+        onComplete={() => setView("bilabial-station-select")}
+        onBack={() => setView("bilabial-station-select")}
+      />
+    );
+  }
+
+  if (view === "bilabial-s3") {
+    return (
+      <BilabialStation3
         onComplete={() => setView("bilabial-station-select")}
         onBack={() => setView("bilabial-station-select")}
       />
@@ -71,8 +88,8 @@ export default function SpeechQuestPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-xs font-bold text-primary mb-1 uppercase tracking-wider">站點 1</p>
-                  <p className="font-headline text-lg font-bold text-on-surface">氣流實驗室</p>
-                  <p className="text-xs text-on-surface-variant mt-1">視覺教學——嘴形及記憶法</p>
+                  <p className="font-headline text-lg font-bold text-on-surface">噴氣實驗室</p>
+                  <p className="text-xs text-on-surface-variant mt-1">隔離練習：/b/ /p/ /m/</p>
                 </div>
                 <MaterialIcon icon="chevron_right" className="text-on-surface-variant text-2xl" />
               </div>
@@ -88,8 +105,25 @@ export default function SpeechQuestPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-xs font-bold text-secondary mb-1 uppercase tracking-wider">站點 2</p>
-                  <p className="font-headline text-lg font-bold text-on-surface">詞語配對</p>
-                  <p className="text-xs text-on-surface-variant mt-1">聆聽、配對及錄音——三個難度級別</p>
+                  <p className="font-headline text-lg font-bold text-on-surface">單字配對大進擊</p>
+                  <p className="text-xs text-on-surface-variant mt-1">聽 → 揀圖 → 讀（三級別）</p>
+                </div>
+                <MaterialIcon icon="chevron_right" className="text-on-surface-variant text-2xl" />
+              </div>
+            </button>
+
+            <button
+              onClick={() => setView("bilabial-s3")}
+              className="w-full glass-card border border-tertiary-container/40 rounded-xl p-6 text-left transition-all hover:scale-[1.02] active:scale-95 shadow-card"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-tertiary-container/50 flex items-center justify-center shrink-0">
+                  <MaterialIcon icon="waves" filled className="text-tertiary text-2xl" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-tertiary mb-1 uppercase tracking-wider">站點 3</p>
+                  <p className="font-headline text-lg font-bold text-on-surface">貝殼分類大賽</p>
+                  <p className="text-xs text-on-surface-variant mt-1">聽音 → 分類 → 讀出</p>
                 </div>
                 <MaterialIcon icon="chevron_right" className="text-on-surface-variant text-2xl" />
               </div>
@@ -181,7 +215,7 @@ export default function SpeechQuestPage() {
                       <span className="text-3xl">{cat.emoji}</span>
                       <div className="flex-1">
                         <p className="font-headline text-base font-bold text-on-surface">{cat.labelZh}</p>
-                        <p className="text-xs text-on-surface-variant mt-0.5">雙唇海灘——兩個學習站點</p>
+                        <p className="text-xs text-on-surface-variant mt-0.5">雙唇海灘——三個學習站點</p>
                       </div>
                       <span className="text-xs font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">開放</span>
                     </div>

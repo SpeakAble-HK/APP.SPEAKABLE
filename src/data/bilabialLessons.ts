@@ -37,31 +37,31 @@ export const station1Teachings: PhonemeTeaching[] = [
     phoneme: '/b/',
     label: '爸爸音',
     familyWord: '爸爸',
-    description: '嘴唇用力閉緊，像一個小彈簧，然後輕輕彈開。',
-    memoryTrick: 'bangbang槍！',
+    description: '雙唇閉緊 → 輕輕彈開',
+    memoryTrick: 'bangbang槍',
     memoryEmoji: '🔫',
     commonMistake: '/b/ 發成 /m/',
     mistakeFix: '皮皮提醒小朋友收起牙齒，合上嘴唇',
   },
   {
-    phoneme: '/ph/',
+    phoneme: '/p/',
     label: '婆婆音',
     familyWord: '婆婆',
-    description: '嘴唇閉緊，彈開時噴出一大團火花（強調送氣）。',
+    description: '雙唇閉緊 → 強力噴氣',
     memoryTrick: '吹泡泡',
     memoryEmoji: '🫧',
     commonMistake: '/p/ 發成 /b/',
-    mistakeFix: '皮皮提醒小朋友放手指係嘴巴前，感受氣流噴出',
+    mistakeFix: '皮皮提醒：把手指放在嘴前，感受氣流噴出',
   },
   {
     phoneme: '/m/',
     label: '媽媽音',
     familyWord: '媽媽',
-    description: '嘴唇閉著不打開，重點在於鼻子，發出「嗯——」的震動。',
-    memoryTrick: 'mmm，皮皮係鼻前面揮手「好臭好臭」',
+    description: '雙唇閉合 → 鼻震動',
+    memoryTrick: 'mmm 鼻震',
     memoryEmoji: '🤢',
     commonMistake: '/m/ 氣流從嘴巴出',
-    mistakeFix: '皮皮提醒小朋友閉住嘴巴，用鼻子發聲',
+    mistakeFix: '皮皮提醒：閉上嘴巴，用鼻子發聲',
   },
 ];
 
@@ -74,7 +74,7 @@ export const station2Phonemes: Station2Phoneme[] = [
       {
         level: 1,
         levelLabel: '單字',
-        prompt: '呢個係咩黎架？',
+        prompt: '這是什麼？',
         items: [
           { word: '波', image: '⚽' },
           { word: '包', image: '🍞' },
@@ -86,7 +86,7 @@ export const station2Phonemes: Station2Phoneme[] = [
       {
         level: 2,
         levelLabel: '詞組',
-        prompt: '聽下呢個詞語',
+        prompt: '請聽這個詞語',
         items: [
           { word: '巴士', image: '🚌' },
           { word: '打波', image: '⚽' },
@@ -98,11 +98,11 @@ export const station2Phonemes: Station2Phoneme[] = [
       {
         level: 3,
         levelLabel: '情景',
-        prompt: '佢哋係度做緊咩呀？',
+        prompt: '他們在做什麼？',
         items: [
-          { word: '爸爸食漢堡包', image: '🍔' },
-          { word: '搭巴士嘟八達通', image: '🚌' },
-          { word: '爸爸同伯伯講拜拜', image: '👋' },
+          { word: '爸爸吃漢堡', image: '🍔' },
+          { word: '搭巴士刷八達通', image: '🚌' },
+          { word: '爸爸和伯伯道別', image: '👋' },
         ],
       },
     ],
@@ -114,7 +114,7 @@ export const station2Phonemes: Station2Phoneme[] = [
       {
         level: 1,
         levelLabel: '單字',
-        prompt: '呢個係咩黎架？',
+        prompt: '這是什麼？',
         items: [
           { word: '爬', image: '🧗' },
           { word: '怕', image: '😨' },
@@ -125,23 +125,18 @@ export const station2Phonemes: Station2Phoneme[] = [
       {
         level: 2,
         levelLabel: '詞組',
-        prompt: '聽下呢個詞語',
+        prompt: '請聽這個詞語',
         items: [
           { word: '排隊', image: '🧍' },
-          { word: '皮膚', image: '🤚' },
           { word: '跑步', image: '🏃' },
           { word: '拍手', image: '👏' },
-          { word: '可怕', image: '😱' },
         ],
       },
       {
         level: 3,
         levelLabel: '情景',
-        prompt: '佢哋係度做緊咩呀？',
-        items: [
-          { word: '我平時會陪婆婆去跑步', image: '🏃' },
-          { word: '排隊買蘋果批', image: '🍎' },
-        ],
+        prompt: '他們在做什麼？',
+        items: [{ word: '陪婆婆跑步', image: '🏃' }],
       },
     ],
   },
@@ -152,7 +147,7 @@ export const station2Phonemes: Station2Phoneme[] = [
       {
         level: 1,
         levelLabel: '單字',
-        prompt: '呢個係咩黎架？',
+        prompt: '這是什麼？',
         items: [
           { word: '貓', image: '🐱' },
           { word: '馬', image: '🐴' },
@@ -164,7 +159,7 @@ export const station2Phonemes: Station2Phoneme[] = [
       {
         level: 2,
         levelLabel: '詞組',
-        prompt: '聽下呢個詞語',
+        prompt: '請聽這個詞語',
         items: [
           { word: '妹妹', image: '👧' },
           { word: '馬騮', image: '🐒' },
@@ -176,14 +171,34 @@ export const station2Phonemes: Station2Phoneme[] = [
       {
         level: 3,
         levelLabel: '情景',
-        prompt: '佢哋係度做緊咩呀？',
-        items: [
-          { word: '媽媽幫妹妹開門', image: '🚪' },
-          { word: '馬騮搶咗妹妹個麵包', image: '🐒' },
-        ],
+        prompt: '他們在做什麼？',
+        items: [{ word: '媽媽開門', image: '🚪' }],
       },
     ],
   },
+];
+
+// ── Station 3: 貝殼分類大賽 ──
+export type Station3ShellKey = "b" | "p" | "m";
+
+export interface Station3Item {
+  word: string;
+  /** 系統讀出提示，例如：婆 po4 */
+  displayPrompt: string;
+  image: string;
+  shell: Station3ShellKey;
+}
+
+export const station3Items: Station3Item[] = [
+  { word: "波", displayPrompt: "波，爸爸音", image: "⚽", shell: "b" },
+  { word: "婆", displayPrompt: "婆，婆婆音", image: "👵", shell: "p" },
+  { word: "媽", displayPrompt: "媽，媽媽音", image: "👩", shell: "m" },
+  { word: "怕", displayPrompt: "怕，婆婆音", image: "😨", shell: "p" },
+  { word: "貓", displayPrompt: "貓，媽媽音", image: "🐱", shell: "m" },
+  { word: "包", displayPrompt: "包，爸爸音", image: "🍞", shell: "b" },
+  { word: "跑", displayPrompt: "跑，婆婆音", image: "🏃", shell: "p" },
+  { word: "門", displayPrompt: "門，媽媽音", image: "🚪", shell: "m" },
+  { word: "餅", displayPrompt: "餅，爸爸音", image: "🍪", shell: "b" },
 ];
 
 // Get total exercise count for progress tracking
