@@ -56,7 +56,7 @@ const App = () => (
                 {/* Standalone pages (no bottom nav) */}
                 <Route path="/" element={<Index />} />
                 <Route path="/role-select" element={<RoleSelectionPage />} />
-                <Route path="/explorer/onboarding" element={<ExplorerOnboardingPage />} />
+                <Route path="/explorer/onboarding/*" element={<ExplorerOnboardingPage />} />
                 <Route path="/adventure-start" element={<AdventureStartPage />} />
                 <Route path="/ngo" element={<ResourcesPage />} />
                 <Route path="/resources/find-provider" element={<SpeechTherapyInfoPage />} />

@@ -399,10 +399,15 @@ interface LanguageProviderProps {
   initialLanguage?: Language;
 }
 
+const VALID_LANGUAGES: Language[] = ["en-GB", "zh-TW", "zh-CN"];
+
 export function LanguageProvider({ children, initialLanguage = "zh-TW" }: LanguageProviderProps) {
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem("preferred_language") as Language;
-    return saved || initialLanguage;
+    const saved = localStorage.getItem("preferred_language");
+    if (saved && VALID_LANGUAGES.includes(saved as Language)) {
+      return saved as Language;
+    }
+    return initialLanguage;
   });
 
   const setLanguage = (lang: Language) => {
