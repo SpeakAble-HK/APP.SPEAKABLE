@@ -27,8 +27,6 @@ const FALLBACK_WORDS: Record<BilabialPhonemeKey, string> = {
   m: "唔",
 };
 
-/** Minimum useful audio size in bytes (WAV header = 44 bytes) */
-const MIN_AUDIO_BYTES = 200;
 
 // ── IndexedDB store for demo clips ──────────────────────────────────
 const DB_NAME = "speakable_demos";
