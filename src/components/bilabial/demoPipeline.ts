@@ -19,6 +19,16 @@ const DEMO_SENTENCES: Record<BilabialPhonemeKey, string> = {
   m: "雙唇閉合，鼻震動，，唔。",
 };
 
+// Fallback words for Web Speech API when voice-clone fails
+const FALLBACK_WORDS: Record<BilabialPhonemeKey, string> = {
+  b: "爸",
+  p: "爬",
+  m: "唔",
+};
+
+/** Minimum useful audio size in bytes (WAV header = 44 bytes) */
+const MIN_AUDIO_BYTES = 200;
+
 // ── IndexedDB store for demo clips ──────────────────────────────────
 const DB_NAME = "speakable_demos";
 const DB_VERSION = 1;
