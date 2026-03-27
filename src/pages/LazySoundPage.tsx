@@ -101,9 +101,10 @@ export default function LazySoundPage() {
   };
 
   const handleAnalyze = async () => {
+    if (!audioBlob) return;
     const text = getTestText();
-    if (!text || !audioBlob) return;
-    const result = await analyze(audioBlob, text);
+    // For custom mode without text, pass empty string — hook will do ASR-only
+    const result = await analyze(audioBlob, text || "");
     if (result) setHasResults(true);
   };
 
