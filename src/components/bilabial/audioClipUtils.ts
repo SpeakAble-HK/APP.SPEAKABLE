@@ -47,36 +47,47 @@ export function encodeWav(buffer: AudioBuffer, startSample: number, endSample: n
 }
 
 /**
- * Find the start sample of the last word by scanning backwards for a silence
- * gap ≥ `minSilenceMs` (amplitude RMS below `threshold`).
+ * Find the start sample of the last word/syllable.
+ * 
+ * Strategy: For carrier phrases ending with a single target syllable,
+ * we use a time-based approach (last ~1.0s) as primary, then refine
+ * by scanning for a silence gap within that window.
+ * This avoids the fragile full-scan that often clips at wrong positions.
  */
 export function findLastWordStart(
   buffer: AudioBuffer,
-  minSilenceMs = 150,
-  threshold = 0.015
+  maxTailMs = 1000,
+  minSilenceMs = 100,
+  threshold = 0.02
 ): number {
   const data = buffer.getChannelData(0);
   const sr = buffer.sampleRate;
-  const windowSize = Math.round((minSilenceMs / 1000) * sr);
   const totalSamples = data.length;
 
-  for (let end = totalSamples; end - windowSize > 0; end -= Math.round(windowSize / 4)) {
-    const start = end - windowSize;
+  // Start searching from at most `maxTailMs` before the end
+  const searchStart = Math.max(0, totalSamples - Math.round((maxTailMs / 1000) * sr));
+  const windowSize = Math.round((minSilenceMs / 1000) * sr);
+
+  // Scan forward from searchStart looking for a silence gap
+  for (let pos = searchStart; pos + windowSize < totalSamples - Math.round(0.1 * sr); pos += Math.round(windowSize / 3)) {
     let sum = 0;
-    for (let i = start; i < end; i++) sum += data[i] * data[i];
+    for (let i = pos; i < pos + windowSize; i++) sum += data[i] * data[i];
     const rms = Math.sqrt(sum / windowSize);
     if (rms < threshold) {
-      // Found silence — scan forward for first non-silent sample
-      for (let j = end; j < totalSamples; j++) {
+      // Found silence — find where speech resumes after it
+      for (let j = pos + windowSize; j < totalSamples; j++) {
         if (Math.abs(data[j]) > threshold * 2) {
-          return Math.max(0, j - Math.round(0.05 * sr));
+          // Add a small pre-roll (30ms) for natural onset
+          return Math.max(0, j - Math.round(0.03 * sr));
         }
       }
-      return end;
+      // Silence found but no speech after — use position after silence
+      return Math.min(pos + windowSize, totalSamples - Math.round(0.2 * sr));
     }
   }
-  // Fallback: last 35% of audio (biased toward shorter target words)
-  return Math.round(totalSamples * 0.65);
+
+  // No clear silence gap found — take the last 0.8s as fallback
+  return Math.max(0, totalSamples - Math.round(0.8 * sr));
 }
 
 /**
