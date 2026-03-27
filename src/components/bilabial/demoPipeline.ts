@@ -276,7 +276,7 @@ export async function generateAllDemos(): Promise<
   for (const key of ["b", "p", "m"] as BilabialPhonemeKey[]) {
     // Check cache first
     const cached = await getDemoClip(`word_${key}`);
-    if (cached) {
+    if (cached && cached.size >= MIN_AUDIO_BYTES) {
       result[key] = cached;
       continue;
     }
