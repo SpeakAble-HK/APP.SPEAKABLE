@@ -42,6 +42,8 @@ export default function LazySoundPage() {
     return activeCategory.words.map(w => w.character).join("");
   };
 
+  const canRecord = isCustom || !!getTestText();
+
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
