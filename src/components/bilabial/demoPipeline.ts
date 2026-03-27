@@ -10,6 +10,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getVoiceSample } from "@/hooks/useVoiceSampleStore";
 import { speakCantonese } from "./cantoneseTTS";
+import { clipLastWord, MIN_AUDIO_BYTES } from "./audioClipUtils";
 import type { BilabialPhonemeKey } from "./bilabialTypes";
 
 // ── Instruction sentences fed to TTS ────────────────────────────────
