@@ -47,9 +47,14 @@ export async function speakWithClonedVoice(text: string, promptText?: string): P
     const token = await getAuthToken();
     const projectUrl = import.meta.env.VITE_SUPABASE_URL;
 
+    const cleanText = text.trim();
+    const useCarrier = cleanText.length <= 2;
+    const ttsText = useCarrier ? `請跟住讀，${cleanText}。` : cleanText;
+    const ttsPrompt = promptText?.trim() || ttsText;
+
     const fd = new FormData();
-    fd.append("text", text);
-    fd.append("prompt_text", promptText || text);
+    fd.append("text", ttsText);
+    fd.append("prompt_text", ttsPrompt);
     fd.append("prompt_audio", sample, "voice-sample.webm");
 
     const res = await fetch(`${projectUrl}/functions/v1/voice-clone`, {
