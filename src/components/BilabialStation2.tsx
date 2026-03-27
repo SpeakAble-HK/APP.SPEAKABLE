@@ -6,7 +6,7 @@ import type { BilabialPhonemeKey } from "@/components/bilabial/bilabialTypes";
 import { MatchingGame, type MatchingOption } from "@/components/bilabial/MatchingGame";
 import { RecordingModule } from "@/components/bilabial/RecordingModule";
 import { AIFeedbackModule } from "@/components/bilabial/AIFeedbackModule";
-import { speakCantonese } from "@/components/bilabial/cantoneseTTS";
+import { speakWithClonedVoice } from "@/components/bilabial/clonedVoiceTTS";
 import {
   computeAccuracyFromResult,
   matchingWrongMessage,
