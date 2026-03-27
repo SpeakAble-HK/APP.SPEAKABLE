@@ -8,7 +8,7 @@ import {
   AIFeedbackModule,
   type FeedbackAnimation,
 } from "@/components/bilabial/AIFeedbackModule";
-import { speakCantonese } from "@/components/bilabial/cantoneseTTS";
+import { speakWithClonedVoice } from "@/components/bilabial/clonedVoiceTTS";
 import {
   computeAccuracyFromResult,
   firstSpokenInitial,
@@ -70,8 +70,8 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
   const runDemo = useCallback(async () => {
     if (!selected) return;
     setDemoDone(false);
-    await speakCantonese("請聽示範發音");
-    await speakCantonese(getPracticeWordForPhoneme(selected));
+    await speakWithClonedVoice("請聽示範發音");
+    await speakWithClonedVoice(getPracticeWordForPhoneme(selected));
     setDemoDone(true);
   }, [selected]);
 

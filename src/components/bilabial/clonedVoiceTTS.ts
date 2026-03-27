@@ -1,0 +1,82 @@
+/**
+ * Cantonese TTS using the voice-clone API with the user's stored voice sample.
+ * Falls back to Web Speech API if no voice sample is available or if the API fails.
+ */
+import { supabase } from "@/integrations/supabase/client";
+import { getVoiceSample } from "@/hooks/useVoiceSampleStore";
+import { speakCantonese } from "./cantoneseTTS";
+
+let cachedSampleBlob: Blob | null | undefined = undefined; // undefined = not loaded yet
+
+async function getStoredSample(): Promise<Blob | null> {
+  if (cachedSampleBlob !== undefined) return cachedSampleBlob;
+  try {
+    cachedSampleBlob = await getVoiceSample("sample1");
+  } catch {
+    cachedSampleBlob = null;
+  }
+  return cachedSampleBlob;
+}
+
+/** Invalidate cache so next call re-reads from IndexedDB (call after new recording). */
+export function invalidateVoiceCache() {
+  cachedSampleBlob = undefined;
+}
+
+async function getAuthToken(): Promise<string> {
+  let { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    const { data, error } = await supabase.auth.signInAnonymously();
+    if (error || !data.session?.access_token) throw new Error("No session");
+    session = data.session;
+  }
+  return session.access_token;
+}
+
+/**
+ * Speak text using the user's cloned voice.
+ * Falls back to Web Speech API if no stored sample or API fails.
+ */
+export async function speakWithClonedVoice(text: string, promptText?: string): Promise<void> {
+  const sample = await getStoredSample();
+  if (!sample) {
+    return speakCantonese(text);
+  }
+
+  try {
+    const token = await getAuthToken();
+    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
+
+    const fd = new FormData();
+    fd.append("text", text);
+    fd.append("prompt_text", promptText || text);
+    fd.append("prompt_audio", sample, "voice-sample.webm");
+
+    const res = await fetch(`${projectUrl}/functions/v1/voice-clone`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: fd,
+    });
+
+    if (!res.ok) throw new Error(`voice-clone ${res.status}`);
+
+    const data = await res.json();
+    if (!data.success || !data.audio_base64) throw new Error("No audio returned");
+
+    const contentType = data.content_type || "audio/wav";
+    const audioUrl = `data:${contentType};base64,${data.audio_base64}`;
+
+    await new Promise<void>((resolve) => {
+      const a = new Audio(audioUrl);
+      a.onended = () => resolve();
+      a.onerror = () => resolve();
+      a.play().catch(() => resolve());
+    });
+  } catch (err) {
+    console.warn("Voice clone TTS failed, falling back to Web Speech:", err);
+    return speakCantonese(text);
+  }
+}

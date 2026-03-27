@@ -6,7 +6,7 @@ import type { BilabialPhonemeKey } from "@/components/bilabial/bilabialTypes";
 import { PHONEME_OPTIONS } from "@/components/bilabial/bilabialTypes";
 import { DragDropGame } from "@/components/bilabial/DragDropGame";
 import { RecordingModule } from "@/components/bilabial/RecordingModule";
-import { speakCantonese } from "@/components/bilabial/cantoneseTTS";
+import { speakWithClonedVoice } from "@/components/bilabial/clonedVoiceTTS";
 import { computeAccuracyFromResult } from "@/components/bilabial/bilabialUtils";
 import { AIFeedbackModule } from "@/components/bilabial/AIFeedbackModule";
 import { BilabialGameHUD } from "@/components/bilabial/BilabialGameHUD";
@@ -65,7 +65,7 @@ export function BilabialStation3({ onComplete, onBack }: BilabialStation3Props) 
   const bump = () => setTimerKey((k) => k + 1);
 
   const playCue = async () => {
-    await speakCantonese(item.displayPrompt);
+    await speakWithClonedVoice(item.displayPrompt);
     setListenDone(true);
   };
 
