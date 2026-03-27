@@ -82,6 +82,7 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
   const [gameEnd, setGameEnd] = useState(false);
   const [failClone, setFailClone] = useState<string | null>(null);
   const [failUser, setFailUser] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const targetWord = sp && level ? level.items[itemIdx]?.word ?? "" : "";
 
@@ -114,8 +115,13 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
   };
 
   const playTarget = async () => {
-    if (!targetWord) return;
-    await speakWithClonedVoice(targetWord);
+    if (!targetWord || isPlaying) return;
+    setIsPlaying(true);
+    try {
+      await speakWithClonedVoice(targetWord);
+    } finally {
+      setIsPlaying(false);
+    }
     setListenDone(true);
   };
 
@@ -333,6 +339,7 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
                       canSelect
                       listenDone={listenDone}
                       wrongId={wrongId}
+                      isPlaying={isPlaying}
                     />
                     {!listenDone && (
                       <p className="text-center text-xs font-bold text-amber-700">先按「播放」</p>
