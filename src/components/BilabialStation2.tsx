@@ -115,8 +115,13 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
   };
 
   const playTarget = async () => {
-    if (!targetWord) return;
-    await speakWithClonedVoice(targetWord);
+    if (!targetWord || isPlaying) return;
+    setIsPlaying(true);
+    try {
+      await speakWithClonedVoice(targetWord);
+    } finally {
+      setIsPlaying(false);
+    }
     setListenDone(true);
   };
 
