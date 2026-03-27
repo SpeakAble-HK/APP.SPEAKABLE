@@ -46,7 +46,7 @@ function openDemoDB(): Promise<IDBDatabase> {
   });
 }
 
-async function saveDemoClip(key: string, blob: Blob): Promise<void> {
+export async function saveDemoClip(key: string, blob: Blob): Promise<void> {
   const db = await openDemoDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, "readwrite");
