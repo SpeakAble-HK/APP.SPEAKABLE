@@ -128,6 +128,24 @@ export default function ResourcesPage() {
           </button>
         </section>
 
+        {/* Lazy Sound Detection CTA */}
+        <section className="bg-secondary/5 rounded-2xl p-8 text-center border border-secondary/10">
+          <MaterialIcon icon="hearing" filled className="text-secondary text-5xl mb-4" />
+          <h2 className="font-headline text-2xl font-bold text-on-surface mb-2">
+            懶音檢測
+          </h2>
+          <p className="text-on-surface-variant text-sm mb-6 max-w-lg mx-auto">
+            即時分析你嘅發音，檢測 n/l 不分、ng 脫落、gw/g 混淆等常見懶音問題。
+          </p>
+          <button
+            onClick={() => navigate("/lazy-sound")}
+            className="bg-secondary text-secondary-foreground font-bold px-8 py-4 rounded-xl shadow-lg shadow-secondary/20 hover:brightness-110 active:scale-95 transition-all inline-flex items-center gap-2 text-lg"
+          >
+            <MaterialIcon icon="mic" />
+            開始檢測
+          </button>
+        </section>
+
         {/* Find a therapist CTA */}
         <section className="bg-primary-container/30 rounded-2xl p-8 text-center">
           <MaterialIcon icon="location_on" filled className="text-primary text-5xl mb-4" />
