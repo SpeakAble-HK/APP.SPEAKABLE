@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import { toast } from "sonner";
 
@@ -19,10 +19,6 @@ export function RecordingModule({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-
-  const stopStream = useCallback(() => {
-    mediaRecorderRef.current?.stream.getTracks().forEach((t) => t.stop());
-  }, []);
 
   const startRecording = async () => {
     if (disabled) return;
