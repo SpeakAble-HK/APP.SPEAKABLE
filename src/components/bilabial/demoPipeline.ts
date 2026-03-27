@@ -9,6 +9,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { getVoiceSample } from "@/hooks/useVoiceSampleStore";
+import { speakCantonese } from "./cantoneseTTS";
 import type { BilabialPhonemeKey } from "./bilabialTypes";
 
 // ── Instruction sentences fed to TTS ────────────────────────────────
@@ -17,6 +18,16 @@ const DEMO_SENTENCES: Record<BilabialPhonemeKey, string> = {
   p: "雙唇閉緊，強力噴氣，，爬。",
   m: "雙唇閉合，鼻震動，，唔。",
 };
+
+// Fallback words for Web Speech API when voice-clone fails
+const FALLBACK_WORDS: Record<BilabialPhonemeKey, string> = {
+  b: "爸",
+  p: "爬",
+  m: "唔",
+};
+
+/** Minimum useful audio size in bytes (WAV header = 44 bytes) */
+const MIN_AUDIO_BYTES = 200;
 
 // ── IndexedDB store for demo clips ──────────────────────────────────
 const DB_NAME = "speakable_demos";
@@ -236,11 +247,18 @@ export async function generateDemoForPhoneme(
     const clipped = await clipLastWord(fullAudio);
     console.log(`[demoPipeline] Clipped demo for /${key}/:`, clipped.size, "bytes");
 
-    // Store both full instruction + clipped word
+    // Store full instruction audio
     await saveDemoClip(`full_${key}`, fullAudio);
-    await saveDemoClip(`word_${key}`, clipped);
 
-    return clipped;
+    // Only store clipped word if it has real audio data (not just WAV header)
+    if (clipped.size >= MIN_AUDIO_BYTES) {
+      await saveDemoClip(`word_${key}`, clipped);
+    } else {
+      console.warn(`[demoPipeline] Clipped audio too small (${clipped.size} bytes) for /${key}/, storing full audio as word fallback`);
+      await saveDemoClip(`word_${key}`, fullAudio);
+    }
+
+    return clipped.size >= MIN_AUDIO_BYTES ? clipped : fullAudio;
   } catch (err) {
     console.error(`[demoPipeline] Failed for /${key}/:`, err);
     return null;
@@ -258,7 +276,7 @@ export async function generateAllDemos(): Promise<
   for (const key of ["b", "p", "m"] as BilabialPhonemeKey[]) {
     // Check cache first
     const cached = await getDemoClip(`word_${key}`);
-    if (cached) {
+    if (cached && cached.size >= MIN_AUDIO_BYTES) {
       result[key] = cached;
       continue;
     }
@@ -278,14 +296,17 @@ export async function playDemo(
   const cacheKey = `${variant}_${key}`;
   let blob = await getDemoClip(cacheKey);
 
-  if (!blob) {
+  if (!blob || blob.size < MIN_AUDIO_BYTES) {
     // Generate on demand
     await generateDemoForPhoneme(key);
     blob = await getDemoClip(cacheKey);
   }
 
-  if (!blob) {
-    console.warn(`[demoPipeline] No demo available for /${key}/ (${variant})`);
+  // If still no usable audio, fallback to Web Speech API
+  if (!blob || blob.size < MIN_AUDIO_BYTES) {
+    console.warn(`[demoPipeline] No usable demo for /${key}/ (${variant}), falling back to Web Speech`);
+    const word = variant === "word" ? FALLBACK_WORDS[key] : DEMO_SENTENCES[key];
+    await speakCantonese(word);
     return;
   }
 
@@ -294,7 +315,10 @@ export async function playDemo(
     await new Promise<void>((resolve) => {
       const a = new Audio(url);
       a.onended = () => resolve();
-      a.onerror = () => resolve();
+      a.onerror = () => {
+        console.warn(`[demoPipeline] Audio playback error for /${key}/ (${variant})`);
+        resolve();
+      };
       a.play().catch(() => resolve());
     });
   } finally {
