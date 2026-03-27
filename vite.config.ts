@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     // "::" can make localhost unreachable on some Windows setups; 0.0.0.0 is reliable for IPv4 + LAN.
     host: "0.0.0.0",
-    port: 8080,
+    port: 8000,
     strictPort: true,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
