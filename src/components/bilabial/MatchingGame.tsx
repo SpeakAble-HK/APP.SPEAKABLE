@@ -59,12 +59,16 @@ export function MatchingGame({
         <p className="font-headline text-2xl font-extrabold text-on-surface">{targetWord}</p>
         <button
           type="button"
-          disabled={disabled}
+          disabled={disabled || isPlaying}
           onClick={onPlaySound}
           className="flex min-h-[64px] w-full max-w-[200px] items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-headline text-base font-extrabold text-on-primary shadow-lg active:scale-[0.98] disabled:opacity-40"
         >
-          <MaterialIcon icon="volume_up" filled className="text-2xl" />
-          播放
+          {isPlaying ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-on-primary border-t-transparent" />
+          ) : (
+            <MaterialIcon icon="volume_up" filled className="text-2xl" />
+          )}
+          {isPlaying ? "播放中…" : "播放"}
         </button>
         {!listenDone && (
           <p className="text-center text-xs font-bold text-amber-700">請先按「播放」聽清楚</p>

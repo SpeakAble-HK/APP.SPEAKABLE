@@ -339,6 +339,7 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
                       canSelect
                       listenDone={listenDone}
                       wrongId={wrongId}
+                      isPlaying={isPlaying}
                     />
                     {!listenDone && (
                       <p className="text-center text-xs font-bold text-amber-700">先按「播放」</p>
