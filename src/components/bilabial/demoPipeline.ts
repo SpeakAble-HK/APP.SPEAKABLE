@@ -10,6 +10,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getVoiceSample } from "@/hooks/useVoiceSampleStore";
 import { speakCantonese } from "./cantoneseTTS";
+import { clipLastWord, MIN_AUDIO_BYTES } from "./audioClipUtils";
 import type { BilabialPhonemeKey } from "./bilabialTypes";
 
 // ── Instruction sentences fed to TTS ────────────────────────────────
@@ -26,8 +27,6 @@ const FALLBACK_WORDS: Record<BilabialPhonemeKey, string> = {
   m: "唔",
 };
 
-/** Minimum useful audio size in bytes (WAV header = 44 bytes) */
-const MIN_AUDIO_BYTES = 200;
 
 // ── IndexedDB store for demo clips ──────────────────────────────────
 const DB_NAME = "speakable_demos";
@@ -129,97 +128,6 @@ async function generateFullAudio(
   return { audioBlob: new Blob([u8], { type: ct }), contentType: ct };
 }
 
-// ── Step 2 & 3: Silence detection → clip last word ──────────────────
-
-/** Encode an AudioBuffer region as a WAV blob. */
-function encodeWav(buffer: AudioBuffer, startSample: number, endSample: number): Blob {
-  const numCh = buffer.numberOfChannels;
-  const len = endSample - startSample;
-  const sr = buffer.sampleRate;
-  const bitsPerSample = 16;
-  const blockAlign = numCh * (bitsPerSample / 8);
-  const dataSize = len * blockAlign;
-  const headerSize = 44;
-  const buf = new ArrayBuffer(headerSize + dataSize);
-  const view = new DataView(buf);
-
-  // RIFF header
-  const writeStr = (off: number, s: string) => {
-    for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i));
-  };
-  writeStr(0, "RIFF");
-  view.setUint32(4, 36 + dataSize, true);
-  writeStr(8, "WAVE");
-  writeStr(12, "fmt ");
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true); // PCM
-  view.setUint16(22, numCh, true);
-  view.setUint32(24, sr, true);
-  view.setUint32(28, sr * blockAlign, true);
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, bitsPerSample, true);
-  writeStr(36, "data");
-  view.setUint32(40, dataSize, true);
-
-  let offset = headerSize;
-  for (let i = 0; i < len; i++) {
-    for (let ch = 0; ch < numCh; ch++) {
-      let sample = buffer.getChannelData(ch)[startSample + i];
-      sample = Math.max(-1, Math.min(1, sample));
-      view.setInt16(offset, sample * 0x7fff, true);
-      offset += 2;
-    }
-  }
-  return new Blob([buf], { type: "audio/wav" });
-}
-
-/**
- * Find the start sample of the last word by scanning backwards for a silence
- * gap ≥ `minSilenceMs` (amplitude RMS below `threshold`).
- */
-function findLastWordStart(
-  buffer: AudioBuffer,
-  minSilenceMs = 200,
-  threshold = 0.02
-): number {
-  const data = buffer.getChannelData(0);
-  const sr = buffer.sampleRate;
-  const windowSize = Math.round((minSilenceMs / 1000) * sr);
-  const totalSamples = data.length;
-
-  // Walk backwards in windows until we find a silence window
-  for (let end = totalSamples; end - windowSize > 0; end -= Math.round(windowSize / 4)) {
-    const start = end - windowSize;
-    let sum = 0;
-    for (let i = start; i < end; i++) sum += data[i] * data[i];
-    const rms = Math.sqrt(sum / windowSize);
-    if (rms < threshold) {
-      // Found silence — the word starts after this window
-      // Scan forward from here to find first non-silent sample
-      for (let j = end; j < totalSamples; j++) {
-        if (Math.abs(data[j]) > threshold * 2) {
-          // Add a tiny lead-in (50ms)
-          return Math.max(0, j - Math.round(0.05 * sr));
-        }
-      }
-      return end;
-    }
-  }
-  // Fallback: last 40% of audio
-  return Math.round(totalSamples * 0.6);
-}
-
-async function clipLastWord(audioBlob: Blob): Promise<Blob> {
-  const ctx = new AudioContext();
-  try {
-    const arrayBuf = await audioBlob.arrayBuffer();
-    const decoded = await ctx.decodeAudioData(arrayBuf);
-    const wordStart = findLastWordStart(decoded);
-    return encodeWav(decoded, wordStart, decoded.length);
-  } finally {
-    await ctx.close();
-  }
-}
 
 // ── Public API ──────────────────────────────────────────────────────
 

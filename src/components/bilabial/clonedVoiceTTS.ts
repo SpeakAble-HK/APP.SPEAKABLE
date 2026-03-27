@@ -5,8 +5,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getVoiceSample } from "@/hooks/useVoiceSampleStore";
 import { speakCantonese } from "./cantoneseTTS";
+import { clipLastWord } from "./audioClipUtils";
 
-let cachedSampleBlob: Blob | null | undefined = undefined; // undefined = not loaded yet
+let cachedSampleBlob: Blob | null | undefined = undefined;
 
 async function getStoredSample(): Promise<Blob | null> {
   if (cachedSampleBlob !== undefined) return cachedSampleBlob;
@@ -18,7 +19,6 @@ async function getStoredSample(): Promise<Blob | null> {
   return cachedSampleBlob;
 }
 
-/** Invalidate cache so next call re-reads from IndexedDB (call after new recording). */
 export function invalidateVoiceCache() {
   cachedSampleBlob = undefined;
 }
@@ -35,6 +35,7 @@ async function getAuthToken(): Promise<string> {
 
 /**
  * Speak text using the user's cloned voice.
+ * For short text (≤2 chars), wraps in a carrier phrase then clips the target word.
  * Falls back to Web Speech API if no stored sample or API fails.
  */
 export async function speakWithClonedVoice(text: string, promptText?: string): Promise<void> {
@@ -77,15 +78,21 @@ export async function speakWithClonedVoice(text: string, promptText?: string): P
     const raw = atob(data.audio_base64);
     const u8 = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i++) u8[i] = raw.charCodeAt(i);
-    const blob = new Blob([u8], { type: contentType });
-    const audioUrl = URL.createObjectURL(blob);
+    let audioBlob = new Blob([u8], { type: contentType });
 
-    console.log(`[clonedVoiceTTS] Playing audio: ${blob.size} bytes, type: ${contentType}, carrier: ${useCarrier}`);
+    // Clip the target word out of the carrier phrase
+    if (useCarrier && audioBlob.size > 1000) {
+      console.log(`[clonedVoiceTTS] Clipping target word from carrier phrase (${audioBlob.size} bytes)`);
+      audioBlob = await clipLastWord(audioBlob);
+    }
+
+    const audioUrl = URL.createObjectURL(audioBlob);
+    console.log(`[clonedVoiceTTS] Playing: ${audioBlob.size} bytes, carrier: ${useCarrier}`);
 
     await new Promise<void>((resolve, reject) => {
       const a = new Audio(audioUrl);
       a.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
-      a.onerror = (e) => { URL.revokeObjectURL(audioUrl); reject(new Error(`Audio playback error: ${e}`)); };
+      a.onerror = (e) => { URL.revokeObjectURL(audioUrl); reject(new Error(`Playback error: ${e}`)); };
       a.play().catch((e) => { URL.revokeObjectURL(audioUrl); reject(e); });
     });
   } catch (err) {
