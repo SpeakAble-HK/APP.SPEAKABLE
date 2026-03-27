@@ -9,7 +9,6 @@ import {
   type FeedbackAnimation,
 } from "@/components/bilabial/AIFeedbackModule";
 import { playDemo } from "@/components/bilabial/demoPipeline";
-import { playDemo } from "@/components/bilabial/demoPipeline";
 import {
   computeAccuracyFromResult,
   firstSpokenInitial,
