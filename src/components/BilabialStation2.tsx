@@ -114,7 +114,7 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
 
   const playTarget = async () => {
     if (!targetWord) return;
-    await speakCantonese(targetWord);
+    await speakWithClonedVoice(targetWord);
     setListenDone(true);
   };
 

@@ -65,7 +65,7 @@ export function BilabialStation3({ onComplete, onBack }: BilabialStation3Props) 
   const bump = () => setTimerKey((k) => k + 1);
 
   const playCue = async () => {
-    await speakCantonese(item.displayPrompt);
+    await speakWithClonedVoice(item.displayPrompt);
     setListenDone(true);
   };
 

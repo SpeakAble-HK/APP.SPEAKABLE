@@ -282,12 +282,26 @@ function VoiceSamplePage({ sample }: { sample: VoiceSample }) {
     navigate("/explorer/onboarding/voice/2");
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (!audioURL) {
       toast.error("請先錄製你的聲音。");
       return;
     }
     setVoice2Url(audioURL);
+
+    // Persist voice blobs to IndexedDB for later voice-clone TTS
+    try {
+      if (voice1Url) {
+        const r1 = await fetch(voice1Url);
+        await saveVoiceSample("sample1", await r1.blob());
+      }
+      const r2 = await fetch(audioURL);
+      await saveVoiceSample("sample2", await r2.blob());
+      invalidateVoiceCache();
+    } catch (e) {
+      console.warn("Failed to persist voice samples:", e);
+    }
+
     localStorage.setItem(
       "speakable_user",
       JSON.stringify({
