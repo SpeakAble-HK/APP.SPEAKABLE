@@ -9,7 +9,8 @@ export default defineConfig(({ mode }) => ({
     // "::" can make localhost unreachable on some Windows setups; 0.0.0.0 is reliable for IPv4 + LAN.
     host: "0.0.0.0",
     port: 8000,
-    strictPort: true,
+    // If 8000 is taken, try the next free port instead of exiting (see terminal for URL).
+    strictPort: false,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

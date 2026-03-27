@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
 import type { BilabialFlowPhase, BilabialPhonemeKey } from "@/components/bilabial/bilabialTypes";
@@ -20,6 +20,7 @@ import { BilabialGameHUD } from "@/components/bilabial/BilabialGameHUD";
 import { BILABIAL_TARGET_COUNT, useBilabialGameSession } from "@/components/bilabial/useBilabialGameSession";
 import { SPEECH_PASS_ACCURACY_THRESHOLD } from "@/lib/speechExerciseRules";
 import pipi from "@/assets/pipi-parrot-only.png";
+import bilabialBLipDemo from "@/assets/bilabial-b-lip-demo.mp4";
 
 interface BilabialStation1Props {
   onComplete: () => void;
@@ -54,6 +55,9 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
   const [phase, setPhase] = useState<BilabialFlowPhase>("idle");
   const [selected, setSelected] = useState<BilabialPhonemeKey | null>(null);
   const [demoDone, setDemoDone] = useState(false);
+  const [isDemoPlaying, setIsDemoPlaying] = useState(false);
+  const demoPlayingLock = useRef(false);
+  const lipDemoVideoRef = useRef<HTMLVideoElement | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const [gameEnd, setGameEnd] = useState(false);
@@ -69,13 +73,30 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
   const [failUserUrl, setFailUserUrl] = useState<string | null>(null);
 
   const runDemo = useCallback(async () => {
-    if (!selected) return;
+    if (!selected || demoPlayingLock.current) return;
+    demoPlayingLock.current = true;
+    setIsDemoPlaying(true);
     setDemoDone(false);
-    // Play full instruction (with clipped last word as voice demo)
-    await playDemo(selected, "full");
-    // Then play just the isolated word
-    await playDemo(selected, "word");
-    setDemoDone(true);
+    try {
+      const lip = lipDemoVideoRef.current;
+      if (selected === "b" && lip) {
+        lip.currentTime = 0;
+        void lip.play().catch(() => {});
+      }
+      // Play full instruction (with clipped last word as voice demo)
+      await playDemo(selected, "full");
+      // Then play just the isolated word
+      await playDemo(selected, "word");
+      setDemoDone(true);
+    } finally {
+      const lip = lipDemoVideoRef.current;
+      if (lip) {
+        lip.pause();
+        lip.currentTime = 0;
+      }
+      demoPlayingLock.current = false;
+      setIsDemoPlaying(false);
+    }
   }, [selected]);
 
   const bumpTimer = () => setTimerKey((k) => k + 1);
@@ -88,11 +109,13 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
     bumpTimer();
   };
 
-  const goDemo = async () => {
+  /** Enter demo step without auto-playing — user taps「播放示範音」. */
+  const enterDemoPhase = () => {
     if (!selected) return;
     setPhase("demo");
+    setDemoDone(false);
+    setIsDemoPlaying(false);
     bumpTimer();
-    await runDemo();
   };
 
   const goRecord = () => {
@@ -154,8 +177,8 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
     setPhase("demo");
     setAudioBlob(null);
     setDemoDone(false);
+    setIsDemoPlaying(false);
     bumpTimer();
-    void runDemo();
   };
 
   const retryFailPrimary = () => {
@@ -291,7 +314,7 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
                 <button
                   type="button"
                   disabled={!selected}
-                  onClick={() => void goDemo()}
+                  onClick={enterDemoPhase}
                   className="min-h-[56px] w-full rounded-2xl bg-primary py-4 font-headline text-base font-extrabold text-primary-foreground shadow-lg disabled:opacity-40"
                 >
                   下一步：聽示範
@@ -302,21 +325,44 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
             {phase === "demo" && selected && (
               <div className="space-y-4 rounded-3xl border-2 border-primary/20 bg-card p-6 text-center">
                 <p className="text-sm font-bold text-foreground">聲音示範（粵語）</p>
-                {!demoDone && <p className="animate-pulse text-primary">播放中⋯</p>}
+                <p className="text-xs text-muted-foreground">
+                  請先點「播放示範音」聽清楚發音，再開始錄音。
+                </p>
+                {selected === "b" && (
+                  <div className="mx-auto w-full max-w-sm overflow-hidden rounded-xl border border-border bg-muted/20 shadow-inner">
+                    <video
+                      ref={lipDemoVideoRef}
+                      src={bilabialBLipDemo}
+                      className="aspect-video w-full object-contain bg-black/40"
+                      playsInline
+                      muted
+                      preload="metadata"
+                      aria-label="/b/ 唇部動作示範影片"
+                    />
+                    <p className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground">
+                      /b/ 唇部動作參考（與示範音同步播放）
+                    </p>
+                  </div>
+                )}
+                {isDemoPlaying && (
+                  <p className="animate-pulse text-sm font-bold text-primary">播放中⋯</p>
+                )}
                 <button
                   type="button"
-                  disabled={!demoDone}
+                  disabled={isDemoPlaying}
+                  onClick={() => void runDemo()}
+                  className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-primary/10 py-4 font-headline text-base font-extrabold text-primary shadow-sm transition hover:bg-primary/15 active:scale-[0.98] disabled:opacity-60"
+                >
+                  <MaterialIcon icon="volume_up" className="text-2xl" filled />
+                  {demoDone ? "再聽一次示範" : "播放示範音"}
+                </button>
+                <button
+                  type="button"
+                  disabled={!demoDone || isDemoPlaying}
                   onClick={goRecord}
                   className="min-h-[56px] w-full rounded-2xl bg-primary py-4 font-headline text-base font-extrabold text-primary-foreground shadow-lg disabled:opacity-40"
                 >
                   聽完示範，開始錄音
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void runDemo()}
-                  className="text-sm font-bold text-primary underline"
-                >
-                  再聽一次示範
                 </button>
               </div>
             )}
@@ -365,7 +411,15 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
                 primaryLabel={success ? (reachTarget ? "查看成績" : "繼續") : "再試錄音"}
                 onPrimary={success ? afterSuccessPrimary : retryFailPrimary}
                 secondaryLabel={success ? undefined : "聽示範"}
-                onSecondary={success ? undefined : () => { setPhase("demo"); setDemoDone(false); void runDemo(); }}
+                onSecondary={
+                  success
+                    ? undefined
+                    : () => {
+                        setPhase("demo");
+                        setDemoDone(false);
+                        setIsDemoPlaying(false);
+                      }
+                }
               />
             )}
           </>
