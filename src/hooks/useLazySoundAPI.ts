@@ -95,8 +95,8 @@ export const useLazySoundAPI = () => {
         phoneme,
       }));
 
-      // Step 3: ASRPhone verification
-      const verifyText = intended.filter(p => p.phoneme !== null).map(p => p.phoneme).join(' ');
+      // Step 3: ASRPhone verification (only if we have intended text)
+      const verifyText = intended.length > 0 ? intended.filter(p => p.phoneme !== null).map(p => p.phoneme).join(' ') : '';
 
       if (verifyText) {
         const phoneFD = new FormData();
