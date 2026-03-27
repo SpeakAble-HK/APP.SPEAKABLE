@@ -8,6 +8,8 @@ import {
   ExplorerOnboardingProvider,
   useExplorerOnboarding,
 } from "@/contexts/ExplorerOnboardingContext";
+import { saveVoiceSample } from "@/hooks/useVoiceSampleStore";
+import { invalidateVoiceCache } from "@/components/bilabial/clonedVoiceTTS";
 
 const STEPS = ["暱稱", "聲音樣本 1", "聲音樣本 2"] as const;
 
