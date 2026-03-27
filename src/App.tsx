@@ -61,6 +61,7 @@ const App = () => (
                 <Route path="/adventure-start" element={<AdventureStartPage />} />
                 <Route path="/ngo" element={<ResourcesPage />} />
                 <Route path="/resources/find-provider" element={<SpeechTherapyInfoPage />} />
+                <Route path="/lazy-sound" element={<LazySoundPage />} />
 
                 {/* ST pages with therapist nav */}
                 <Route element={<STLayout />}>

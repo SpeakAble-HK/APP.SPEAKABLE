@@ -66,6 +66,13 @@ export default function ResourcesPage() {
                 <MaterialIcon icon="warning" />
                 警示清單
               </button>
+              <button
+                onClick={() => navigate("/lazy-sound")}
+                className="bg-secondary text-secondary-foreground font-bold px-6 py-3 rounded-xl shadow-lg shadow-secondary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
+              >
+                <MaterialIcon icon="hearing" />
+                懶音檢測
+              </button>
             </div>
           </div>
           <img
