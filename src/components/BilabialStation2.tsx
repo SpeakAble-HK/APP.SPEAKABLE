@@ -177,10 +177,12 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
     } else {
       game.registerWrong();
       setProdHint("請留意聲母。");
-      if (result.clone?.audio_base64) {
-        const ct = result.clone.content_type || "audio/wav";
-        setFailClone(`data:${ct};base64,${result.clone.audio_base64}`);
-      }
+      // Generate reference audio using carrier phrase + clip for reliable playback
+      generateClonedAudioBlob(targetWord).then((refBlob) => {
+        if (refBlob) {
+          setFailClone(URL.createObjectURL(refBlob));
+        }
+      });
       setFailUser(URL.createObjectURL(audioBlob));
     }
     setItemPhase("prod_feedback");
