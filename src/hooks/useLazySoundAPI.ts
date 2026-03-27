@@ -67,17 +67,21 @@ export const useLazySoundAPI = () => {
     setIntendedPhonemes([]);
 
     try {
-      // Step 1: jyutping
-      const jyutpingFD = new FormData();
-      jyutpingFD.append('text', intendedText);
-      const jyutpingData = await invokeFunction('jyutping', jyutpingFD);
-      if (!jyutpingData.success) throw new Error(jyutpingData.error || 'Jyutping conversion failed');
+      let intended: PhonemeResult[] = [];
 
-      const intended: PhonemeResult[] = jyutpingData.result.map(([char, phoneme]: [string, string | null]) => ({
-        character: char,
-        phoneme,
-      }));
-      setIntendedPhonemes(intended);
+      // Step 1: jyutping (skip if no text provided)
+      if (intendedText) {
+        const jyutpingFD = new FormData();
+        jyutpingFD.append('text', intendedText);
+        const jyutpingData = await invokeFunction('jyutping', jyutpingFD);
+        if (!jyutpingData.success) throw new Error(jyutpingData.error || 'Jyutping conversion failed');
+
+        intended = jyutpingData.result.map(([char, phoneme]: [string, string | null]) => ({
+          character: char,
+          phoneme,
+        }));
+        setIntendedPhonemes(intended);
+      }
 
       // Step 2: ASR
       const asrFD = new FormData();
