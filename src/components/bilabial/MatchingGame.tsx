@@ -28,6 +28,7 @@ export function MatchingGame({
   listenDone,
   disabled,
   wrongId,
+  isPlaying,
 }: MatchingGameProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
