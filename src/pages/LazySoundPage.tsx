@@ -282,101 +282,150 @@ export default function LazySoundPage() {
         )}
 
         {/* Results */}
-        {hasResults && intendedPhonemes.length > 0 && (
+        {hasResults && (intendedPhonemes.length > 0 || spokenPhonemes.length > 0) && (
           <div className="glass-card rounded-xl p-5 border border-white/40 shadow-card space-y-4">
             <h2 className="font-headline text-lg font-bold flex items-center gap-2">
               <MaterialIcon icon="fact_check" filled className="text-primary" />
               分析結果
             </h2>
 
-            {/* Summary */}
-            {(() => {
-              const rows = getResultRows();
-              const total = rows.length;
-              const correct = rows.filter(r => r.initialOk && r.finalOk && r.toneOk).length;
-              const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
-              return (
-                <div className="flex items-center gap-4 bg-muted/30 rounded-lg p-4">
-                  <div className={`text-3xl font-extrabold ${pct >= 80 ? "text-success" : pct >= 50 ? "text-accent" : "text-destructive"}`}>
-                    {pct}%
-                  </div>
-                  <div>
-                    <p className="font-bold text-on-surface">{correct}/{total} 字正確</p>
-                    <p className="text-xs text-on-surface-variant">
-                      {pct >= 80 ? "做得好！發音非常準確 👍" : pct >= 50 ? "唔錯，可以再加油 💪" : "繼續練習，你會進步嘅！🌟"}
-                    </p>
-                  </div>
-                </div>
-              );
-            })()}
+            {intendedPhonemes.length > 0 ? (
+              <>
+                {/* Summary */}
+                {(() => {
+                  const rows = getResultRows();
+                  const total = rows.length;
+                  const correct = rows.filter(r => r.initialOk && r.finalOk && r.toneOk).length;
+                  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+                  return (
+                    <div className="flex items-center gap-4 bg-muted/30 rounded-lg p-4">
+                      <div className={`text-3xl font-extrabold ${pct >= 80 ? "text-success" : pct >= 50 ? "text-accent" : "text-destructive"}`}>
+                        {pct}%
+                      </div>
+                      <div>
+                        <p className="font-bold text-on-surface">{correct}/{total} 字正確</p>
+                        <p className="text-xs text-on-surface-variant">
+                          {pct >= 80 ? "做得好！發音非常準確 👍" : pct >= 50 ? "唔錯，可以再加油 💪" : "繼續練習，你會進步嘅！🌟"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })()}
 
-            {/* Detail table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-outline-variant/20">
-                    <th className="py-2 px-2 text-left text-on-surface-variant font-medium">字</th>
-                    <th className="py-2 px-2 text-center text-on-surface-variant font-medium">目標</th>
-                    <th className="py-2 px-2 text-center text-on-surface-variant font-medium">聲母</th>
-                    <th className="py-2 px-2 text-center text-on-surface-variant font-medium">韻母</th>
-                    <th className="py-2 px-2 text-center text-on-surface-variant font-medium">聲調</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {getResultRows().map((row, i) => (
-                    <tr key={i} className="border-b border-outline-variant/10">
-                      <td className="py-3 px-2 font-bold text-lg">{row.character}</td>
-                      <td className="py-3 px-2 text-center text-on-surface-variant">{row.expected}</td>
-                      <td className="py-3 px-2 text-center">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${row.initialOk ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                          {row.intParsed.initial ?? "∅"}
-                          {!row.initialOk && row.spkParsed.initial !== null && (
-                            <span className="text-[10px]">→{row.spkParsed.initial}</span>
-                          )}
-                        </span>
-                      </td>
-                      <td className="py-3 px-2 text-center">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${row.finalOk ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                          {row.intParsed.final ?? "—"}
-                          {!row.finalOk && row.spkParsed.final !== null && (
-                            <span className="text-[10px]">→{row.spkParsed.final}</span>
-                          )}
-                        </span>
-                      </td>
-                      <td className="py-3 px-2 text-center">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${row.toneOk ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                          {row.intParsed.tone ?? "—"}
-                          {!row.toneOk && row.spkParsed.tone !== null && (
-                            <span className="text-[10px]">→{row.spkParsed.tone}</span>
-                          )}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Lazy sound tips */}
-            {!isCustom && activeCategory && (() => {
-              const rows = getResultRows();
-              const wrongInitials = rows.filter(r => !r.initialOk);
-              if (wrongInitials.length === 0) return null;
-              return (
-                <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
-                  <h3 className="font-bold text-sm text-accent-foreground mb-2 flex items-center gap-1">
-                    <MaterialIcon icon="lightbulb" filled className="text-accent" />
-                    懶音提示
-                  </h3>
-                  <p className="text-sm text-on-surface-variant">
-                    你可能混淆咗 <span className="font-bold text-on-surface">{activeCategory.confusionPair}</span>。
-                    留意以下字嘅聲母：
-                    {wrongInitials.map(r => ` 「${r.character}」`).join("、")}。
-                    試下再讀慢啲，注意嘴型同送氣嘅分別。
-                  </p>
+                {/* Detail table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-outline-variant/20">
+                        <th className="py-2 px-2 text-left text-on-surface-variant font-medium">字</th>
+                        <th className="py-2 px-2 text-center text-on-surface-variant font-medium">目標</th>
+                        <th className="py-2 px-2 text-center text-on-surface-variant font-medium">聲母</th>
+                        <th className="py-2 px-2 text-center text-on-surface-variant font-medium">韻母</th>
+                        <th className="py-2 px-2 text-center text-on-surface-variant font-medium">聲調</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getResultRows().map((row, i) => (
+                        <tr key={i} className="border-b border-outline-variant/10">
+                          <td className="py-3 px-2 font-bold text-lg">{row.character}</td>
+                          <td className="py-3 px-2 text-center text-on-surface-variant">{row.expected}</td>
+                          <td className="py-3 px-2 text-center">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${row.initialOk ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                              {row.intParsed.initial ?? "∅"}
+                              {!row.initialOk && row.spkParsed.initial !== null && (
+                                <span className="text-[10px]">→{row.spkParsed.initial}</span>
+                              )}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${row.finalOk ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                              {row.intParsed.final ?? "—"}
+                              {!row.finalOk && row.spkParsed.final !== null && (
+                                <span className="text-[10px]">→{row.spkParsed.final}</span>
+                              )}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${row.toneOk ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                              {row.intParsed.tone ?? "—"}
+                              {!row.toneOk && row.spkParsed.tone !== null && (
+                                <span className="text-[10px]">→{row.spkParsed.tone}</span>
+                              )}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              );
-            })()}
+
+                {/* Lazy sound tips */}
+                {!isCustom && activeCategory && (() => {
+                  const rows = getResultRows();
+                  const wrongInitials = rows.filter(r => !r.initialOk);
+                  if (wrongInitials.length === 0) return null;
+                  return (
+                    <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
+                      <h3 className="font-bold text-sm text-accent-foreground mb-2 flex items-center gap-1">
+                        <MaterialIcon icon="lightbulb" filled className="text-accent" />
+                        懶音提示
+                      </h3>
+                      <p className="text-sm text-on-surface-variant">
+                        你可能混淆咗 <span className="font-bold text-on-surface">{activeCategory.confusionPair}</span>。
+                        留意以下字嘅聲母：
+                        {wrongInitials.map(r => ` 「${r.character}」`).join("、")}。
+                        試下再讀慢啲，注意嘴型同送氣嘅分別。
+                      </p>
+                    </div>
+                  );
+                })()}
+              </>
+            ) : (
+              /* ASR-only mode: show what was recognized */
+              <div className="space-y-3">
+                <p className="text-sm text-on-surface-variant">語音辨識結果：</p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-outline-variant/20">
+                        <th className="py-2 px-2 text-left text-on-surface-variant font-medium">字</th>
+                        <th className="py-2 px-2 text-center text-on-surface-variant font-medium">粵拼</th>
+                        <th className="py-2 px-2 text-center text-on-surface-variant font-medium">聲母</th>
+                        <th className="py-2 px-2 text-center text-on-surface-variant font-medium">韻母</th>
+                        <th className="py-2 px-2 text-center text-on-surface-variant font-medium">聲調</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {spokenPhonemes.filter(p => p.phoneme !== null).map((p, i) => {
+                        const parsed = parseJyutping(p.phoneme);
+                        return (
+                          <tr key={i} className="border-b border-outline-variant/10">
+                            <td className="py-3 px-2 font-bold text-lg">{p.character}</td>
+                            <td className="py-3 px-2 text-center text-on-surface-variant">{p.phoneme}</td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary">
+                                {parsed.initial ?? "∅"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary">
+                                {parsed.final ?? "—"}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary">
+                                {parsed.tone ?? "—"}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-on-surface-variant">💡 輸入文字後再錄音，可以獲得更詳細嘅對比分析。</p>
+              </div>
+            )}
           </div>
         )}
       </div>
