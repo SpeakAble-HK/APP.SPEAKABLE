@@ -211,11 +211,11 @@ export default function LazySoundPage() {
 
           <TabsContent value="custom" className="mt-4">
             <div className="glass-card rounded-xl p-5 border border-white/40 shadow-card">
-              <p className="text-sm text-on-surface-variant mb-3">輸入你想測試的字詞或句子：</p>
+              <p className="text-sm text-on-surface-variant mb-3">輸入你想測試的字詞或句子（可選）：</p>
               <Textarea
                 value={customText}
                 onChange={e => setCustomText(e.target.value)}
-                placeholder="例如：你好，我叫皮皮"
+                placeholder="例如：你好，我叫皮皮（留空則只顯示語音辨識結果）"
                 className="min-h-[80px] text-lg"
                 maxLength={50}
               />
