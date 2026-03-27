@@ -95,8 +95,29 @@ export const useLazySoundAPI = () => {
         phoneme,
       }));
 
-      // Step 3: ASRPhone verification (only if we have intended text)
-      const verifyText = intended.length > 0 ? intended.filter(p => p.phoneme !== null).map(p => p.phoneme).join(' ') : '';
+      // Step 2b: If no reference text, use ASR transcription as self-reference
+      if (intended.length === 0) {
+        const transcribedText = spoken.filter(p => p.character).map(p => p.character).join('');
+        if (transcribedText) {
+          const jyutpingFD2 = new FormData();
+          jyutpingFD2.append('text', transcribedText);
+          try {
+            const jyutpingData2 = await invokeFunction('jyutping', jyutpingFD2);
+            if (jyutpingData2.success) {
+              intended = jyutpingData2.result.map(([char, phoneme]: [string, string | null]) => ({
+                character: char,
+                phoneme,
+              }));
+              setIntendedPhonemes(intended);
+            }
+          } catch (e) {
+            console.warn('Jyutping self-reference error (continuing):', e);
+          }
+        }
+      }
+
+      // Step 3: ASRPhone verification
+      const verifyText = intended.filter(p => p.phoneme !== null).map(p => p.phoneme).join(' ');
 
       if (verifyText) {
         const phoneFD = new FormData();
