@@ -8,7 +8,7 @@ import {
   AIFeedbackModule,
   type FeedbackAnimation,
 } from "@/components/bilabial/AIFeedbackModule";
-import { speakWithClonedVoice } from "@/components/bilabial/clonedVoiceTTS";
+import { playDemo } from "@/components/bilabial/demoPipeline";
 import {
   computeAccuracyFromResult,
   firstSpokenInitial,
@@ -70,8 +70,10 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
   const runDemo = useCallback(async () => {
     if (!selected) return;
     setDemoDone(false);
-    await speakWithClonedVoice("請聽示範發音");
-    await speakWithClonedVoice(getPracticeWordForPhoneme(selected));
+    // Play full instruction (with clipped last word as voice demo)
+    await playDemo(selected, "full");
+    // Then play just the isolated word
+    await playDemo(selected, "word");
     setDemoDone(true);
   }, [selected]);
 
