@@ -16,6 +16,7 @@ interface MatchingGameProps {
   listenDone: boolean;
   disabled?: boolean;
   wrongId?: string | null;
+  isPlaying?: boolean;
 }
 
 export function MatchingGame({
