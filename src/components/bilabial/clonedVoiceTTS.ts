@@ -38,6 +38,8 @@ async function getAuthToken(): Promise<string> {
  * Falls back to Web Speech API if no stored sample or API fails.
  */
 export async function speakWithClonedVoice(text: string, promptText?: string): Promise<void> {
+  if (!text.trim()) return;
+
   const sample = await getStoredSample();
   if (!sample) {
     return speakCantonese(text);
