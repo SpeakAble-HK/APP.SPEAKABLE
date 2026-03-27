@@ -296,14 +296,17 @@ export async function playDemo(
   const cacheKey = `${variant}_${key}`;
   let blob = await getDemoClip(cacheKey);
 
-  if (!blob) {
+  if (!blob || blob.size < MIN_AUDIO_BYTES) {
     // Generate on demand
     await generateDemoForPhoneme(key);
     blob = await getDemoClip(cacheKey);
   }
 
-  if (!blob) {
-    console.warn(`[demoPipeline] No demo available for /${key}/ (${variant})`);
+  // If still no usable audio, fallback to Web Speech API
+  if (!blob || blob.size < MIN_AUDIO_BYTES) {
+    console.warn(`[demoPipeline] No usable demo for /${key}/ (${variant}), falling back to Web Speech`);
+    const word = variant === "word" ? FALLBACK_WORDS[key] : DEMO_SENTENCES[key];
+    await speakCantonese(word);
     return;
   }
 
@@ -312,7 +315,10 @@ export async function playDemo(
     await new Promise<void>((resolve) => {
       const a = new Audio(url);
       a.onended = () => resolve();
-      a.onerror = () => resolve();
+      a.onerror = () => {
+        console.warn(`[demoPipeline] Audio playback error for /${key}/ (${variant})`);
+        resolve();
+      };
       a.play().catch(() => resolve());
     });
   } finally {
