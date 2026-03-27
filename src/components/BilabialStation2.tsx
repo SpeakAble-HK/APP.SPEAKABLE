@@ -7,6 +7,7 @@ import { MatchingGame, type MatchingOption } from "@/components/bilabial/Matchin
 import { RecordingModule } from "@/components/bilabial/RecordingModule";
 import { AIFeedbackModule } from "@/components/bilabial/AIFeedbackModule";
 import { speakWithClonedVoice, generateClonedAudioBlob } from "@/components/bilabial/clonedVoiceTTS";
+import { getDemoClip, saveDemoClip } from "@/components/bilabial/demoPipeline";
 import {
   computeAccuracyFromResult,
   matchingWrongMessage,
@@ -177,9 +178,16 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
     } else {
       game.registerWrong();
       setProdHint("請留意聲母。");
-      // Generate reference audio using carrier phrase + clip for reliable playback
-      generateClonedAudioBlob(targetWord).then((refBlob) => {
+      // Check cache first, then generate + cache if missing
+      const cacheKey = `ref_${targetWord}`;
+      getDemoClip(cacheKey).then(async (cached) => {
+        if (cached && cached.size > 200) {
+          setFailClone(URL.createObjectURL(cached));
+          return;
+        }
+        const refBlob = await generateClonedAudioBlob(targetWord);
         if (refBlob) {
+          await saveDemoClip(cacheKey, refBlob);
           setFailClone(URL.createObjectURL(refBlob));
         }
       });
