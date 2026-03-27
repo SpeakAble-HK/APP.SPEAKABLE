@@ -82,6 +82,7 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
   const [gameEnd, setGameEnd] = useState(false);
   const [failClone, setFailClone] = useState<string | null>(null);
   const [failUser, setFailUser] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const targetWord = sp && level ? level.items[itemIdx]?.word ?? "" : "";
 
