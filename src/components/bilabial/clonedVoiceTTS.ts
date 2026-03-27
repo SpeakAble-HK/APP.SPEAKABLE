@@ -34,17 +34,13 @@ async function getAuthToken(): Promise<string> {
 }
 
 /**
- * Speak text using the user's cloned voice.
- * For short text (≤2 chars), wraps in a carrier phrase then clips the target word.
- * Falls back to Web Speech API if no stored sample or API fails.
+ * Generate a cloned voice audio Blob (with carrier phrase + clipping for short text).
+ * Returns null if no voice sample or API fails.
  */
-export async function speakWithClonedVoice(text: string, promptText?: string): Promise<void> {
-  if (!text.trim()) return;
-
+export async function generateClonedAudioBlob(text: string): Promise<Blob | null> {
+  if (!text.trim()) return null;
   const sample = await getStoredSample();
-  if (!sample) {
-    return speakCantonese(text);
-  }
+  if (!sample) return null;
 
   try {
     const token = await getAuthToken();
@@ -53,11 +49,10 @@ export async function speakWithClonedVoice(text: string, promptText?: string): P
     const cleanText = text.trim();
     const useCarrier = cleanText.length <= 2;
     const ttsText = useCarrier ? `請跟住讀，${cleanText}。` : cleanText;
-    const ttsPrompt = promptText?.trim() || ttsText;
 
     const fd = new FormData();
     fd.append("text", ttsText);
-    fd.append("prompt_text", ttsPrompt);
+    fd.append("prompt_text", ttsText);
     fd.append("prompt_audio", sample, "voice-sample.webm");
 
     const res = await fetch(`${projectUrl}/functions/v1/voice-clone`, {
@@ -70,7 +65,6 @@ export async function speakWithClonedVoice(text: string, promptText?: string): P
     });
 
     if (!res.ok) throw new Error(`voice-clone ${res.status}`);
-
     const data = await res.json();
     if (!data.success || !data.audio_base64) throw new Error("No audio returned");
 
@@ -80,15 +74,33 @@ export async function speakWithClonedVoice(text: string, promptText?: string): P
     for (let i = 0; i < raw.length; i++) u8[i] = raw.charCodeAt(i);
     let audioBlob = new Blob([u8], { type: contentType });
 
-    // Clip the target word out of the carrier phrase
     if (useCarrier && audioBlob.size > 1000) {
-      console.log(`[clonedVoiceTTS] Clipping target word from carrier phrase (${audioBlob.size} bytes)`);
       audioBlob = await clipLastWord(audioBlob);
     }
+    return audioBlob;
+  } catch (err) {
+    console.warn("generateClonedAudioBlob failed:", err);
+    return null;
+  }
+}
 
-    const audioUrl = URL.createObjectURL(audioBlob);
-    console.log(`[clonedVoiceTTS] Playing: ${audioBlob.size} bytes, carrier: ${useCarrier}`);
+/**
+ * Speak text using the user's cloned voice.
+ * For short text (≤2 chars), wraps in a carrier phrase then clips the target word.
+ * Falls back to Web Speech API if no stored sample or API fails.
+ */
+export async function speakWithClonedVoice(text: string, promptText?: string): Promise<void> {
+  if (!text.trim()) return;
 
+  const blob = await generateClonedAudioBlob(text);
+  if (!blob) {
+    return speakCantonese(text);
+  }
+
+  const audioUrl = URL.createObjectURL(blob);
+  console.log(`[clonedVoiceTTS] Playing: ${blob.size} bytes`);
+
+  try {
     await new Promise<void>((resolve, reject) => {
       const a = new Audio(audioUrl);
       a.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
@@ -96,7 +108,7 @@ export async function speakWithClonedVoice(text: string, promptText?: string): P
       a.play().catch((e) => { URL.revokeObjectURL(audioUrl); reject(e); });
     });
   } catch (err) {
-    console.warn("Voice clone TTS failed, falling back to Web Speech:", err);
+    console.warn("Voice clone playback failed, falling back to Web Speech:", err);
     return speakCantonese(text);
   }
 }
