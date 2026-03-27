@@ -78,7 +78,7 @@ export async function speakWithClonedVoice(text: string, promptText?: string): P
     const blob = new Blob([u8], { type: contentType });
     const audioUrl = URL.createObjectURL(blob);
 
-    console.log(`[clonedVoiceTTS] Playing audio: ${blob.size} bytes, type: ${contentType}`);
+    console.log(`[clonedVoiceTTS] Playing audio: ${blob.size} bytes, type: ${contentType}, carrier: ${useCarrier}`);
 
     await new Promise<void>((resolve, reject) => {
       const a = new Audio(audioUrl);
