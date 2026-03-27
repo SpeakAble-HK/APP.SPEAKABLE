@@ -66,6 +66,13 @@ export default function ResourcesPage() {
                 <MaterialIcon icon="warning" />
                 警示清單
               </button>
+              <button
+                onClick={() => navigate("/lazy-sound")}
+                className="bg-secondary text-secondary-foreground font-bold px-6 py-3 rounded-xl shadow-lg shadow-secondary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-2"
+              >
+                <MaterialIcon icon="hearing" />
+                懶音檢測
+              </button>
             </div>
           </div>
           <img
@@ -118,6 +125,24 @@ export default function ResourcesPage() {
             className="text-error font-bold text-sm hover:text-error-dim transition-colors flex items-center gap-1"
           >
             查看完整年齡清單 <MaterialIcon icon="arrow_forward" className="text-lg" />
+          </button>
+        </section>
+
+        {/* Lazy Sound Detection CTA */}
+        <section className="bg-secondary/5 rounded-2xl p-8 text-center border border-secondary/10">
+          <MaterialIcon icon="hearing" filled className="text-secondary text-5xl mb-4" />
+          <h2 className="font-headline text-2xl font-bold text-on-surface mb-2">
+            懶音檢測
+          </h2>
+          <p className="text-on-surface-variant text-sm mb-6 max-w-lg mx-auto">
+            即時分析你嘅發音，檢測 n/l 不分、ng 脫落、gw/g 混淆等常見懶音問題。
+          </p>
+          <button
+            onClick={() => navigate("/lazy-sound")}
+            className="bg-secondary text-secondary-foreground font-bold px-8 py-4 rounded-xl shadow-lg shadow-secondary/20 hover:brightness-110 active:scale-95 transition-all inline-flex items-center gap-2 text-lg"
+          >
+            <MaterialIcon icon="mic" />
+            開始檢測
           </button>
         </section>
 
