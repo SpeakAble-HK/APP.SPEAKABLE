@@ -128,7 +128,6 @@ async function generateFullAudio(
   return { audioBlob: new Blob([u8], { type: ct }), contentType: ct };
 }
 
-}
 
 // ── Public API ──────────────────────────────────────────────────────
 
