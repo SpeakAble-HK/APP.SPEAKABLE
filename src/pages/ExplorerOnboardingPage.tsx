@@ -11,12 +11,9 @@ import {
 import { saveVoiceSample } from "@/hooks/useVoiceSampleStore";
 import { invalidateVoiceCache } from "@/components/bilabial/clonedVoiceTTS";
 
-const STEPS = ["暱稱", "聲音樣本 1", "聲音樣本 2"] as const;
+const STEPS = ["暱稱", "聲音樣本"] as const;
 
-const VOICE_PHRASES = {
-  1: "你好，朋友！",
-  2: "皮皮早晨！",
-} as const;
+const VOICE_PHRASE = "你好，朋友！";
 
 function useOnboardingRecorder() {
   const [recording, setRecording] = useState(false);
@@ -91,8 +88,7 @@ function useOnboardingRecorder() {
 
 function OnboardingProgress() {
   const location = useLocation();
-  const step =
-    location.pathname.endsWith("/voice/2") ? 2 : location.pathname.endsWith("/voice/1") ? 1 : 0;
+  const step = location.pathname.endsWith("/voice/1") ? 1 : 0;
   const progress = ((step + 1) / STEPS.length) * 100;
 
   return (
@@ -232,12 +228,9 @@ function NicknamePage() {
   );
 }
 
-type VoiceSample = 1 | 2;
-
-function VoiceSamplePage({ sample }: { sample: VoiceSample }) {
+function VoiceSamplePage() {
   const navigate = useNavigate();
-  const { nickname, voice1Url, voice2Url, setVoice1Url, setVoice2Url } = useExplorerOnboarding();
-  const phrase = VOICE_PHRASES[sample];
+  const { nickname, voice1Url, setVoice1Url } = useExplorerOnboarding();
 
   const {
     recording,
@@ -250,36 +243,21 @@ function VoiceSamplePage({ sample }: { sample: VoiceSample }) {
     setSeconds,
   } = useOnboardingRecorder();
 
-  const savedUrl = sample === 1 ? voice1Url : voice2Url;
-
   useEffect(() => {
-    if (!savedUrl) return;
-    setAudioURLExternal(savedUrl);
+    if (!voice1Url) return;
+    setAudioURLExternal(voice1Url);
     setSeconds(0);
-  }, [sample, savedUrl, setAudioURLExternal, setSeconds]);
+  }, [voice1Url, setAudioURLExternal, setSeconds]);
 
   if (!nickname.trim()) {
     return <Navigate to="/explorer/onboarding" replace />;
-  }
-  if (sample === 2 && !voice1Url) {
-    return <Navigate to="/explorer/onboarding/voice/1" replace />;
   }
 
   const fmt = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   const handleBack = () => {
-    if (sample === 1) navigate("/explorer/onboarding");
-    else navigate("/explorer/onboarding/voice/1");
-  };
-
-  const handleNextFromSample1 = () => {
-    if (!audioURL) {
-      toast.error("請先錄製你的聲音。");
-      return;
-    }
-    setVoice1Url(audioURL);
-    navigate("/explorer/onboarding/voice/2");
+    navigate("/explorer/onboarding");
   };
 
   const handleFinish = async () => {
@@ -287,16 +265,12 @@ function VoiceSamplePage({ sample }: { sample: VoiceSample }) {
       toast.error("請先錄製你的聲音。");
       return;
     }
-    setVoice2Url(audioURL);
+    setVoice1Url(audioURL);
 
-    // Persist voice blobs to IndexedDB for later voice-clone TTS
+    // Persist voice blob to IndexedDB for later voice-clone TTS
     try {
-      if (voice1Url) {
-        const r1 = await fetch(voice1Url);
-        await saveVoiceSample("sample1", await r1.blob());
-      }
-      const r2 = await fetch(audioURL);
-      await saveVoiceSample("sample2", await r2.blob());
+      const r = await fetch(audioURL);
+      await saveVoiceSample("sample1", await r.blob());
       invalidateVoiceCache();
     } catch (e) {
       console.warn("Failed to persist voice samples:", e);
@@ -308,7 +282,7 @@ function VoiceSamplePage({ sample }: { sample: VoiceSample }) {
         nickname: nickname.trim(),
         role: "learner",
         voiceCloned: true,
-        voiceSamples: 2,
+        voiceSamples: 1,
       })
     );
     navigate("/adventure-start");
@@ -326,19 +300,15 @@ function VoiceSamplePage({ sample }: { sample: VoiceSample }) {
           讓皮皮認識你的聲音
         </p>
         <p className="text-sm text-on-surface-variant max-w-sm leading-relaxed">
-          {sample === 1
-            ? "第一句：請朗讀下方句子並錄音。完成兩句錄音有助聲音複製更準確。"
-            : "第二句：再朗讀一句，讓皮皮更熟悉你的聲音。"}
+          請朗讀下方句子並錄音，讓皮皮認識你的聲音。
         </p>
       </header>
 
       <div className="glass-card rounded-xl border border-white/60 p-6 shadow-xl shadow-primary/10 sm:p-8 space-y-6">
         <div className="bg-primary-container/30 rounded-xl p-5 text-center border border-primary/10">
-          <p className="text-xs text-on-surface-variant mb-2 font-medium">
-            聲音樣本 {sample}/2 — 請朗讀：
-          </p>
+          <p className="text-xs text-on-surface-variant mb-2 font-medium">聲音樣本 — 請朗讀：</p>
           <p className="font-headline text-2xl sm:text-3xl font-bold text-primary tracking-wide">
-            「{phrase}」
+            「{VOICE_PHRASE}」
           </p>
         </div>
 
@@ -400,25 +370,14 @@ function VoiceSamplePage({ sample }: { sample: VoiceSample }) {
           >
             上一步
           </button>
-          {sample === 1 ? (
-            <button
-              type="button"
-              onClick={handleNextFromSample1}
-              disabled={!audioURL}
-              className="flex-1 rounded-lg bg-primary py-3.5 text-base font-bold text-on-primary shadow-lg shadow-primary/30 transition hover:bg-primary-dim active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              下一步
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleFinish}
-              disabled={!audioURL}
-              className="flex-1 rounded-lg bg-primary py-3.5 text-base font-bold text-on-primary shadow-lg shadow-primary/30 transition hover:bg-primary-dim active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              開始旅程
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleFinish}
+            disabled={!audioURL}
+            className="flex-1 rounded-lg bg-primary py-3.5 text-base font-bold text-on-primary shadow-lg shadow-primary/30 transition hover:bg-primary-dim active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            開始旅程
+          </button>
         </div>
       </div>
     </>
@@ -430,10 +389,10 @@ function OnboardingRoutes() {
   const base = pathname.replace(/\/$/, "");
 
   if (base.endsWith("/voice/2")) {
-    return <VoiceSamplePage sample={2} />;
+    return <Navigate to="/explorer/onboarding/voice/1" replace />;
   }
   if (base.endsWith("/voice/1")) {
-    return <VoiceSamplePage sample={1} />;
+    return <VoiceSamplePage />;
   }
   if (base === "/explorer/onboarding") {
     return <NicknamePage />;

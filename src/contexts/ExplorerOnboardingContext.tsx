@@ -13,8 +13,6 @@ type ExplorerOnboardingContextValue = {
   setNickname: (v: string) => void;
   voice1Url: string | null;
   setVoice1Url: (v: string | null) => void;
-  voice2Url: string | null;
-  setVoice2Url: (v: string | null) => void;
 };
 
 const ExplorerOnboardingContext = createContext<ExplorerOnboardingContextValue | null>(null);
@@ -22,7 +20,6 @@ const ExplorerOnboardingContext = createContext<ExplorerOnboardingContextValue |
 export function ExplorerOnboardingProvider({ children }: { children: ReactNode }) {
   const [nickname, setNickname] = useState("");
   const [voice1Url, setVoice1UrlState] = useState<string | null>(null);
-  const [voice2Url, setVoice2UrlState] = useState<string | null>(null);
 
   const setVoice1Url = useCallback((next: string | null) => {
     setVoice1UrlState((prev) => {
@@ -31,22 +28,12 @@ export function ExplorerOnboardingProvider({ children }: { children: ReactNode }
     });
   }, []);
 
-  const setVoice2Url = useCallback((next: string | null) => {
-    setVoice2UrlState((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return next;
-    });
-  }, []);
-
   const voice1Ref = useRef(voice1Url);
-  const voice2Ref = useRef(voice2Url);
   voice1Ref.current = voice1Url;
-  voice2Ref.current = voice2Url;
 
   useEffect(() => {
     return () => {
       if (voice1Ref.current) URL.revokeObjectURL(voice1Ref.current);
-      if (voice2Ref.current) URL.revokeObjectURL(voice2Ref.current);
     };
   }, []);
 
@@ -55,8 +42,6 @@ export function ExplorerOnboardingProvider({ children }: { children: ReactNode }
     setNickname,
     voice1Url,
     setVoice1Url,
-    voice2Url,
-    setVoice2Url,
   };
 
   return (
