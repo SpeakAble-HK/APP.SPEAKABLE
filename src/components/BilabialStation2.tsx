@@ -7,6 +7,7 @@ import { MatchingGame, type MatchingOption } from "@/components/bilabial/Matchin
 import { RecordingModule } from "@/components/bilabial/RecordingModule";
 import { AIFeedbackModule } from "@/components/bilabial/AIFeedbackModule";
 import { speakWithClonedVoice, generateClonedAudioBlob } from "@/components/bilabial/clonedVoiceTTS";
+import { getDemoClip, saveDemoClip } from "@/components/bilabial/audioClipUtils";
 import {
   computeAccuracyFromResult,
   matchingWrongMessage,
