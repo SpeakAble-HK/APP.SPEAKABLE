@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import { station2Phonemes, type LessonLevel, type Station2Phoneme } from "@/data/bilabialLessons";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
@@ -6,7 +6,7 @@ import type { BilabialPhonemeKey } from "@/components/bilabial/bilabialTypes";
 import { MatchingGame, type MatchingOption } from "@/components/bilabial/MatchingGame";
 import { RecordingModule } from "@/components/bilabial/RecordingModule";
 import { AIFeedbackModule } from "@/components/bilabial/AIFeedbackModule";
-import { speakWithClonedVoice } from "@/components/bilabial/clonedVoiceTTS";
+import { speakWithClonedVoice, generateClonedAudioBlob } from "@/components/bilabial/clonedVoiceTTS";
 import {
   computeAccuracyFromResult,
   matchingWrongMessage,
@@ -177,10 +177,12 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
     } else {
       game.registerWrong();
       setProdHint("請留意聲母。");
-      if (result.clone?.audio_base64) {
-        const ct = result.clone.content_type || "audio/wav";
-        setFailClone(`data:${ct};base64,${result.clone.audio_base64}`);
-      }
+      // Generate reference audio using carrier phrase + clip for reliable playback
+      generateClonedAudioBlob(targetWord).then((refBlob) => {
+        if (refBlob) {
+          setFailClone(URL.createObjectURL(refBlob));
+        }
+      });
       setFailUser(URL.createObjectURL(audioBlob));
     }
     setItemPhase("prod_feedback");
