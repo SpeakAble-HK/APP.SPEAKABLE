@@ -67,13 +67,19 @@ export async function speakWithClonedVoice(text: string, promptText?: string): P
     if (!data.success || !data.audio_base64) throw new Error("No audio returned");
 
     const contentType = data.content_type || "audio/wav";
-    const audioUrl = `data:${contentType};base64,${data.audio_base64}`;
+    const raw = atob(data.audio_base64);
+    const u8 = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) u8[i] = raw.charCodeAt(i);
+    const blob = new Blob([u8], { type: contentType });
+    const audioUrl = URL.createObjectURL(blob);
 
-    await new Promise<void>((resolve) => {
+    console.log(`[clonedVoiceTTS] Playing audio: ${blob.size} bytes, type: ${contentType}`);
+
+    await new Promise<void>((resolve, reject) => {
       const a = new Audio(audioUrl);
-      a.onended = () => resolve();
-      a.onerror = () => resolve();
-      a.play().catch(() => resolve());
+      a.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
+      a.onerror = (e) => { URL.revokeObjectURL(audioUrl); reject(new Error(`Audio playback error: ${e}`)); };
+      a.play().catch((e) => { URL.revokeObjectURL(audioUrl); reject(e); });
     });
   } catch (err) {
     console.warn("Voice clone TTS failed, falling back to Web Speech:", err);
