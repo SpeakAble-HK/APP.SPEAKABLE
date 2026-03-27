@@ -11,6 +11,7 @@ import { computeAccuracyFromResult } from "@/components/bilabial/bilabialUtils";
 import { AIFeedbackModule } from "@/components/bilabial/AIFeedbackModule";
 import { BilabialGameHUD } from "@/components/bilabial/BilabialGameHUD";
 import { BILABIAL_TARGET_COUNT, useBilabialGameSession } from "@/components/bilabial/useBilabialGameSession";
+import { SPEECH_PASS_ACCURACY_THRESHOLD } from "@/lib/speechExerciseRules";
 import pipi from "@/assets/pipi-parrot-only.png";
 
 interface BilabialStation3Props {
@@ -113,7 +114,7 @@ export function BilabialStation3({ onComplete, onBack }: BilabialStation3Props) 
     }
     const score = computeAccuracyFromResult(result.intended, result.spoken);
     setAcc(score);
-    const ok = score >= 70;
+    const ok = score >= SPEECH_PASS_ACCURACY_THRESHOLD;
     setProdOk(ok);
     setRewardLine("");
     setFeedbackMsg(ok ? "貝殼變金色！" : "請留意聲母與嘴形。");

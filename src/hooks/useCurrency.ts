@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { computeLessonXpReward, type LessonXpParams } from "@/lib/xpRewardEngine";
 
 export type Currency = "USD" | "HKD" | "RMB" | "GBP";
 
@@ -84,6 +85,21 @@ export function useCurrency() {
     });
   }, [coins]);
 
+  /** Applies bonus/penalty rules then credits XP (quest / lesson completion). */
+  const awardLessonXp = useCallback(
+    (params: LessonXpParams) => {
+      const amount = computeLessonXpReward(params);
+      if (amount <= 0) return 0;
+      setXP((prev) => {
+        const next = prev + amount;
+        saveGameCurrency(coins, next);
+        return next;
+      });
+      return amount;
+    },
+    [coins]
+  );
+
   const convert = (usdAmount: number): string => {
     const rate = EXCHANGE_RATES[currency];
     const converted = Math.round(usdAmount * rate);
@@ -97,6 +113,6 @@ export function useCurrency() {
   return {
     currency, setCurrency, convert, formatFixed,
     symbol: CURRENCY_SYMBOLS[currency],
-    coins, xp, addCoins, addXP,
+    coins, xp, addCoins, addXP, awardLessonXp,
   };
 }

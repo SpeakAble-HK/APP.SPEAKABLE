@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { questWorldsData, QuestWorldData, difficultyConfig } from "@/data/questLessons";
 import { useQuestProgress } from "@/hooks/useQuestProgress";
+import { isWorldUnlocked, worldProgressPercent } from "@/lib/worldProgression";
 
 interface QuestWorldListProps {
   onSelectWorld: (world: QuestWorldData, worldIndex: number) => void;
@@ -22,17 +23,14 @@ export function QuestWorldList({ onSelectWorld, onBack, allLocked }: QuestWorldL
   const getDiffLabel = (d: typeof difficultyConfig[keyof typeof difficultyConfig]) =>
     isEn ? d.labelEn : isTW ? d.labelTW : d.labelCN;
 
-  const isWorldUnlocked = (worldIndex: number): boolean => {
+  const worldUnlocked = (worldIndex: number): boolean => {
     if (allLocked) return false;
-    if (worldIndex === 0) return true;
-    const prevWorld = questWorldsData[worldIndex - 1];
-    return prevWorld.lessons.every(l => getLessonStatus(l.lesson_id) === "completed");
+    return isWorldUnlocked(worldIndex, questWorldsData, getLessonStatus);
   };
 
   const getWorldProgress = (worldIndex: number): number => {
     const world = questWorldsData[worldIndex];
-    const done = world.lessons.filter(l => getLessonStatus(l.lesson_id) === "completed").length;
-    return world.lessons.length > 0 ? (done / world.lessons.length) * 100 : 0;
+    return worldProgressPercent(world, getLessonStatus);
   };
 
   return (
@@ -50,7 +48,7 @@ export function QuestWorldList({ onSelectWorld, onBack, allLocked }: QuestWorldL
 
       <div className="space-y-3">
         {questWorldsData.map((world, wi) => {
-          const unlocked = isWorldUnlocked(wi);
+          const unlocked = worldUnlocked(wi);
           const prog = getWorldProgress(wi);
           const done = prog === 100;
           const diff = difficultyConfig[world.difficulty];

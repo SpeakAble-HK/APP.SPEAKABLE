@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { LessonStatus, getAllQuestLessons } from '@/data/questLessons';
+import { recordLearningActivity } from '@/hooks/useLearningStreak';
 
 const LOCAL_KEY = "speakable-quest-progress-v2";
 
@@ -111,6 +112,7 @@ export function useQuestProgress() {
     };
     setProgress(newData);
     await persistProgress(newData);
+    recordLearningActivity();
   }, [progress, persistProgress]);
 
   const spendPoints = useCallback(async (amount: number) => {

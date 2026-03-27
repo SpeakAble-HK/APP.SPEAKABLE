@@ -14,6 +14,7 @@ import {
 } from "@/components/bilabial/bilabialUtils";
 import { BilabialGameHUD } from "@/components/bilabial/BilabialGameHUD";
 import { BILABIAL_TARGET_COUNT, useBilabialGameSession } from "@/components/bilabial/useBilabialGameSession";
+import { SPEECH_PASS_ACCURACY_THRESHOLD } from "@/lib/speechExerciseRules";
 import pipi from "@/assets/pipi-parrot-only.png";
 
 interface BilabialStation2Props {
@@ -159,7 +160,7 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
     }
     const acc = computeAccuracyFromResult(result.intended, result.spoken);
     setProdAcc(acc);
-    const ok = acc >= 70;
+    const ok = acc >= SPEECH_PASS_ACCURACY_THRESHOLD;
     setProdOk(ok);
     setRewardLine("");
     if (ok) {

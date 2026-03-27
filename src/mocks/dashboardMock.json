@@ -1,0 +1,12 @@
+{
+  "user_id": "mock-user-1",
+  "lessons_completed": 12,
+  "avg_score": 78,
+  "weak_areas": ["tone_error", "consonant_error"],
+  "trend_data": [
+    { "date": "2025-03-20", "avg": 72 },
+    { "date": "2025-03-21", "avg": 75 },
+    { "date": "2025-03-22", "avg": 78 },
+    { "date": "2025-03-23", "avg": 80 }
+  ]
+}

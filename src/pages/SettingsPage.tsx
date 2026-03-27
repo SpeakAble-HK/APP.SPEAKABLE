@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Mic, Bell, Volume2, ChevronRight, LogOut, Sun, Moon, Globe } from "lucide-react";
+import { User, Mic, Bell, Volume2, ChevronRight, LogOut, Sun, Moon, Globe, Shield } from "lucide-react";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import type { LearnerSegment } from "@/types/learningData";
+import { getUserProfile, setConsentGiven, setLearnerSegment } from "@/lib/userProfileStore";
 import pipiRoom from "@/assets/pipi-mascot.png";
 
 export default function SettingsPage() {
@@ -14,10 +17,18 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem("app_language") || "zh-TW";
   });
+  const [consentLearningLog, setConsentLearningLog] = useState(true);
+  const [learnerSegment, setLearnerSegmentState] = useState<LearnerSegment>("general");
 
   useEffect(() => {
     const stored = sessionStorage.getItem("explorer_nickname");
     if (stored) setNickname(stored);
+  }, []);
+
+  useEffect(() => {
+    const p = getUserProfile();
+    setConsentLearningLog(p.consent_given !== false);
+    setLearnerSegmentState(p.user_type ?? "general");
   }, []);
 
   const handleLanguageChange = (val: string) => {
@@ -33,6 +44,13 @@ export default function SettingsPage() {
   const languages = [
     { value: "zh-TW", label: "繁體中文" },
     { value: "zh-CN", label: "简体中文" },
+  ];
+
+  const learnerSegments: { value: LearnerSegment; label: string }[] = [
+    { value: "general", label: "一般" },
+    { value: "student", label: "學生" },
+    { value: "SEN", label: "特教需要" },
+    { value: "elderly", label: "長者" },
   ];
 
   return (
@@ -172,6 +190,57 @@ export default function SettingsPage() {
                 soundOn ? "translate-x-5" : ""
               }`} />
             </button>
+          </div>
+
+          {/* Learner segment (local profile) */}
+          <div className="flex items-center gap-3 px-4 py-4">
+            <div className="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center">
+              <User className="h-4 w-4 text-success" />
+            </div>
+            <span className="flex-1 text-sm font-bold text-foreground">學習者類型</span>
+            <Select
+              value={learnerSegment}
+              onValueChange={(val) => {
+                const seg = val as LearnerSegment;
+                setLearnerSegmentState(seg);
+                setLearnerSegment(seg);
+              }}
+            >
+              <SelectTrigger className="w-[120px] h-8 bg-background border-border text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border z-[60]">
+                {learnerSegments.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Consent: store pronunciation analysis summaries locally */}
+          <div className="flex flex-col gap-2 px-4 py-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground">儲存學習分析紀錄</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  關閉後只在本裝置不儲存發音分析摘要（僅前端，不上傳錄音）。
+                </p>
+              </div>
+              <Switch
+                checked={consentLearningLog}
+                onCheckedChange={(checked) => {
+                  setConsentLearningLog(checked);
+                  setConsentGiven(checked);
+                }}
+                className="shrink-0 mt-1"
+                aria-label="儲存學習分析紀錄"
+              />
+            </div>
           </div>
         </div>
 

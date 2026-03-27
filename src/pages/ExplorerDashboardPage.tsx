@@ -1,12 +1,24 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import pipiIsland from "@/assets/pipi-island.png";
+import { useLearningStreak } from "@/hooks/useLearningStreak";
 
 export default function ExplorerDashboardPage() {
   const navigate = useNavigate();
+  const { currentStreak, refresh } = useLearningStreak();
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   return (
     <div className="min-h-full bg-surface overflow-hidden">
+      {currentStreak > 0 && (
+        <div className="fixed right-4 top-4 z-50 rounded-full border-2 border-amber-400/80 bg-amber-100/95 px-4 py-2 text-sm font-extrabold text-amber-900 shadow-md backdrop-blur-sm">
+          🔥 {currentStreak} 日連續
+        </div>
+      )}
       <main className="relative h-[calc(100vh-160px)] w-full overflow-hidden ocean-gradient">
         {/* Cloud textures */}
         <div className="absolute top-10 left-10 w-64 h-64 bg-white/40 blur-[80px] rounded-full" aria-hidden="true" />

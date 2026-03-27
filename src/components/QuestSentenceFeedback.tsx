@@ -3,7 +3,8 @@ import { Play, Square, RotateCcw, ArrowRight, ChevronDown, ChevronUp, Volume2, T
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PhonemeResult } from "@/hooks/usePronunciationAPI";
-import { QuestLessonData } from "@/data/questLessons";
+import type { QuestLessonData } from "@/data/questLessons";
+import type { NormalizedPronunciationFeedback } from "@/lib/pronunciationFeedbackAdapter";
 import mascot from "@/assets/pipi-mascot.png";
 
 const CONFETTI_COLORS = [
@@ -57,19 +58,32 @@ function XPPopup({ xp }: { xp: number }) {
 interface Props {
   lesson: QuestLessonData;
   accuracy: number;
+  normalized?: NormalizedPronunciationFeedback;
   spokenPhonemes: PhonemeResult[];
   intendedPhonemes: PhonemeResult[];
   recordingUrl: string | null;
   generatedAudioUrl: string | null;
   attempts: number;
+  bestScore?: number;
   onTryAgain?: () => void;
-  onContinue: () => void;
+  /** Omitted until pass or max attempts — user must retry first. */
+  onContinue?: () => void;
   passed: boolean;
 }
 
 export function QuestSentenceFeedback({
-  lesson, accuracy, spokenPhonemes, intendedPhonemes,
-  recordingUrl, generatedAudioUrl, attempts, onTryAgain, onContinue, passed,
+  lesson,
+  accuracy,
+  normalized,
+  spokenPhonemes,
+  intendedPhonemes,
+  recordingUrl,
+  generatedAudioUrl,
+  attempts,
+  bestScore = 0,
+  onTryAgain,
+  onContinue,
+  passed,
 }: Props) {
   const { language } = useLanguage();
   const isEn = language === "en-GB";
@@ -136,6 +150,9 @@ export function QuestSentenceFeedback({
   const scoreBg = accuracy >= 80 ? "bg-success/10 border-success/30" : accuracy >= 50 ? "bg-accent/10 border-accent/30" : "bg-destructive/10 border-destructive/30";
 
   const feedbackMsg = (() => {
+    if (normalized) {
+      return isEn ? normalized.shortMessageEn : normalized.shortMessageZh;
+    }
     if (accuracy >= 90) return isEn ? "Excellent pronunciation!" : isTW ? "發音非常好！" : "发音非常好！";
     if (accuracy >= 70) return isEn ? "Good job! Lesson passed." : isTW ? "做得好！通過了。" : "做得好！通过了。";
     if (accuracy >= 50) return isEn ? "Almost there! Some tones need work." : isTW ? "差一點！有些聲調需要改進。" : "差一点！有些声调需要改进。";
@@ -174,6 +191,11 @@ export function QuestSentenceFeedback({
           </div>
 
           <p className="mt-4 text-base font-bold text-foreground">{feedbackMsg}</p>
+          {bestScore > 0 && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {isEn ? `Best this round: ${bestScore}%` : `本輪最佳：${bestScore}%`}
+            </p>
+          )}
 
           {passed && (
             <div className="mt-3">
@@ -203,7 +225,7 @@ export function QuestSentenceFeedback({
           <Button
             variant="outline"
             onClick={() => playAudio(recordingUrl, setPlayingUser, userAudioRef)}
-            className="h-12 rounded-2xl gap-2 font-bold"
+            className="h-12 min-h-11 rounded-2xl gap-2 font-bold"
             disabled={!recordingUrl}
           >
             {playingUser ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -212,7 +234,7 @@ export function QuestSentenceFeedback({
           <Button
             variant="outline"
             onClick={() => playAudio(generatedAudioUrl, setPlayingRef, refAudioRef)}
-            className="h-12 rounded-2xl gap-2 font-bold"
+            className="h-12 min-h-11 rounded-2xl gap-2 font-bold"
             disabled={!generatedAudioUrl}
           >
             <Volume2 className="h-4 w-4" />
@@ -226,23 +248,31 @@ export function QuestSentenceFeedback({
             <Button
               variant="outline"
               onClick={onTryAgain}
-              className="w-full h-12 rounded-2xl gap-2 font-bold"
+              className="h-12 min-h-11 w-full rounded-2xl gap-2 font-bold"
             >
               <RotateCcw className="h-4 w-4" />
               {isEn ? "Try Again" : isTW ? "再試一次" : "再试一次"}
-              <span className="text-xs text-muted-foreground ml-1">({attempts}/3)</span>
+              <span className="ml-1 text-xs text-muted-foreground">({attempts}/3)</span>
             </Button>
           )}
-          <Button
-            onClick={onContinue}
-            className="w-full h-14 rounded-2xl gap-2 text-base font-extrabold game-btn"
-            style={{ boxShadow: "0 4px 0 hsl(var(--primary-dark))" }}
-          >
-            {passed
-              ? (isEn ? "Continue" : "繼續")
-              : (isEn ? "Back to Map" : isTW ? "返回地圖" : "返回地图")}
-            <ArrowRight className="h-5 w-5" />
-          </Button>
+          {onContinue && (
+            <Button
+              onClick={onContinue}
+              className="game-btn h-14 min-h-11 w-full gap-2 rounded-2xl text-base font-extrabold"
+              style={{ boxShadow: "0 4px 0 hsl(var(--primary-dark))" }}
+            >
+              {passed
+                ? isEn
+                  ? "Continue"
+                  : "繼續"
+                : isEn
+                  ? "Back to Map"
+                  : isTW
+                    ? "返回地圖"
+                    : "返回地图"}
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+          )}
         </div>
 
         {/* Detailed analysis */}
