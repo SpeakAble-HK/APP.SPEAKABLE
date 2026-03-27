@@ -247,11 +247,18 @@ export async function generateDemoForPhoneme(
     const clipped = await clipLastWord(fullAudio);
     console.log(`[demoPipeline] Clipped demo for /${key}/:`, clipped.size, "bytes");
 
-    // Store both full instruction + clipped word
+    // Store full instruction audio
     await saveDemoClip(`full_${key}`, fullAudio);
-    await saveDemoClip(`word_${key}`, clipped);
 
-    return clipped;
+    // Only store clipped word if it has real audio data (not just WAV header)
+    if (clipped.size >= MIN_AUDIO_BYTES) {
+      await saveDemoClip(`word_${key}`, clipped);
+    } else {
+      console.warn(`[demoPipeline] Clipped audio too small (${clipped.size} bytes) for /${key}/, storing full audio as word fallback`);
+      await saveDemoClip(`word_${key}`, fullAudio);
+    }
+
+    return clipped.size >= MIN_AUDIO_BYTES ? clipped : fullAudio;
   } catch (err) {
     console.error(`[demoPipeline] Failed for /${key}/:`, err);
     return null;
