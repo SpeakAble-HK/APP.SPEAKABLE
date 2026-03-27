@@ -32,6 +32,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 const AdventureStartPage = lazy(() => import("./pages/AdventureStartPage"));
 const SemanticIslandPage = lazy(() => import("./pages/SemanticIslandPage"));
 const RedFlagsPage = lazy(() => import("./pages/RedFlagsPage"));
+const LazySoundPage = lazy(() => import("./pages/LazySoundPage"));
 
 const queryClient = new QueryClient();
 
