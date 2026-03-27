@@ -9,6 +9,7 @@ import {
   type FeedbackAnimation,
 } from "@/components/bilabial/AIFeedbackModule";
 import { speakWithClonedVoice } from "@/components/bilabial/clonedVoiceTTS";
+import { playDemo } from "@/components/bilabial/demoPipeline";
 import {
   computeAccuracyFromResult,
   firstSpokenInitial,
