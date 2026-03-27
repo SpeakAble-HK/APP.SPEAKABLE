@@ -239,12 +239,12 @@ export default function LazySoundPage() {
                 variant={isRecording ? "destructive" : "default"}
                 className="w-20 h-20 rounded-full shadow-lg"
                 onClick={isRecording ? handleStopRecording : handleStartRecording}
-                disabled={!getTestText()}
+                disabled={!canRecord}
               >
                 {isRecording ? <Square className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
               </Button>
               <p className="text-sm text-on-surface-variant">
-                {isRecording ? "點擊停止錄音" : getTestText() ? "點擊開始錄音" : "請先選擇或輸入測試內容"}
+                {isRecording ? "點擊停止錄音" : canRecord ? "點擊開始錄音" : "請先選擇測試內容"}
               </p>
             </>
           ) : (
