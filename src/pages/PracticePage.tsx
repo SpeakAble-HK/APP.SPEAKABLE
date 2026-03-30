@@ -310,7 +310,7 @@ const PracticePage = () => {
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Target className="h-4 w-4 text-primary" />
-                  <span>{language === 'en-GB' ? "Today's goal: 10 drills" : '今日目標：10題'}</span>
+                  <span>{t3("Today's goal: 10 drills", '今日目標：10題', '今日目标：10题')}</span>
                 </div>
               </div>
             </div>
