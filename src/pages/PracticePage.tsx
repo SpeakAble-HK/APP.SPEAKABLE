@@ -364,9 +364,11 @@ const PracticePage = () => {
                 {t3('Select Practice Language', '選擇練習語言', '选择练习语言')}
               </CardTitle>
               <CardDescription>
-                {language === 'en-GB' 
-                  ? 'Choose the language you want to practice' 
-                  : '選擇您想練習的語言'}
+                {t3(
+                  'Choose the language you want to practice',
+                  '選擇您想練習的語言',
+                  '选择您想练习的语言'
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
