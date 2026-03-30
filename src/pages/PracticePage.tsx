@@ -361,7 +361,7 @@ const PracticePage = () => {
           <Card className="card-shadow">
             <CardHeader>
               <CardTitle>
-                {language === 'en-GB' ? 'Select Practice Language' : '選擇練習語言'}
+                {t3('Select Practice Language', '選擇練習語言', '选择练习语言')}
               </CardTitle>
               <CardDescription>
                 {language === 'en-GB' 
