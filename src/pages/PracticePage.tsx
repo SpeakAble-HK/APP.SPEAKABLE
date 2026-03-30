@@ -511,7 +511,7 @@ const PracticePage = () => {
                     className="w-full gap-2"
                   >
                     <Upload className="h-4 w-4" />
-                    {uploadedFileName || (language === 'en-GB' ? 'Choose Audio File' : '選擇音頻文件')}
+                    {uploadedFileName || t3('Choose Audio File', '選擇音頻文件', '选择音频文件')}
                   </Button>
                 </TabsContent>
               </Tabs>
