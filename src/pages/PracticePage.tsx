@@ -438,7 +438,7 @@ const PracticePage = () => {
           {/* Topic Badge */}
           <div className="flex items-center gap-2 mb-4">
             <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              {language === 'en-GB' ? "Today's Focus:" : '今日主題：'} {getTopicTitle(topic, language)}
+              {t3("Today's Focus:", '今日主題：', '今日主题：')} {getTopicTitle(topic, language)}
             </span>
           </div>
 
