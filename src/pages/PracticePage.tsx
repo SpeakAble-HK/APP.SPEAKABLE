@@ -426,7 +426,7 @@ const PracticePage = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">
-                {language === 'en-GB' ? 'Question' : '題目'} {sessionState.currentQuestionIndex + 1} / {sessionState.totalQuestions}
+                {t3('Question', '題目', '题目')} {sessionState.currentQuestionIndex + 1} / {sessionState.totalQuestions}
               </span>
               <span className="text-sm font-medium text-primary">
                 {Math.round(progress)}%
