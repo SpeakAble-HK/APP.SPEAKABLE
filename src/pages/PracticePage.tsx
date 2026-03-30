@@ -473,7 +473,7 @@ const PracticePage = () => {
                   </TabsTrigger>
                   <TabsTrigger value="upload" className="gap-2">
                     <Upload className="h-4 w-4" />
-                    {language === 'en-GB' ? 'Upload' : '上傳'}
+                    {t3('Upload', '上傳', '上传')}
                   </TabsTrigger>
                 </TabsList>
 
