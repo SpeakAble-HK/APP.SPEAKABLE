@@ -315,9 +315,11 @@ const PracticePage = () => {
               </div>
             </div>
             <p className="text-muted-foreground">
-              {language === 'en-GB' 
-                ? 'Complete 10 pronunciation drills to improve your skills.' 
-                : '完成10道發音練習以提升您的技能。'}
+              {t3(
+                'Complete 10 pronunciation drills to improve your skills.',
+                '完成10道發音練習以提升您的技能。',
+                '完成10道发音练习以提升您的技能。'
+              )}
             </p>
           </div>
 
