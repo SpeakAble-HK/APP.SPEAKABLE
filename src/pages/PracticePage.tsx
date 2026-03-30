@@ -695,9 +695,11 @@ const PracticePage = () => {
               {t3('Practice Complete!', '練習完成！', '练习完成！')}
             </h1>
             <p className="text-muted-foreground">
-              {language === 'en-GB' 
-                ? `You've completed today's ${getTopicTitle(topic, language)} practice`
-                : `您已完成今日的 ${getTopicTitle(topic, language)} 練習`}
+              {t3(
+                `You've completed today's ${getTopicTitle(topic, language)} practice`,
+                `您已完成今日的 ${getTopicTitle(topic, language)} 練習`,
+                `您已完成今日的 ${getTopicTitle(topic, language)} 练习`
+              )}
             </p>
           </div>
 
