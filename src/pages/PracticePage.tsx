@@ -404,7 +404,7 @@ const PracticePage = () => {
               </div>
 
               <Button onClick={handleStartPractice} className="w-full gap-2" size="lg">
-                {language === 'en-GB' ? 'Start Practice' : '開始練習'}
+                {t3('Start Practice', '開始練習', '开始练习')}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </CardContent>
