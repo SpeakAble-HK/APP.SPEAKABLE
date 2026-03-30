@@ -18,16 +18,14 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname;
-  const { t, language } = useLanguage();
-  const isEn = language === 'en-GB';
-  const isTW = language === 'zh-TW';
+  const { t, t3 } = useLanguage();
 
   const navItems = [
-    { title: isEn ? "Dashboard" : isTW ? "儀表板" : "仪表板", url: "/", icon: Home },
-    { title: isEn ? "Echo Speech" : "迴聲語音", url: "/#golden-speaker", icon: AudioLines },
-    { title: isEn ? "Speech Quest" : isTW ? "語音冒險" : "语音冒险", url: "/speech-quest", icon: Swords },
+    { title: t3("Dashboard", "儀表板", "仪表板"), url: "/", icon: Home },
+    { title: t3("Echo Speech", "迴聲語音", "回声语音"), url: "/#golden-speaker", icon: AudioLines },
+    { title: t3("Speech Quest", "語音冒險", "语音冒险"), url: "/speech-quest", icon: Swords },
     { title: "IPA", url: "/ipa", icon: BookOpen },
-    { title: isEn ? "About" : isTW ? "關於" : "关于", url: "/about", icon: Info },
+    { title: t3("About", "關於", "关于"), url: "/about", icon: Info },
   ];
 
   const isActive = (path: string) => {
@@ -76,7 +74,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
           <img src={mascot} alt="" className="h-9 w-9 object-contain" />
           <span className="text-lg font-extrabold whitespace-nowrap">SpeakAble HK</span>
         </button>
-        <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-sidebar-accent transition-colors" aria-label={isEn ? "Close menu" : "關閉選單"}>
+        <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-sidebar-accent transition-colors" aria-label={t3("Close menu", "關閉選單", "关闭菜单")}>
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -99,7 +97,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
           <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-accent/20">
             <CreditCard className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
           </div>
-          <span>{isEn ? "Pricing" : isTW ? "定價方案" : "定价方案"}</span>
+          <span>{t3("Pricing", "定價方案", "定价方案")}</span>
         </button>
       </div>
 
@@ -116,7 +114,7 @@ export function AppSidebar({ user, profile, onSignOut, onClose }: AppSidebarProp
               <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-sidebar-accent">
                 <Settings className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
               </div>
-              <span>{isEn ? "Settings" : isTW ? "設定" : "设置"}</span>
+              <span>{t3("Settings", "設定", "设置")}</span>
             </button>
           }
         />

@@ -209,7 +209,7 @@ export function QuestSentenceExercise({ lesson, onComplete, onExit }: Props) {
             </Button>
             <div className="flex-1 text-center">
               <span className="text-sm font-extrabold text-muted-foreground">
-                {isEn ? `Lesson ${lesson.lesson_id}` : `第 ${lesson.lesson_id} 課`}
+                {isEn ? `Lesson ${lesson.lesson_id}` : isTW ? `第 ${lesson.lesson_id} 課` : `第 ${lesson.lesson_id} 课`}
               </span>
             </div>
             <div className="w-10" />
@@ -268,7 +268,7 @@ export function QuestSentenceExercise({ lesson, onComplete, onExit }: Props) {
           </button>
           <p className="text-sm font-bold text-muted-foreground">
             {isRecording
-              ? `🔴 ${isEn ? "Recording..." : "錄音中..."}`
+              ? `🔴 ${isEn ? "Recording..." : isTW ? "錄音中..." : "录音中..."}`
               : isEn
                 ? "Tap to speak"
                 : isTW
@@ -287,7 +287,7 @@ export function QuestSentenceExercise({ lesson, onComplete, onExit }: Props) {
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
           <p className="text-sm font-bold text-muted-foreground">
-            {isEn ? "Analyzing pronunciation…" : "分析發音中⋯"}
+            {isEn ? "Analyzing pronunciation…" : isTW ? "分析發音中⋯" : "分析发音中⋯"}
           </p>
         </div>
       )}

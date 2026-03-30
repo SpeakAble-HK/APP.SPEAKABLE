@@ -6,6 +6,7 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  t3: (en: string, tw: string, cn: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -424,8 +425,14 @@ export function LanguageProvider({ children, initialLanguage = "zh-TW" }: Langua
     return translations[language][key] || translations["en-GB"][key] || key;
   };
 
+  const t3 = (en: string, tw: string, cn: string): string => {
+    if (language === "en-GB") return en;
+    if (language === "zh-TW") return tw;
+    return cn;
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, t3 }}>
       {children}
     </LanguageContext.Provider>
   );

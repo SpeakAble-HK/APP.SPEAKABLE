@@ -19,6 +19,7 @@ interface PrecisionPracticeProps {
 export function PrecisionPractice({ audioUrl, waveformData, errorMarkers = [], className = "" }: PrecisionPracticeProps) {
   const { language } = useLanguage();
   const isEn = language === "en-GB";
+  const isTW = language === "zh-TW";
   const [slowMode, setSlowMode] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackPos, setPlaybackPos] = useState(0);
@@ -87,7 +88,7 @@ export function PrecisionPractice({ audioUrl, waveformData, errorMarkers = [], c
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold text-foreground">
-          {isEn ? "Precision Practice" : "精確練習"}
+          {isEn ? "Precision Practice" : isTW ? "精確練習" : "精确练习"}
         </h3>
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm cursor-pointer">

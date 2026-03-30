@@ -193,7 +193,7 @@ export function QuestSentenceFeedback({
           <p className="mt-4 text-base font-bold text-foreground">{feedbackMsg}</p>
           {bestScore > 0 && (
             <p className="mt-1 text-xs text-muted-foreground">
-              {isEn ? `Best this round: ${bestScore}%` : `本輪最佳：${bestScore}%`}
+              {isEn ? `Best this round: ${bestScore}%` : isTW ? `本輪最佳：${bestScore}%` : `本轮最佳：${bestScore}%`}
             </p>
           )}
 

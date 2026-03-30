@@ -86,7 +86,7 @@ export function QuestLessonList({ world, worldIndex, onSelectLesson, onBack, all
                     {isCurrent && (
                       <div className="flex items-center gap-1 text-xs text-primary mt-1.5 font-extrabold">
                         <ChevronRight className="h-3 w-3" />
-                        {isEn ? "Start" : "開始"}
+                        {isEn ? "Start" : isTW ? "開始" : "开始"}
                       </div>
                     )}
                     {lessonDone && (

@@ -35,7 +35,7 @@ type PracticeStep = 'language' | 'practice' | 'feedback' | 'summary';
 
 const PracticePage = () => {
   const navigate = useNavigate();
-  const { t, language } = useLanguage();
+  const { t, t3, language } = useLanguage();
   const { user } = useAuth();
   const { stats } = useUserStats();
   const { saveResult } = usePronunciationResults();
@@ -300,24 +300,26 @@ const PracticePage = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-                {language === 'en-GB' ? 'Practice Mode' : '練習模式'}
+                {t3('Practice Mode', '練習模式', '练习模式')}
                 <BookOpen className="h-6 w-6 text-primary" />
               </h1>
               <div className="flex items-center gap-4 text-sm">
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Flame className="h-4 w-4 text-orange-500" />
-                  <span>{language === 'en-GB' ? 'Streak:' : '連續:'} {stats.streak_days} {language === 'en-GB' ? 'days' : '天'}</span>
+                  <span>{t3('Streak:', '連續:', '连续:')} {stats.streak_days} {t3('days', '天', '天')}</span>
                 </div>
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Target className="h-4 w-4 text-primary" />
-                  <span>{language === 'en-GB' ? "Today's goal: 10 drills" : '今日目標：10題'}</span>
+                  <span>{t3("Today's goal: 10 drills", '今日目標：10題', '今日目标：10题')}</span>
                 </div>
               </div>
             </div>
             <p className="text-muted-foreground">
-              {language === 'en-GB' 
-                ? 'Complete 10 pronunciation drills to improve your skills.' 
-                : '完成10道發音練習以提升您的技能。'}
+              {t3(
+                'Complete 10 pronunciation drills to improve your skills.',
+                '完成10道發音練習以提升您的技能。',
+                '完成10道发音练习以提升您的技能。'
+              )}
             </p>
           </div>
 
@@ -330,7 +332,7 @@ const PracticePage = () => {
                 </div>
                 <div>
                   <CardTitle className="text-xl">
-                    {language === 'en-GB' ? "Today's Focus" : '今日主題'}
+                    {t3("Today's Focus", '今日主題', '今日主题')}
                   </CardTitle>
                   <CardDescription className="text-lg font-medium text-foreground">
                     {getTopicTitle(topic, language)}
@@ -359,12 +361,14 @@ const PracticePage = () => {
           <Card className="card-shadow">
             <CardHeader>
               <CardTitle>
-                {language === 'en-GB' ? 'Select Practice Language' : '選擇練習語言'}
+                {t3('Select Practice Language', '選擇練習語言', '选择练习语言')}
               </CardTitle>
               <CardDescription>
-                {language === 'en-GB' 
-                  ? 'Choose the language you want to practice' 
-                  : '選擇您想練習的語言'}
+                {t3(
+                  'Choose the language you want to practice',
+                  '選擇您想練習的語言',
+                  '选择您想练习的语言'
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -379,10 +383,10 @@ const PracticePage = () => {
                 >
                   <div className="text-2xl mb-2">🇭🇰</div>
                   <div className="font-semibold">
-                    {language === 'en-GB' ? 'Cantonese' : '粵語'}
+                    {t3('Cantonese', '粵語', '粤语')}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {language === 'en-GB' ? 'Hong Kong Cantonese' : '香港粵語'}
+                    {t3('Hong Kong Cantonese', '香港粵語', '香港粤语')}
                   </div>
                 </button>
                 <button
@@ -391,16 +395,16 @@ const PracticePage = () => {
                 >
                   <div className="text-2xl mb-2">🇬🇧</div>
                   <div className="font-semibold">
-                    {language === 'en-GB' ? 'English' : '英語'}
+                    {t3('English', '英語', '英语')}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {language === 'en-GB' ? 'Coming soon' : '即將推出'}
+                    {t3('Coming soon', '即將推出', '即将推出')}
                   </div>
                 </button>
               </div>
 
               <Button onClick={handleStartPractice} className="w-full gap-2" size="lg">
-                {language === 'en-GB' ? 'Start Practice' : '開始練習'}
+                {t3('Start Practice', '開始練習', '开始练习')}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </CardContent>
@@ -422,7 +426,7 @@ const PracticePage = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">
-                {language === 'en-GB' ? 'Question' : '題目'} {sessionState.currentQuestionIndex + 1} / {sessionState.totalQuestions}
+                {t3('Question', '題目', '题目')} {sessionState.currentQuestionIndex + 1} / {sessionState.totalQuestions}
               </span>
               <span className="text-sm font-medium text-primary">
                 {Math.round(progress)}%
@@ -434,7 +438,7 @@ const PracticePage = () => {
           {/* Topic Badge */}
           <div className="flex items-center gap-2 mb-4">
             <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-              {language === 'en-GB' ? "Today's Focus:" : '今日主題：'} {getTopicTitle(topic, language)}
+              {t3("Today's Focus:", '今日主題：', '今日主题：')} {getTopicTitle(topic, language)}
             </span>
           </div>
 
@@ -457,7 +461,7 @@ const PracticePage = () => {
           <Card className="card-shadow mb-6">
             <CardHeader>
               <CardTitle className="text-lg">
-                {language === 'en-GB' ? 'Record Your Pronunciation' : '錄製您的發音'}
+                {t3('Record Your Pronunciation', '錄製您的發音', '录制您的发音')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -465,11 +469,11 @@ const PracticePage = () => {
                 <TabsList className="grid w-full grid-cols-2 mb-4">
                   <TabsTrigger value="record" className="gap-2">
                     <Mic className="h-4 w-4" />
-                    {language === 'en-GB' ? 'Record' : '錄音'}
+                    {t3('Record', '錄音', '录音')}
                   </TabsTrigger>
                   <TabsTrigger value="upload" className="gap-2">
                     <Upload className="h-4 w-4" />
-                    {language === 'en-GB' ? 'Upload' : '上傳'}
+                    {t3('Upload', '上傳', '上传')}
                   </TabsTrigger>
                 </TabsList>
 
@@ -488,8 +492,8 @@ const PracticePage = () => {
                   </div>
                   <p className="text-center text-sm text-muted-foreground">
                     {isRecording 
-                      ? (language === 'en-GB' ? 'Recording... Tap to stop' : '錄音中... 點擊停止')
-                      : (language === 'en-GB' ? 'Tap to start recording' : '點擊開始錄音')}
+                      ? t3('Recording... Tap to stop', '錄音中... 點擊停止', '录音中... 点击停止')
+                      : t3('Tap to start recording', '點擊開始錄音', '点击开始录音')}
                   </p>
                 </TabsContent>
 
@@ -507,7 +511,7 @@ const PracticePage = () => {
                     className="w-full gap-2"
                   >
                     <Upload className="h-4 w-4" />
-                    {uploadedFileName || (language === 'en-GB' ? 'Choose Audio File' : '選擇音頻文件')}
+                    {uploadedFileName || t3('Choose Audio File', '選擇音頻文件', '选择音频文件')}
                   </Button>
                 </TabsContent>
               </Tabs>
@@ -548,11 +552,11 @@ const PracticePage = () => {
             {isProcessing ? (
               <>
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {language === 'en-GB' ? 'Analyzing...' : '分析中...'}
+                {t3('Analyzing...', '分析中...', '分析中...')}
               </>
             ) : (
               <>
-                {language === 'en-GB' ? 'Analyze Pronunciation' : '分析發音'}
+                {t3('Analyze Pronunciation', '分析發音', '分析发音')}
                 <ChevronRight className="h-4 w-4" />
               </>
             )}
@@ -573,7 +577,7 @@ const PracticePage = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">
-                {language === 'en-GB' ? 'Question' : '題目'} {sessionState.currentQuestionIndex + 1} / {sessionState.totalQuestions}
+                {t3('Question', '題目', '题目')} {sessionState.currentQuestionIndex + 1} / {sessionState.totalQuestions}
               </span>
               <span className="text-sm font-medium text-primary">
                 {Math.round(progress)}%
@@ -603,7 +607,7 @@ const PracticePage = () => {
                   {currentResult.overallAccuracy}%
                 </span>
                 <span className="text-muted-foreground">
-                  {language === 'en-GB' ? 'Accuracy' : '準確度'}
+                  {t3('Accuracy', '準確度', '准确度')}
                 </span>
               </div>
             </CardContent>
@@ -614,7 +618,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Vowels' : '元音'}
+                  {t3('Vowels', '元音', '元音')}
                 </p>
                 <p className={`text-xl font-bold ${getAccuracyColor(currentResult.vowelAccuracy)}`}>
                   {currentResult.vowelAccuracy}%
@@ -624,7 +628,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Consonants' : '輔音'}
+                  {t3('Consonants', '輔音', '辅音')}
                 </p>
                 <p className={`text-xl font-bold ${getAccuracyColor(currentResult.consonantAccuracy)}`}>
                   {currentResult.consonantAccuracy}%
@@ -634,7 +638,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Tones' : '聲調'}
+                  {t3('Tones', '聲調', '声调')}
                 </p>
                 <p className={`text-xl font-bold ${getAccuracyColor(currentResult.toneAccuracy)}`}>
                   {currentResult.toneAccuracy}%
@@ -651,7 +655,7 @@ const PracticePage = () => {
               className="gap-2"
             >
               <Play className="h-4 w-4" />
-              {language === 'en-GB' ? 'Play Mine' : '播放我的'}
+              {t3('Play Mine', '播放我的', '播放我的')}
             </Button>
             <Button
               variant="outline"
@@ -659,15 +663,15 @@ const PracticePage = () => {
               className="gap-2"
             >
               <Volume2 className="h-4 w-4" />
-              {language === 'en-GB' ? 'Play Model' : '播放示範'}
+              {t3('Play Model', '播放示範', '播放示范')}
             </Button>
           </div>
 
           {/* Next Button */}
           <Button onClick={handleNextQuestion} className="w-full gap-2" size="lg">
             {sessionState.currentQuestionIndex + 1 >= sessionState.totalQuestions
-              ? (language === 'en-GB' ? 'View Summary' : '查看總結')
-              : (language === 'en-GB' ? 'Next Question' : '下一題')}
+              ? t3('View Summary', '查看總結', '查看总结')
+              : t3('Next Question', '下一題', '下一题')}
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -688,12 +692,14 @@ const PracticePage = () => {
               <Trophy className="h-10 w-10 text-primary" />
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              {language === 'en-GB' ? 'Practice Complete!' : '練習完成！'}
+              {t3('Practice Complete!', '練習完成！', '练习完成！')}
             </h1>
             <p className="text-muted-foreground">
-              {language === 'en-GB' 
-                ? `You've completed today's ${getTopicTitle(topic, language)} practice`
-                : `您已完成今日的 ${getTopicTitle(topic, language)} 練習`}
+              {t3(
+                `You've completed today's ${getTopicTitle(topic, language)} practice`,
+                `您已完成今日的 ${getTopicTitle(topic, language)} 練習`,
+                `您已完成今日的 ${getTopicTitle(topic, language)} 练习`
+              )}
             </p>
           </div>
 
@@ -704,7 +710,7 @@ const PracticePage = () => {
                 {summaryStats.avgOverall}%
               </div>
               <p className="text-muted-foreground">
-                {language === 'en-GB' ? 'Overall Accuracy' : '整體準確度'}
+                {t3('Overall Accuracy', '整體準確度', '整体准确度')}
               </p>
             </CardContent>
           </Card>
@@ -714,7 +720,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Vowels' : '元音'}
+                  {t3('Vowels', '元音', '元音')}
                 </p>
                 <p className={`text-2xl font-bold ${getAccuracyColor(summaryStats.avgVowel)}`}>
                   {summaryStats.avgVowel}%
@@ -724,7 +730,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Consonants' : '輔音'}
+                  {t3('Consonants', '輔音', '辅音')}
                 </p>
                 <p className={`text-2xl font-bold ${getAccuracyColor(summaryStats.avgConsonant)}`}>
                   {summaryStats.avgConsonant}%
@@ -734,7 +740,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Tones' : '聲調'}
+                  {t3('Tones', '聲調', '声调')}
                 </p>
                 <p className={`text-2xl font-bold ${getAccuracyColor(summaryStats.avgTone)}`}>
                   {summaryStats.avgTone}%
@@ -747,7 +753,7 @@ const PracticePage = () => {
           <Card className="card-shadow mb-6">
             <CardHeader>
               <CardTitle className="text-lg">
-                {language === 'en-GB' ? 'Question Breakdown' : '題目明細'}
+                {t3('Question Breakdown', '題目明細', '题目明细')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -789,7 +795,7 @@ const PracticePage = () => {
             {user && (
               <Button onClick={handleSaveSummary} className="w-full gap-2" size="lg">
                 <CheckCircle className="h-4 w-4" />
-                {language === 'en-GB' ? 'Save & Return to Dashboard' : '保存並返回儀表板'}
+                {t3('Save & Return to Dashboard', '保存並返回儀表板', '保存并返回仪表板')}
               </Button>
             )}
             <Button
@@ -799,7 +805,7 @@ const PracticePage = () => {
               size="lg"
             >
               <RotateCcw className="h-4 w-4" />
-              {language === 'en-GB' ? 'Practice Again' : '再次練習'}
+              {t3('Practice Again', '再次練習', '再次练习')}
             </Button>
             {!user && (
               <Button
@@ -807,7 +813,7 @@ const PracticePage = () => {
                 variant="ghost"
                 className="w-full"
               >
-                {language === 'en-GB' ? 'Return to Dashboard' : '返回儀表板'}
+                {t3('Return to Dashboard', '返回儀表板', '返回仪表板')}
               </Button>
             )}
           </div>

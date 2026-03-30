@@ -9,10 +9,11 @@ interface SecurityStatusProps {
 export function SecurityStatus({ isProcessing = false }: SecurityStatusProps) {
   const { language } = useLanguage();
   const isEn = language === "en-GB";
+  const isTW = language === "zh-TW";
 
   const statusText = isProcessing
-    ? (isEn ? "Secure Local Processing" : "安全本地處理")
-    : (isEn ? "Data Protected" : "數據已保護");
+    ? (isEn ? "Secure Local Processing" : isTW ? "安全本地處理" : "安全本地处理")
+    : (isEn ? "Data Protected" : isTW ? "數據已保護" : "数据已保護");
 
   const tooltipText = isEn
     ? "All voice data is processed securely. Audio is encrypted in transit (TLS 1.3) and never stored permanently. Golden Speaker models run within our secured infrastructure."

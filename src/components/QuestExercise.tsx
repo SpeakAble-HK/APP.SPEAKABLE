@@ -252,7 +252,7 @@ export function QuestExercise({ lesson, onComplete, onExit }: QuestExerciseProps
             </button>
             <p className="text-sm text-muted-foreground font-bold">
               {isRecording
-                ? `🔴 ${isEn ? "Recording..." : "錄音中..."}`
+                ? `🔴 ${isEn ? "Recording..." : isTW ? "錄音中..." : "录音中..."}`
                 : isEn ? "Tap to speak" : isTW ? "點擊開始說" : "点击开始说"}
             </p>
             {attempts > 0 && (

@@ -107,7 +107,7 @@ export function QuestFeedback({
             className="w-full h-14 rounded-2xl gap-2 text-base font-extrabold game-btn"
             style={{ boxShadow: "0 4px 0 hsl(var(--primary-dark))" }}
           >
-            {isEn ? "Continue" : "繼續"}
+            {isEn ? "Continue" : isTW ? "繼續" : "继续"}
             <ArrowRight className="h-5 w-5" />
           </Button>
         </div>
