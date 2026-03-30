@@ -469,7 +469,7 @@ const PracticePage = () => {
                 <TabsList className="grid w-full grid-cols-2 mb-4">
                   <TabsTrigger value="record" className="gap-2">
                     <Mic className="h-4 w-4" />
-                    {language === 'en-GB' ? 'Record' : '錄音'}
+                    {t3('Record', '錄音', '录音')}
                   </TabsTrigger>
                   <TabsTrigger value="upload" className="gap-2">
                     <Upload className="h-4 w-4" />
