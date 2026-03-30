@@ -492,8 +492,8 @@ const PracticePage = () => {
                   </div>
                   <p className="text-center text-sm text-muted-foreground">
                     {isRecording 
-                      ? (language === 'en-GB' ? 'Recording... Tap to stop' : '錄音中... 點擊停止')
-                      : (language === 'en-GB' ? 'Tap to start recording' : '點擊開始錄音')}
+                      ? t3('Recording... Tap to stop', '錄音中... 點擊停止', '录音中... 点击停止')
+                      : t3('Tap to start recording', '點擊開始錄音', '点击开始录音')}
                   </p>
                 </TabsContent>
 
