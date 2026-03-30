@@ -556,7 +556,7 @@ const PracticePage = () => {
               </>
             ) : (
               <>
-                {language === 'en-GB' ? 'Analyze Pronunciation' : '分析發音'}
+                {t3('Analyze Pronunciation', '分析發音', '分析发音')}
                 <ChevronRight className="h-4 w-4" />
               </>
             )}
