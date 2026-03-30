@@ -7,16 +7,15 @@ import { Switch } from "@/components/ui/switch";
 import type { LearnerSegment } from "@/types/learningData";
 import { getUserProfile, setConsentGiven, setLearnerSegment } from "@/lib/userProfileStore";
 import pipiRoom from "@/assets/pipi-mascot.png";
+import { useLanguage, type Language } from "@/contexts/LanguageContext";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useAccessibility();
+  const { language, setLanguage } = useLanguage();
   const [nickname, setNickname] = useState("探險家");
   const [soundOn, setSoundOn] = useState(true);
   const [reminderOn, setReminderOn] = useState(false);
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem("app_language") || "zh-TW";
-  });
   const [consentLearningLog, setConsentLearningLog] = useState(true);
   const [learnerSegment, setLearnerSegmentState] = useState<LearnerSegment>("general");
 
@@ -32,8 +31,7 @@ export default function SettingsPage() {
   }, []);
 
   const handleLanguageChange = (val: string) => {
-    setLanguage(val);
-    localStorage.setItem("app_language", val);
+    setLanguage(val as Language);
   };
 
   const handleLogout = () => {
@@ -41,9 +39,10 @@ export default function SettingsPage() {
     navigate("/");
   };
 
-  const languages = [
+  const languages: { value: Language; label: string }[] = [
     { value: "zh-TW", label: "繁體中文" },
     { value: "zh-CN", label: "简体中文" },
+    { value: "en-GB", label: "English" },
   ];
 
   const learnerSegments: { value: LearnerSegment; label: string }[] = [
@@ -143,7 +142,7 @@ export default function SettingsPage() {
             </div>
             <span className="flex-1 text-sm font-bold text-foreground">語言偏好</span>
             <Select value={language} onValueChange={handleLanguageChange}>
-              <SelectTrigger className="w-[120px] h-8 bg-background border-border text-xs">
+              <SelectTrigger className="w-[140px] h-8 bg-background border-border text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-card border-border z-[60]">

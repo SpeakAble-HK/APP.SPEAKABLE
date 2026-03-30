@@ -401,18 +401,23 @@ interface LanguageProviderProps {
 
 const VALID_LANGUAGES: Language[] = ["en-GB", "zh-TW", "zh-CN"];
 
+function readStoredLanguage(initialLanguage: Language): Language {
+  const pref = localStorage.getItem("preferred_language");
+  if (pref && VALID_LANGUAGES.includes(pref as Language)) return pref as Language;
+  const app = localStorage.getItem("app_language");
+  if (app && VALID_LANGUAGES.includes(app as Language)) return app as Language;
+  return initialLanguage;
+}
+
 export function LanguageProvider({ children, initialLanguage = "zh-TW" }: LanguageProviderProps) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem("preferred_language");
-    if (saved && VALID_LANGUAGES.includes(saved as Language)) {
-      return saved as Language;
-    }
-    return initialLanguage;
-  });
+  const [language, setLanguageState] = useState<Language>(() =>
+    readStoredLanguage(initialLanguage)
+  );
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem("preferred_language", lang);
+    localStorage.setItem("app_language", lang);
   };
 
   const t = (key: string): string => {
