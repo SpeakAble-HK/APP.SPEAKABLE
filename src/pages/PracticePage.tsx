@@ -300,7 +300,7 @@ const PracticePage = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
-                {language === 'en-GB' ? 'Practice Mode' : '練習模式'}
+                {t3('Practice Mode', '練習模式', '练习模式')}
                 <BookOpen className="h-6 w-6 text-primary" />
               </h1>
               <div className="flex items-center gap-4 text-sm">
