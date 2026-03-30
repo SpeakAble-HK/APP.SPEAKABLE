@@ -35,7 +35,7 @@ type PracticeStep = 'language' | 'practice' | 'feedback' | 'summary';
 
 const PracticePage = () => {
   const navigate = useNavigate();
-  const { t, language } = useLanguage();
+  const { t, t3, language } = useLanguage();
   const { user } = useAuth();
   const { stats } = useUserStats();
   const { saveResult } = usePronunciationResults();
