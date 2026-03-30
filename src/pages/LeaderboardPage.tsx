@@ -85,7 +85,7 @@ const LeaderboardPage = () => {
                       {isCurrentUser && <span className="text-xs text-primary ml-1">({isEn ? "You" : "你"})</span>}
                     </p>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{entry.lessons_completed} {isEn ? "lessons" : "課"}</span>
+                      <span>{entry.lessons_completed} {isEn ? "lessons" : isTW ? "課" : "课"}</span>
                       {entry.streak_days > 0 && (
                         <span className="flex items-center gap-0.5">
                           <Flame className="h-3 w-3 text-destructive" />
