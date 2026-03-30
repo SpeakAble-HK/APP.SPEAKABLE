@@ -386,7 +386,7 @@ const PracticePage = () => {
                     {t3('Cantonese', '粵語', '粤语')}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {language === 'en-GB' ? 'Hong Kong Cantonese' : '香港粵語'}
+                    {t3('Hong Kong Cantonese', '香港粵語', '香港粤语')}
                   </div>
                 </button>
                 <button
