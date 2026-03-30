@@ -332,7 +332,7 @@ const PracticePage = () => {
                 </div>
                 <div>
                   <CardTitle className="text-xl">
-                    {language === 'en-GB' ? "Today's Focus" : '今日主題'}
+                    {t3("Today's Focus", '今日主題', '今日主题')}
                   </CardTitle>
                   <CardDescription className="text-lg font-medium text-foreground">
                     {getTopicTitle(topic, language)}
