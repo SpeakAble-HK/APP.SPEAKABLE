@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function LandingNav() {
   const navigate = useNavigate();
+  const { t3 } = useLanguage();
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-surface-variant/30">
@@ -17,7 +19,7 @@ export function LandingNav() {
           onClick={() => navigate("/role-select")}
           className="bg-primary hover:bg-primary-dim text-on-primary font-headline font-bold text-sm px-6 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95"
         >
-          開始使用
+          {t3("Get Started", "開始使用", "开始使用")}
         </button>
       </div>
     </header>
