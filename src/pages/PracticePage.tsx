@@ -395,7 +395,7 @@ const PracticePage = () => {
                 >
                   <div className="text-2xl mb-2">🇬🇧</div>
                   <div className="font-semibold">
-                    {language === 'en-GB' ? 'English' : '英語'}
+                    {t3('English', '英語', '英语')}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {language === 'en-GB' ? 'Coming soon' : '即將推出'}
