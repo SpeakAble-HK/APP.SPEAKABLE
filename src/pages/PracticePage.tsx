@@ -577,7 +577,7 @@ const PracticePage = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-muted-foreground">
-                {language === 'en-GB' ? 'Question' : '題目'} {sessionState.currentQuestionIndex + 1} / {sessionState.totalQuestions}
+                {t3('Question', '題目', '题目')} {sessionState.currentQuestionIndex + 1} / {sessionState.totalQuestions}
               </span>
               <span className="text-sm font-medium text-primary">
                 {Math.round(progress)}%
@@ -607,7 +607,7 @@ const PracticePage = () => {
                   {currentResult.overallAccuracy}%
                 </span>
                 <span className="text-muted-foreground">
-                  {language === 'en-GB' ? 'Accuracy' : '準確度'}
+                  {t3('Accuracy', '準確度', '准确度')}
                 </span>
               </div>
             </CardContent>
@@ -618,7 +618,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Vowels' : '元音'}
+                  {t3('Vowels', '元音', '元音')}
                 </p>
                 <p className={`text-xl font-bold ${getAccuracyColor(currentResult.vowelAccuracy)}`}>
                   {currentResult.vowelAccuracy}%
@@ -628,7 +628,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Consonants' : '輔音'}
+                  {t3('Consonants', '輔音', '辅音')}
                 </p>
                 <p className={`text-xl font-bold ${getAccuracyColor(currentResult.consonantAccuracy)}`}>
                   {currentResult.consonantAccuracy}%
@@ -638,7 +638,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Tones' : '聲調'}
+                  {t3('Tones', '聲調', '声调')}
                 </p>
                 <p className={`text-xl font-bold ${getAccuracyColor(currentResult.toneAccuracy)}`}>
                   {currentResult.toneAccuracy}%
@@ -655,7 +655,7 @@ const PracticePage = () => {
               className="gap-2"
             >
               <Play className="h-4 w-4" />
-              {language === 'en-GB' ? 'Play Mine' : '播放我的'}
+              {t3('Play Mine', '播放我的', '播放我的')}
             </Button>
             <Button
               variant="outline"
@@ -663,15 +663,15 @@ const PracticePage = () => {
               className="gap-2"
             >
               <Volume2 className="h-4 w-4" />
-              {language === 'en-GB' ? 'Play Model' : '播放示範'}
+              {t3('Play Model', '播放示範', '播放示范')}
             </Button>
           </div>
 
           {/* Next Button */}
           <Button onClick={handleNextQuestion} className="w-full gap-2" size="lg">
             {sessionState.currentQuestionIndex + 1 >= sessionState.totalQuestions
-              ? (language === 'en-GB' ? 'View Summary' : '查看總結')
-              : (language === 'en-GB' ? 'Next Question' : '下一題')}
+              ? t3('View Summary', '查看總結', '查看总结')
+              : t3('Next Question', '下一題', '下一题')}
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -692,7 +692,7 @@ const PracticePage = () => {
               <Trophy className="h-10 w-10 text-primary" />
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              {language === 'en-GB' ? 'Practice Complete!' : '練習完成！'}
+              {t3('Practice Complete!', '練習完成！', '练习完成！')}
             </h1>
             <p className="text-muted-foreground">
               {language === 'en-GB' 
@@ -708,7 +708,7 @@ const PracticePage = () => {
                 {summaryStats.avgOverall}%
               </div>
               <p className="text-muted-foreground">
-                {language === 'en-GB' ? 'Overall Accuracy' : '整體準確度'}
+                {t3('Overall Accuracy', '整體準確度', '整体准确度')}
               </p>
             </CardContent>
           </Card>
@@ -718,7 +718,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Vowels' : '元音'}
+                  {t3('Vowels', '元音', '元音')}
                 </p>
                 <p className={`text-2xl font-bold ${getAccuracyColor(summaryStats.avgVowel)}`}>
                   {summaryStats.avgVowel}%
@@ -728,7 +728,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Consonants' : '輔音'}
+                  {t3('Consonants', '輔音', '辅音')}
                 </p>
                 <p className={`text-2xl font-bold ${getAccuracyColor(summaryStats.avgConsonant)}`}>
                   {summaryStats.avgConsonant}%
@@ -738,7 +738,7 @@ const PracticePage = () => {
             <Card className="card-shadow">
               <CardContent className="pt-4 pb-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en-GB' ? 'Tones' : '聲調'}
+                  {t3('Tones', '聲調', '声调')}
                 </p>
                 <p className={`text-2xl font-bold ${getAccuracyColor(summaryStats.avgTone)}`}>
                   {summaryStats.avgTone}%
@@ -751,7 +751,7 @@ const PracticePage = () => {
           <Card className="card-shadow mb-6">
             <CardHeader>
               <CardTitle className="text-lg">
-                {language === 'en-GB' ? 'Question Breakdown' : '題目明細'}
+                {t3('Question Breakdown', '題目明細', '题目明细')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -793,7 +793,7 @@ const PracticePage = () => {
             {user && (
               <Button onClick={handleSaveSummary} className="w-full gap-2" size="lg">
                 <CheckCircle className="h-4 w-4" />
-                {language === 'en-GB' ? 'Save & Return to Dashboard' : '保存並返回儀表板'}
+                {t3('Save & Return to Dashboard', '保存並返回儀表板', '保存并返回仪表板')}
               </Button>
             )}
             <Button
@@ -803,7 +803,7 @@ const PracticePage = () => {
               size="lg"
             >
               <RotateCcw className="h-4 w-4" />
-              {language === 'en-GB' ? 'Practice Again' : '再次練習'}
+              {t3('Practice Again', '再次練習', '再次练习')}
             </Button>
             {!user && (
               <Button
@@ -811,7 +811,7 @@ const PracticePage = () => {
                 variant="ghost"
                 className="w-full"
               >
-                {language === 'en-GB' ? 'Return to Dashboard' : '返回儀表板'}
+                {t3('Return to Dashboard', '返回儀表板', '返回仪表板')}
               </Button>
             )}
           </div>
