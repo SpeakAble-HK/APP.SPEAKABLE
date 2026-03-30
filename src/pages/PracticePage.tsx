@@ -398,7 +398,7 @@ const PracticePage = () => {
                     {t3('English', '英語', '英语')}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {language === 'en-GB' ? 'Coming soon' : '即將推出'}
+                    {t3('Coming soon', '即將推出', '即将推出')}
                   </div>
                 </button>
               </div>
