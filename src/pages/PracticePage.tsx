@@ -552,7 +552,7 @@ const PracticePage = () => {
             {isProcessing ? (
               <>
                 <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                {language === 'en-GB' ? 'Analyzing...' : '分析中...'}
+                {t3('Analyzing...', '分析中...', '分析中...')}
               </>
             ) : (
               <>
