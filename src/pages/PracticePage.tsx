@@ -383,7 +383,7 @@ const PracticePage = () => {
                 >
                   <div className="text-2xl mb-2">🇭🇰</div>
                   <div className="font-semibold">
-                    {language === 'en-GB' ? 'Cantonese' : '粵語'}
+                    {t3('Cantonese', '粵語', '粤语')}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {language === 'en-GB' ? 'Hong Kong Cantonese' : '香港粵語'}
