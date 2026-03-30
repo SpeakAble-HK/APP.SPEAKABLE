@@ -40,11 +40,9 @@ export function HeroSection() {
 
         {/* Headline */}
         <h1 className="font-headline font-extrabold text-[1.75rem] sm:text-4xl md:text-[2.75rem] text-on-surface leading-[1.2] mb-5 tracking-tight">
-          {t3(
-            <>Fun, Assisted<br />Cantonese Pronunciation Practice!</>,
-            <>趣味、輔助式的<br />粵語發音練習！</>,
-            <>趣味、辅助式的<br />粤语发音练习！</>
-          )}
+          {t3("Fun, Assisted", "趣味、輔助式的", "趣味、辅助式的")}
+          <br />
+          {t3("Cantonese Pronunciation Practice!", "粵語發音練習！", "粤语发音练习！")}
         </h1>
 
         <p className="text-on-surface-variant text-base sm:text-lg font-medium leading-relaxed mb-1">
