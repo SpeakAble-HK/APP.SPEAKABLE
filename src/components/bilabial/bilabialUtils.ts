@@ -1,11 +1,35 @@
 import type { PhonemeResult } from "@/hooks/usePronunciationAPI";
 import type { BilabialPhonemeKey } from "./bilabialTypes";
 
+function normalizeJyutpingInput(jp: unknown): string {
+  if (typeof jp === "string") return jp.trim().toLowerCase();
+  if (typeof jp === "number") return String(jp);
+  if (!jp) return "";
+
+  if (Array.isArray(jp)) {
+    for (const item of jp) {
+      const normalized = normalizeJyutpingInput(item);
+      if (normalized) return normalized;
+    }
+    return "";
+  }
+
+  if (typeof jp === "object") {
+    const candidate = (jp as Record<string, unknown>).phoneme
+      ?? (jp as Record<string, unknown>).predicted
+      ?? (jp as Record<string, unknown>).jyutping;
+    return normalizeJyutpingInput(candidate);
+  }
+
+  return "";
+}
+
 /** Parse Jyutping body into initial / final / tone (tone digit at end). */
-export function parseJyutping(jp: string): { initial: string; final: string; tone: string } {
-  const toneMatch = jp.match(/(\d)$/);
+export function parseJyutping(jp: unknown): { initial: string; final: string; tone: string } {
+  const normalized = normalizeJyutpingInput(jp);
+  const toneMatch = normalized.match(/(\d)$/);
   const tone = toneMatch ? toneMatch[1] : "";
-  const body = jp.replace(/\d$/, "");
+  const body = normalized.replace(/\d$/, "");
   const initials = [
     "ng",
     "gw",
