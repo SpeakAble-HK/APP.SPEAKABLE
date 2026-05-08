@@ -2,30 +2,15 @@
  * Demo audio generation pipeline for bilabial phoneme teaching.
  *
  * Flow per phoneme (/b/, /p/, /m/):
- *   1. TTS voice-clone → full instruction sentence (user's voice)
- *   2. Decode audio → detect last silence gap → clip the final word
- *   3. Cache the clipped demo blob in IndexedDB for instant replay
+ *   1. Send the stored target recording to the vc API
+ *   2. Cache the returned demo audio blob in IndexedDB for instant replay
  */
 
-import { supabase } from "@/integrations/supabase/client";
 import { getVoiceSample } from "@/hooks/useVoiceSampleStore";
-import { speakCantonese } from "./cantoneseTTS";
-import { clipLastWord, MIN_AUDIO_BYTES } from "./audioClipUtils";
+import { MIN_AUDIO_BYTES } from "./audioClipUtils";
 import type { BilabialPhonemeKey } from "./bilabialTypes";
 
-// ── Instruction sentences fed to TTS ────────────────────────────────
-const DEMO_SENTENCES: Record<BilabialPhonemeKey, string> = {
-  b: "雙唇閉緊，輕輕彈開，，爸。",
-  p: "雙唇閉緊，強力噴氣，，爬。",
-  m: "雙唇閉合，鼻震動，，唔。",
-};
-
-// Fallback words for Web Speech API when voice-clone fails
-const FALLBACK_WORDS: Record<BilabialPhonemeKey, string> = {
-  b: "爸",
-  p: "爬",
-  m: "唔",
-};
+const VC_DEMO_URL = "http://comp.naozumi.me/api/vc";
 
 
 // ── IndexedDB store for demo clips ──────────────────────────────────
@@ -84,48 +69,35 @@ export async function clearDemoClips(): Promise<void> {
   }
 }
 
-// ── Auth helper ─────────────────────────────────────────────────────
-async function getToken(): Promise<string> {
-  let { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
-    const { data, error } = await supabase.auth.signInAnonymously();
-    if (error || !data.session?.access_token) throw new Error("No session");
-    session = data.session;
-  }
-  return session.access_token;
-}
-
-// ── Step 1: Voice-clone TTS ─────────────────────────────────────────
-async function generateFullAudio(
-  text: string,
+async function generateVcDemoAudio(
+  source: BilabialPhonemeKey,
   voiceSample: Blob
-): Promise<{ audioBlob: Blob; contentType: string }> {
-  const token = await getToken();
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-clone`;
-
+): Promise<Blob> {
   const fd = new FormData();
-  fd.append("text", text);
-  fd.append("prompt_text", text);
-  fd.append("prompt_audio", voiceSample, "voice-sample.webm");
+  fd.append("target_audio", voiceSample, "voice-sample.wav");
+  fd.append("source", source);
 
-  const res = await fetch(url, {
+  const res = await fetch(VC_DEMO_URL, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
     body: fd,
   });
 
-  if (!res.ok) throw new Error(`TTS failed: ${res.status}`);
-  const data = await res.json();
-  if (!data.success || !data.audio_base64) throw new Error("No TTS audio");
+  if (!res.ok) {
+    throw new Error(`vc api failed: ${res.status}`);
+  }
 
-  const ct = data.content_type || "audio/wav";
-  const raw = atob(data.audio_base64);
-  const u8 = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) u8[i] = raw.charCodeAt(i);
-  return { audioBlob: new Blob([u8], { type: ct }), contentType: ct };
+  const contentType = (res.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+  const blob = await res.blob();
+
+  if (contentType === "application/zip") {
+    throw new Error("vc api returned a zip bundle; expected a single wav for one phoneme");
+  }
+
+  if (contentType.startsWith("audio/") || contentType === "application/octet-stream" || contentType === "") {
+    return new Blob([await blob.arrayBuffer()], { type: contentType || "audio/wav" });
+  }
+
+  throw new Error(`Unexpected vc api response: ${contentType || "unknown"}`);
 }
 
 
@@ -145,28 +117,19 @@ export async function generateDemoForPhoneme(
       return null;
     }
 
-    const sentence = DEMO_SENTENCES[key];
-    console.log(`[demoPipeline] Generating TTS for /${key}/: "${sentence}"`);
+    console.log(`[demoPipeline] Generating vc demo for /${key}/`);
 
-    // Step 1: Full TTS
-    const { audioBlob: fullAudio } = await generateFullAudio(sentence, voiceSample);
+    const audioBlob = await generateVcDemoAudio(key, voiceSample);
+    console.log(`[demoPipeline] Generated demo for /${key}/:`, audioBlob.size, "bytes");
 
-    // Step 2 & 3: Clip last word via silence detection
-    const clipped = await clipLastWord(fullAudio);
-    console.log(`[demoPipeline] Clipped demo for /${key}/:`, clipped.size, "bytes");
-
-    // Store full instruction audio
-    await saveDemoClip(`full_${key}`, fullAudio);
-
-    // Only store clipped word if it has real audio data (not just WAV header)
-    if (clipped.size >= MIN_AUDIO_BYTES) {
-      await saveDemoClip(`word_${key}`, clipped);
-    } else {
-      console.warn(`[demoPipeline] Clipped audio too small (${clipped.size} bytes) for /${key}/, storing full audio as word fallback`);
-      await saveDemoClip(`word_${key}`, fullAudio);
+    if (audioBlob.size >= MIN_AUDIO_BYTES) {
+      await saveDemoClip(`full_${key}`, audioBlob);
+      await saveDemoClip(`word_${key}`, audioBlob);
+      return audioBlob;
     }
 
-    return clipped.size >= MIN_AUDIO_BYTES ? clipped : fullAudio;
+    console.warn(`[demoPipeline] vc demo too small (${audioBlob.size} bytes) for /${key}/`);
+    return null;
   } catch (err) {
     console.error(`[demoPipeline] Failed for /${key}/:`, err);
     return null;
@@ -210,11 +173,9 @@ export async function playDemo(
     blob = await getDemoClip(cacheKey);
   }
 
-  // If still no usable audio, fallback to Web Speech API
+  // If still no usable audio, stop quietly; this demo path no longer uses TTS.
   if (!blob || blob.size < MIN_AUDIO_BYTES) {
-    console.warn(`[demoPipeline] No usable demo for /${key}/ (${variant}), falling back to Web Speech`);
-    const word = variant === "word" ? FALLBACK_WORDS[key] : DEMO_SENTENCES[key];
-    await speakCantonese(word);
+    console.warn(`[demoPipeline] No usable demo for /${key}/ (${variant})`);
     return;
   }
 
