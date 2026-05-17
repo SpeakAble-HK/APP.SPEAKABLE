@@ -1,0 +1,152 @@
+/* ════════════════════════════════════════════════════════════════
+   Cross-browser compatibility layer — SpeakAble HK
+   Complements index.css (does not duplicate rules already defined there).
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Tap / touch baseline ─────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  /* Kill the grey flash on tap in iOS Safari / Android Chrome */
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  /* Prevent font-size inflation when rotating to landscape on iOS */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  /* Prevent pull-to-refresh on mobile (already overscrolls to blank) */
+  overscroll-behavior-y: contain;
+}
+
+/* ── Buttons & interactive elements ──────────────────────────── */
+
+button,
+a,
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+label {
+  /* Removes 300 ms double-tap delay + prevents accidental zoom */
+  touch-action: manipulation;
+}
+
+/* ── Form element resets ──────────────────────────────────────── */
+
+input,
+select,
+textarea {
+  /* Remove iOS Safari default pill / inset-shadow styling */
+  -webkit-appearance: none;
+  appearance: none;
+
+  /* Font must be ≥ 16 px on inputs to prevent iOS Safari from
+     auto-zooming the viewport on focus. We use max() so larger
+     brand type-scale values are never shrunk. */
+  font-size: max(16px, 1em);
+  font-family: inherit;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  /* iOS date pickers need an explicit minimum height */
+  min-height: 44px;
+}
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ── Images ───────────────────────────────────────────────────── */
+
+img,
+video,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Safe-area insets (notch / home-bar devices) ─────────────── */
+
+/* Already applied on .bottom-tab-bar via env() in index.css.
+   This adds a global fallback for any fixed-bottom elements
+   not using that class. */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ── Viewport-height utilities (iOS Safari 100vh fix) ────────── */
+/* JS in main.tsx sets --vh = window.innerHeight * 0.01 on load
+   and on resize / orientationchange. */
+
+.min-h-screen-mobile {
+  min-height: 100vh; /* non-Safari fallback */
+  min-height: calc(var(--vh, 1vh) * 100);
+}
+
+.h-screen-mobile {
+  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
+}
+
+/* ── Scrollbars — only style on pointer-hover devices ────────── */
+
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(26, 37, 65, 0.15); /* --ink at 15% */
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(26, 37, 65, 0.28);
+  }
+}
+
+/* ── Hover states — only fire on devices that support hover ───── */
+/* Cards and buttons in Tailwind already use hover: prefix, but
+   the media query below guards any raw CSS hover rules. */
+
+@media (hover: none) {
+  /* Prevent stuck :hover styles on touch screens */
+  .hover\:scale-\[1\.02\]:hover,
+  .hover\:-translate-y-1:hover {
+    transform: none;
+  }
+}
+
+/* ── Focus ring — Safari needs outline, not box-shadow ────────── */
+
+:focus-visible {
+  outline: 2px solid #1F73A8; /* sky-600 */
+  outline-offset: 2px;
+}
+
+/* ── Firefox number input spinners ───────────────────────────── */
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

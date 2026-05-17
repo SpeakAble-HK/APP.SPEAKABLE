@@ -1,0 +1,161 @@
+{
+  "nav": {
+    "forSchools": "For schools",
+    "forProfessionals": "For professionals",
+    "forFamilies": "For families",
+    "pilot": "Pilot",
+    "login": "Log in",
+    "bookDemo": "Book demo",
+    "langLabel": "English",
+    "changeLang": "Change language — current: {{lang}}",
+    "practice": "Practice",
+    "nest": "Nest",
+    "progress": "Progress",
+    "profile": "Me"
+  },
+  "hero": {
+    "badge": "For Hong Kong Cantonese",
+    "title": "Practice Cantonese every day — with the voice you already have.",
+    "subtitle": "An AI assistant tool for daily speech practice at home. For SEN students, families, and the schools and NGOs supporting them.",
+    "ctaDemo": "Book a school demo",
+    "ctaFamilies": "For families",
+    "pilotNote": "Summer 2026 pilot · invite-only · applications open",
+    "pipiAlt": "PiPi the parrot mascot, listening and ready to practise"
+  },
+  "trust": {
+    "label": "Partnering with"
+  },
+  "schools": {
+    "eyebrow": "For schools & NGOs",
+    "title": "Daily practice within reach of every learner you support.",
+    "subtitle": "AI voice cloning makes 1-to-1 Cantonese practice affordable at scale. Track tone accuracy, attempt history and progress across your entire SEN programme.",
+    "costTitle": "Cost per learner",
+    "costDesc": "Daily practice costs less than one weekly session. Scales with your programme.",
+    "trackingTitle": "Progress tracking",
+    "trackingDesc": "See tone accuracy, streak data and attempt history. Export reports for coordinators.",
+    "privateTitle": "Safe and private",
+    "privateDesc": "Voice data on HK servers. PDPO-aligned. Built for schools with minors."
+  },
+  "professionals": {
+    "eyebrow": "For teachers & support staff",
+    "title": "A practice partner between your sessions.",
+    "subtitle": "Assign exercises, track tone accuracy, reclaim in-person time for the work AI can't do. Fits your workflow.",
+    "assignTitle": "Assign and track",
+    "assignDesc": "Set exercises for learners or groups. See who's practising, who's stuck, where to focus next.",
+    "reportsTitle": "Progress reports",
+    "reportsDesc": "Weekly summaries show accuracy trends, streak momentum, areas needing attention. Share with families instantly.",
+    "flowTitle": "Fits your flow",
+    "flowDesc": "Works alongside your approach. Complements the work of teachers and speech professionals — doesn't replace."
+  },
+  "families": {
+    "eyebrow": "For families",
+    "title": "Practice at home — in your own voice.",
+    "subtitle": "Daily Cantonese exercises shaped around your child's voice and pace. Recommended by their school's SEN team. PiPi guides them with patience and warmth.",
+    "cta": "Learn more for families",
+    "note": "If your school uses SpeakAble HK, your family can join.",
+    "pipiAlt": "PiPi the parrot at home, ready to listen"
+  },
+  "footer": {
+    "title": "Ready to bring SpeakAble HK to your school?",
+    "subtitle": "Applications open for summer 2026 pilot. Partner with us to make daily practice possible.",
+    "cta": "Apply for the pilot",
+    "note": "Pilot runs June–August 2026 · invite-only · limited spaces",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "contact": "info@speakable.hk"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
+  "roleSelect": {
+    "title": "Welcome to SpeakAble HK",
+    "subtitle": "Choose your role to start practicing Cantonese.",
+    "selectRole": "Select role",
+    "student": {
+      "title": "Students",
+      "desc": "I'm a student who wants to practice Cantonese daily."
+    },
+    "professional": {
+      "title": "Professionals & Admins",
+      "desc": "I'm a teacher, speech professional, or school/org admin managing students and programs."
+    },
+    "public": {
+      "title": "General Public",
+      "desc": "I want to learn about speech support or try basic AI features.",
+      "button": "Explore info"
+    }
+  },
+  "explorer": {
+    "dailyGoal": "Today's goal: complete {{goal}} sessions",
+    "completed": "Completed",
+    "pipiTip": "PiPi says: try practising {{category}} today!",
+    "start": "Start",
+    "locked": "Complete {{requirement}} to unlock",
+    "comingSoon": "Coming soon",
+    "categories": {
+      "bilabial": "Bilabial",
+      "alveolar": "Alveolar",
+      "nasal": "Nasal",
+      "velar": "Velar"
+    },
+    "difficulty": {
+      "basic": "Basic",
+      "intermediate": "Intermediate",
+      "challenge": "Challenge"
+    }
+  },
+  "practice": {
+    "back": "Back",
+    "submit": "Submit",
+    "next": "Next question",
+    "goodJob": "Great job!",
+    "tryAgain": "Try again",
+    "completed": "Exercise complete",
+    "score": "Score",
+    "accuracy": "Accuracy",
+    "earnedXP": "Earned {{amount}} XP",
+    "earnedCoins": "Earned {{amount}} coins",
+    "backToHome": "Back to practice",
+    "comingSoon": "Coming soon",
+    "comingSoonDesc": "This exercise is on its way — check back soon!"
+  },
+  "pipi": {
+    "hunger": "Hunger",
+    "level": "Level",
+    "health": "Health",
+    "tabs": {
+      "decorations": "Decorations",
+      "furniture": "Furniture",
+      "accessories": "Accessories",
+      "food": "Food"
+    },
+    "buy": "Buy",
+    "owned": "Owned",
+    "locked": "Locked"
+  },
+  "settings": {
+    "title": "Settings",
+    "editProfile": "Edit profile",
+    "rerecord": "Re-record voice",
+    "lightMode": "Light mode",
+    "language": "Language",
+    "notifications": "Reminders",
+    "soundEffects": "Sound effects",
+    "learnerType": "Learner type",
+    "analytics": "Save learning analytics",
+    "analyticsDesc": "When off, no analytics are saved on this device (recommended: your recordings are never uploaded).",
+    "logout": "Log out"
+  },
+  "progress": {
+    "title": "Progress",
+    "streak": "Day streak",
+    "days": "days",
+    "totalXP": "Total XP",
+    "totalCoins": "Total coins",
+    "todayGoal": "Today's goal",
+    "completedExercises": "Exercises done",
+    "recentActivity": "Recent activity",
+    "noActivity": "No exercises completed yet — go practise!",
+    "keepItUp": "Keep it up!"
+  }
+}

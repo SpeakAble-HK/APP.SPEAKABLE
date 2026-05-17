@@ -14,29 +14,29 @@ export function GlobalHeader() {
 
   if (isMapPage) {
     return (
-      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-3xl rounded-b-[3rem] shadow-header">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b-[0.5px] border-mist">
         <div className="flex items-center justify-between px-6 sm:px-8 py-4">
           <button
+            type="button"
             onClick={() => navigate("/")}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity active:scale-95"
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity active:scale-95"
             aria-label="返回首頁"
           >
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
+            <div className="w-9 h-9 rounded-md overflow-hidden">
               <img src={logo} alt="" className="w-full h-full object-cover" />
             </div>
-            <span className="font-headline font-semibold text-primary text-lg tracking-tight">
-              SpeakAble HK
-            </span>
+            <span className="font-display font-medium text-ink text-[17px]">SpeakAble HK</span>
           </button>
-          <div className="bg-surface-container-low px-4 py-1.5 rounded-full flex items-center gap-3 shadow-sm">
-            <div className="flex items-center gap-1.5">
-              <MaterialIcon icon="star" filled className="text-amber-500 text-lg" />
-              <span className="font-headline font-bold text-on-surface text-sm">{xp} XP</span>
+
+          {/* XP + Coins stat row */}
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 bg-[#FFF6E0] border border-[#FFE9B5] px-3 py-1.5 rounded-pill">
+              <MaterialIcon icon="star" filled className="text-sunshine text-base" />
+              <span className="font-display font-medium text-ink text-small tabular-nums">{xp} XP</span>
             </div>
-            <div className="w-px h-4 bg-outline-variant/30" />
-            <div className="flex items-center gap-1.5">
-              <MaterialIcon icon="savings" filled className="text-yellow-500 text-lg" />
-              <span className="font-headline font-bold text-on-surface text-sm">{coins}</span>
+            <div className="inline-flex items-center gap-1.5 bg-[#FFE8E0] border border-[#FFD4C5] px-3 py-1.5 rounded-pill">
+              <MaterialIcon icon="savings" filled className="text-coral text-base" />
+              <span className="font-display font-medium text-ink text-small tabular-nums">{coins}</span>
             </div>
           </div>
         </div>
@@ -45,37 +45,38 @@ export function GlobalHeader() {
   }
 
   return (
-    <header className="fixed top-0 w-full z-50 h-14 bg-white/70 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,180,216,0.05)]">
+    <header className="fixed top-0 w-full z-50 h-14 bg-white/90 backdrop-blur border-b-[0.5px] border-mist">
       <div className="flex items-center justify-between px-4 sm:px-6 h-full">
         <div className="flex items-center gap-2">
           {showBack && (
             <button
+              type="button"
               onClick={() => navigate(-1)}
-              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-cloud transition-colors"
               aria-label="返回上一頁"
             >
-              <MaterialIcon icon="arrow_back" className="text-on-surface" />
+              <MaterialIcon icon="arrow_back" className="text-ink" />
             </button>
           )}
           <button
+            type="button"
             onClick={() => navigate("/")}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity active:scale-95"
             aria-label="返回首頁"
           >
-            <img src={logo} alt="" className="h-7 w-7 object-contain" />
-            <span className="font-headline font-bold text-primary text-base tracking-tight">
-              SpeakAble HK
-            </span>
+            <img src={logo} alt="" className="h-7 w-7 object-contain rounded-md" />
+            <span className="font-display font-medium text-ink text-[16px]">SpeakAble HK</span>
           </button>
         </div>
+
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-tertiary-container/60 px-3 py-1 rounded-full">
-            <MaterialIcon icon="paid" filled className="text-tertiary text-sm" />
-            <span className="font-label font-bold text-on-tertiary-container text-sm">{coins}</span>
+          <div className="inline-flex items-center gap-1 bg-[#FFE8E0] px-3 py-1 rounded-pill">
+            <MaterialIcon icon="paid" filled className="text-coral text-sm" />
+            <span className="font-display font-medium text-ink text-small tabular-nums">{coins}</span>
           </div>
-          <div className="flex items-center gap-1 bg-primary-container/40 px-3 py-1 rounded-full">
-            <MaterialIcon icon="star" filled className="text-primary text-sm" />
-            <span className="font-label font-bold text-on-primary-container text-sm">{xp}</span>
+          <div className="inline-flex items-center gap-1 bg-[#FFF6E0] px-3 py-1 rounded-pill">
+            <MaterialIcon icon="star" filled className="text-sunshine text-sm" />
+            <span className="font-display font-medium text-ink text-small tabular-nums">{xp}</span>
           </div>
         </div>
       </div>

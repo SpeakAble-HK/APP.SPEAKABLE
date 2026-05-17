@@ -19,11 +19,40 @@ export default {
     },
     extend: {
       fontFamily: {
-        headline: ['"Plus Jakarta Sans"', "sans-serif"],
-        body: ['"Be Vietnam Pro"', "sans-serif"],
-        label: ['"Plus Jakarta Sans"', "sans-serif"],
+        display: ["Nunito", "sans-serif"],
+        body: ["Inter", "Noto Sans HK", "sans-serif"],
+        chinese: ["Noto Sans HK", "sans-serif"],
+        sans: ["Inter", "Noto Sans HK", "sans-serif"],
+        headline: ["Nunito", "sans-serif"],
+        label: ["Nunito", "sans-serif"],
+      },
+      fontSize: {
+        h1: ["48px", { lineHeight: "1.2", letterSpacing: "-0.01em", fontWeight: "500" }],
+        h2: ["32px", { lineHeight: "1.3", fontWeight: "500" }],
+        h3: ["22px", { lineHeight: "1.4", fontWeight: "500" }],
+        body: ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+        small: ["13px", { lineHeight: "1.6", fontWeight: "400" }],
       },
       colors: {
+        sky: {
+          DEFAULT: "#4FB4E8",
+          50: "#EBF6FD",
+          100: "#C5E5F7",
+          200: "#94D1F0",
+          400: "#4FB4E8",
+          600: "#1F73A8",
+          800: "#0E3A57",
+          900: "#072438",
+        },
+        sunshine: "#FFCB4D",
+        coral: "#FF8A5C",
+        mint: "#6FD4B3",
+        ink: "#1A2541",
+        slate: "#5A6378",
+        mist: "#E2E8F0",
+        cloud: "#F6F8FB",
+        warning: "#F5B642",
+        info: "#4FB4E8",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -149,18 +178,37 @@ export default {
 
       borderRadius: {
         DEFAULT: "1rem",
-        sm: "calc(var(--radius) - 4px)",
-        md: "calc(var(--radius) - 2px)",
-        lg: "2rem",
+        sm: "8px",
+        md: "12px",
+        lg: "16px",
+        pill: "99px",
         xl: "3rem",
         full: "9999px",
       },
 
       boxShadow: {
+        sm: "0 1px 2px rgba(26,37,65,0.06)",
+        md: "0 4px 16px rgba(26,37,65,0.08)",
         card: "0 10px 40px rgba(0,0,0,0.04)",
         "card-hover": "0 8px 30px -8px rgba(0,100,121,0.15)",
         nav: "0 -10px 40px rgba(0,0,0,0.04)",
         header: "0 20px 50px rgba(0,180,216,0.05)",
+      },
+
+      screens: {
+        xs: "375px", // small phones (iPhone SE)
+        // sm/md/lg/xl/2xl use Tailwind defaults (640/768/1024/1280/1536)
+      },
+
+      minHeight: {
+        tap: "44px",
+        "screen-mobile": "calc(var(--vh, 1vh) * 100)",
+      },
+      minWidth: {
+        tap: "44px",
+      },
+      height: {
+        "screen-mobile": "calc(var(--vh, 1vh) * 100)",
       },
 
       keyframes: {

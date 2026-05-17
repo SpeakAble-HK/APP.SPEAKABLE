@@ -1,0 +1,20 @@
+{
+  "name": "SpeakAble HK",
+  "short_name": "SpeakAble",
+  "description": "Practice Cantonese every day with AI — for SEN students, families, and supporting schools.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F6F8FB",
+  "theme_color": "#4FB4E8",
+  "lang": "zh-HK",
+  "icons": [
+    {
+      "src": "/assets/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "health", "productivity"]
+}

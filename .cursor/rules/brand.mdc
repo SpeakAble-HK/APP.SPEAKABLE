@@ -1,0 +1,197 @@
+---
+description: SpeakAble HK brand and UX rules — apply to all design, UI, copy and component work
+alwaysApply: true
+---
+
+# SpeakAble HK · brand and UX rules
+
+You are working on SpeakAble HK with a UX/UI designer. The product is an AI-powered assistant tool for everyday Cantonese speech practice. It uses voice cloning so SEN learners and adults can practise speaking at home, using their own voice as the reference. The team is preparing for a summer 2026 invite-only pilot programme (June–August).
+
+**Full brand kit:** see `@docs/brand-kit.md` — always reference it for design decisions. The summary below covers the laws; the markdown covers the detail.
+
+---
+
+## Project stack (this codebase)
+
+- **Build tool:** Vite
+- **Framework:** React 18 + TypeScript (strict mode)
+- **Styling:** Tailwind CSS (extend `tailwind.config.ts` for brand tokens)
+- **Component base:** shadcn/ui (`components.json` is set up; customise primitives via the `cn()` utility in `src/lib/utils.ts`)
+- **Backend:** Supabase (auth, database, storage) — relevant for invite codes and pilot user accounts
+- **Routing:** React Router (check `package.json` for version)
+- **Package manager:** Bun
+- **Origin:** Lovable-generated (`.lovable/` folder present)
+
+When generating code:
+- Components in `src/components/` (shadcn primitives in `src/components/ui/`)
+- Pages/routes in `src/pages/` or `src/routes/` (check existing convention)
+- Hooks in `src/hooks/`
+- Supabase client in `src/lib/supabase.ts` or similar
+- Never assume Next.js features — no `app/` directory, no server components, no `next/font`, no `next/image`
+- For fonts, use `@fontsource/*` packages and import in `src/main.tsx`
+
+---
+
+## Two surfaces
+
+| Surface | URL | Mode | Audience |
+|---|---|---|---|
+| Public site | `speakable.hk` | Logged-out, marketing | Outsiders, prospective schools, NGOs, parents |
+| Private app | `speakable.naozumi.[domain]` | Logged-in, web app | Pilot participants, internal testers |
+
+At launch the pilot is **invite-only** (summer 2026). No public self-serve sign-up. Demo bookings only on the public site. Pilot users get a private URL + invite code, validated via Supabase.
+
+If unclear whether a feature belongs on the public site or the private app, ask before writing code.
+
+---
+
+## Audience hierarchy (B2B-first)
+
+Default reader for `speakable.hk` is **Tier 1**, not end-learners.
+
+1. **Tier 1 · Schools, NGOs, hospitals** — they sign contracts. Lead with reach, cost per learner, pilot results.
+2. **Tier 2 · Teachers, learning-support staff** — they recommend us. Lead with workflow fit.
+3. **Tier 3 · SEN students, adults, families** — they practise. Lead with warmth and PiPi. Lives at `/for-families`.
+
+---
+
+## The vocabulary law (non-negotiable)
+
+This is not a medical product. We are **an assistant tool**, not clinical software. Never use the left column. Always use the right.
+
+| Don't use | Use instead |
+|---|---|
+| clinical-grade, clinical | everyday, at-home, daily |
+| evidence-based, validated | designed for, built for, made for |
+| therapy, treatment | practice, exercises, sessions |
+| therapist, clinician | teacher, support staff |
+| patient, case | learner, user, child |
+| communication disorder | speech needs, speaking confidence |
+| diagnosis, assessment | progress tracking, attempt history |
+| HKSAR-recognised, accredited | made in Hong Kong, for Hong Kong Cantonese |
+| platform | assistant tool, web app, practice helper |
+
+If asked to write copy that includes any retired term, refuse it and suggest the replacement. This rule applies even if the user requests the retired term directly.
+
+---
+
+## Mascot · PiPi 皮皮
+
+PiPi is the parrot from the existing logo. Use rules:
+
+- **Appears on:** `/for-families` and inside the web app (practice screens, celebrations, tips)
+- **Cameo only on:** the public homepage (small, near the brand mark)
+- **Never appears in:** error states, settings pages, professional/institution pages, admin views
+- **Never:** sad, scolding, or paired with medical props
+
+---
+
+## Color tokens (extend `tailwind.config.ts` with these)
+
+Always use these exact hex values. No improvising.
+
+```ts
+// tailwind.config.ts — theme.extend.colors
+{
+  sky: {
+    DEFAULT: '#4FB4E8',
+    50: '#EBF6FD',
+    100: '#C5E5F7',
+    200: '#94D1F0',
+    400: '#4FB4E8',
+    600: '#1F73A8',
+    800: '#0E3A57',
+    900: '#072438',
+  },
+  sunshine: '#FFCB4D',
+  coral:    '#FF8A5C',
+  mint:     '#6FD4B3',
+  ink:      '#1A2541',
+  slate:    '#5A6378',
+  mist:     '#E2E8F0',
+  cloud:    '#F6F8FB',
+  success:  '#34B475',
+  warning:  '#F5B642',
+  error:    '#E85D5D',
+}
+```
+
+Use as `bg-sky-400`, `text-ink`, `border-mist`, etc.
+
+**Red is for technical errors only.** A mispronunciation uses warning amber with kind copy. Never tell a struggling speaker they are red.
+
+---
+
+## Typography
+
+- **Display:** Nunito (weights 400/500 only — never 600 or 700)
+- **Body:** Inter (weights 400/500 only)
+- **Traditional Chinese:** Noto Sans HK
+
+Install via fontsource: `bun add @fontsource/nunito @fontsource/inter @fontsource-variable/noto-sans-hk` then import in `src/main.tsx`.
+
+Type scale (extend Tailwind's `fontSize`): H1 48px / H2 32px / H3 22px / Body 16px / Small 13px. Line-height 1.6 (English), 1.7 (Chinese).
+
+**Sentence case only.** Never Title Case, never ALL CAPS — including buttons, badges and headings.
+
+---
+
+## UI tokens
+
+```ts
+// tailwind.config.ts — theme.extend.borderRadius
+{
+  sm: '8px',     // inputs
+  md: '12px',    // cards
+  lg: '16px',    // panels
+  pill: '99px',  // buttons, badges
+}
+```
+
+Buttons are pill-shaped (`rounded-pill`). Cards are 16px radius (`rounded-lg`) with 0.5px Mist border. No drop shadows except subtle elevation (`shadow-[0_1px_2px_rgba(26,37,65,0.06)]`).
+
+Minimum tap target: 44 × 44px. Focus ring: 2px Sky 600.
+
+---
+
+## shadcn/ui guidance
+
+The base shadcn primitives are installed. Customise them — don't fight them:
+
+- **Button:** override default variant in `src/components/ui/button.tsx` to use pill radius, brand colors, sentence case
+- **Card:** already close to brand; just verify radius and border match
+- **Input:** add Sky 600 focus ring
+- **Dialog/Sheet:** brand-friendly already; add Nunito to titles
+
+Never use shadcn's default neutral palette where brand colors should go. The shadcn `--primary` CSS variable should map to Sky.
+
+---
+
+## Accessibility (non-negotiable for our audience)
+
+- WCAG 2.2 AA minimum, AAA target on practice screens
+- All semantic colors paired with icons — never color alone
+- 44 × 44px tap targets
+- `prefers-reduced-motion` respected; no autoplay audio
+- Visible 2px focus rings on Sky 600
+- Bilingual EN/繁中 by default
+
+---
+
+## When generating copy
+
+- Two languages from day one: English + Traditional Chinese (HK Cantonese vernacular when natural — 嘅, 喺, 啲)
+- Tone shifts by surface: institutional pages calm and confident; family pages warm; in-app encouraging and specific
+- Specific praise, not generic. "Your tone shape on 媽 was bang on" beats "Good job!"
+- No exclamation marks in institutional copy. Limit to one per family page.
+
+---
+
+## When the user says "design a [page/component]"
+
+1. Confirm which surface — public site or web app — before writing code
+2. Confirm the audience tier if it's a public site page
+3. Reference `@docs/brand-kit.md` if details are needed
+4. Output React + TypeScript + Tailwind (using existing shadcn primitives where possible)
+5. Include both languages in copy from the start
+6. End with a note on which brand-kit sections informed the design, so the designer can audit

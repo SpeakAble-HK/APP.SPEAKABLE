@@ -10,6 +10,7 @@ import { STLayout } from "./components/STLayout";
 import { lazy, Suspense } from "react";
 
 import Index from "./pages/Index";
+import Home from "./pages/Home";
 import RoleSelectionPage from "./pages/RoleSelectionPage";
 import ExplorerOnboardingPage from "./pages/ExplorerOnboardingPage";
 import ExplorerDashboardPage from "./pages/ExplorerDashboardPage";
@@ -22,6 +23,7 @@ import STAccountsPage from "./pages/STAccountsPage";
 import STSettingsPage from "./pages/STSettingsPage";
 import PiPiPage from "./pages/PiPiPage";
 import SettingsPage from "./pages/SettingsPage";
+import ProgressPage from "./pages/ProgressPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import SpeechTherapyInfoPage from "./pages/SpeechTherapyInfoPage";
 import AboutSpeechTherapyPage from "./pages/AboutSpeechTherapyPage";
@@ -30,6 +32,7 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 
 const AdventureStartPage = lazy(() => import("./pages/AdventureStartPage"));
+const ExercisePage = lazy(() => import("./pages/ExercisePage"));
 const SemanticIslandPage = lazy(() => import("./pages/SemanticIslandPage"));
 const RedFlagsPage = lazy(() => import("./pages/RedFlagsPage"));
 const LazySoundPage = lazy(() => import("./pages/LazySoundPage"));
@@ -55,7 +58,8 @@ const App = () => (
             <Suspense fallback={<LazyFallback />}>
               <Routes>
                 {/* Standalone pages (no bottom nav) */}
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/legacy-home" element={<Index />} />
                 <Route path="/role-select" element={<RoleSelectionPage />} />
                 <Route path="/explorer/onboarding/*" element={<ExplorerOnboardingPage />} />
                 <Route path="/adventure-start" element={<AdventureStartPage />} />
@@ -73,6 +77,8 @@ const App = () => (
                 {/* Explorer pages with learner bottom nav */}
                 <Route element={<AppLayout />}>
                   <Route path="/explorer" element={<ExplorerDashboardPage />} />
+                  <Route path="/practice/:exerciseId" element={<ExercisePage />} />
+                  <Route path="/progress" element={<ProgressPage />} />
                   <Route path="/echo-speech" element={<EchoSpeechPage />} />
                   <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
                   <Route path="/speech-quest" element={<SpeechQuestPage />} />

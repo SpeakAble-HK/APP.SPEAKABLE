@@ -1,0 +1,161 @@
+{
+  "nav": {
+    "forSchools": "學校及機構",
+    "forProfessionals": "專業人員",
+    "forFamilies": "家庭用戶",
+    "pilot": "先導計劃",
+    "login": "登入",
+    "bookDemo": "預約示範",
+    "langLabel": "繁體中文",
+    "changeLang": "更改語言 — 目前：{{lang}}",
+    "practice": "練習",
+    "nest": "小窩",
+    "progress": "記錄",
+    "profile": "我的"
+  },
+  "hero": {
+    "badge": "專為香港廣東話而設",
+    "title": "每日練習廣東話 — 用你本身嘅聲音。",
+    "subtitle": "在家每日練習廣東話的 AI 助手工具。專為有特殊教育需要（SEN）的學生、家庭，以及支持他們的學校和非政府組織而設。用自己的聲音，慢慢練。",
+    "ctaDemo": "預約學校示範",
+    "ctaFamilies": "家庭用戶",
+    "pilotNote": "2026 年暑期先導計劃 · 只限邀請 · 接受申請中",
+    "pipiAlt": "吉祥物皮皮（皮皮），一隻正在聆聽、準備好練習的鸚鵡"
+  },
+  "trust": {
+    "label": "合作夥伴"
+  },
+  "schools": {
+    "eyebrow": "學校及非政府組織",
+    "title": "每個學習者都可以每日練習。",
+    "subtitle": "AI 聲音複製令一對一廣東話練習能夠大規模負擔。在一個儀表板追蹤你整個 SEN 計劃的聲調準確度、練習記錄和進度。",
+    "costTitle": "每名學習者成本",
+    "costDesc": "每日練習的成本低於一次每週專業課程。隨你的計劃規模擴展。",
+    "trackingTitle": "進度追蹤",
+    "trackingDesc": "看到每個學生的聲調準確度、連續練習日數、練習記錄。為統籌員和家長匯出報告。",
+    "privateTitle": "安全和私隱",
+    "privateDesc": "語音數據留在香港伺服器。符合個人資料私隱條例。專為有未成年人的學校而設。"
+  },
+  "professionals": {
+    "eyebrow": "教師及支援人員",
+    "title": "你課堂之間的練習夥伴。",
+    "subtitle": "指派練習、追蹤聲調準確度、將面對面時間留給 AI 做不到的事。配合你現有的工作流程。",
+    "assignTitle": "指派和追蹤",
+    "assignDesc": "為個別學習者或小組設定練習。看誰在練習、誰遇到困難、下一課應該專注在哪裡。",
+    "reportsTitle": "進度報告",
+    "reportsDesc": "每週摘要顯示聲調準確度趨勢、連續練習動力、需要關注的地方。立刻和家長分享。",
+    "flowTitle": "配合你的流程",
+    "flowDesc": "配合你現有的方法。補充言語專業人員的工作 — 不是取代。"
+  },
+  "families": {
+    "eyebrow": "家庭用戶",
+    "title": "喺屋企練習 — 用自己嘅聲音。",
+    "subtitle": "根據你小朋友的聲音和步調設計的每日廣東話練習。由他們學校的 SEN 團隊推薦。皮皮在這裡聆聽、慶祝小小的進步，以耐心和溫暖引導他們完成每個練習。",
+    "cta": "了解更多家庭資訊",
+    "note": "如果你的學校使用 SpeakAble HK，你的家庭可以加入練習計劃。",
+    "pipiAlt": "皮皮在家，準備好聆聽"
+  },
+  "footer": {
+    "title": "準備好將 SpeakAble HK 帶入你的學校？",
+    "subtitle": "我們接受 2026 年暑期先導計劃的申請。和我們合作，令每個你照顧的學習者都可以每日練習。",
+    "cta": "申請先導計劃",
+    "note": "先導計劃 2026 年 6 月至 8 月 · 只限邀請 · 名額有限",
+    "privacy": "私隱政策",
+    "terms": "服務條款",
+    "contact": "info@speakable.hk"
+  },
+  "a11y": {
+    "skipToContent": "跳至內容"
+  },
+  "roleSelect": {
+    "title": "歡迎使用 SpeakAble HK",
+    "subtitle": "選擇你的身份，開始練習廣東話。",
+    "selectRole": "選擇身份",
+    "student": {
+      "title": "學生",
+      "desc": "我係學生，想要每日練習廣東話。"
+    },
+    "professional": {
+      "title": "專業人員及管理員",
+      "desc": "我係教師、言語專業人員或學校機構管理員，需要管理學生進度和計劃。"
+    },
+    "public": {
+      "title": "一般市民",
+      "desc": "我想了解言語支援資訊，或試用基本 AI 功能。",
+      "button": "探索資訊"
+    }
+  },
+  "explorer": {
+    "dailyGoal": "今日目標：完成 {{goal}} 次練習",
+    "completed": "已完成",
+    "pipiTip": "皮皮話你知：試下練「{{category}}」啦！",
+    "start": "開始",
+    "locked": "完成「{{requirement}}」後解鎖",
+    "comingSoon": "即將推出",
+    "categories": {
+      "bilabial": "雙唇音",
+      "alveolar": "齒齦音",
+      "nasal": "鼻音",
+      "velar": "軟顎音"
+    },
+    "difficulty": {
+      "basic": "基礎",
+      "intermediate": "進階",
+      "challenge": "挑戰"
+    }
+  },
+  "practice": {
+    "back": "返回",
+    "submit": "提交",
+    "next": "下一題",
+    "goodJob": "做得好！",
+    "tryAgain": "再試一次",
+    "completed": "完成練習",
+    "score": "分數",
+    "accuracy": "準確度",
+    "earnedXP": "獲得 {{amount}} XP",
+    "earnedCoins": "獲得 {{amount}} 金幣",
+    "backToHome": "返回練習",
+    "comingSoon": "即將推出",
+    "comingSoonDesc": "呢個練習即將上線，敬請期待！"
+  },
+  "pipi": {
+    "hunger": "飽食度",
+    "level": "等級",
+    "health": "健康",
+    "tabs": {
+      "decorations": "裝飾",
+      "furniture": "家居",
+      "accessories": "配件",
+      "food": "食物"
+    },
+    "buy": "購買",
+    "owned": "已擁有",
+    "locked": "鎖定"
+  },
+  "settings": {
+    "title": "設定",
+    "editProfile": "編輯個人資料",
+    "rerecord": "重新錄音",
+    "lightMode": "淺色模式",
+    "language": "語言偏好",
+    "notifications": "提醒設定",
+    "soundEffects": "音效開關",
+    "learnerType": "學習者類型",
+    "analytics": "儲存學習分析紀錄",
+    "analyticsDesc": "關閉後只在本裝置不儲存學習分析紀錄（建議保持：不上傳錄音）。",
+    "logout": "登出"
+  },
+  "progress": {
+    "title": "練習記錄",
+    "streak": "連續練習",
+    "days": "日",
+    "totalXP": "累積 XP",
+    "totalCoins": "累積金幣",
+    "todayGoal": "今日目標",
+    "completedExercises": "完成練習",
+    "recentActivity": "最近練習",
+    "noActivity": "尚未完成任何練習，快去練習啦！",
+    "keepItUp": "繼續加油！"
+  }
+}

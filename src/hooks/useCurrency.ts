@@ -49,24 +49,8 @@ export function useCurrency() {
 
   useEffect(() => {
     if (detected) return;
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        if (latitude > 22.1 && latitude < 22.6 && longitude > 113.8 && longitude < 114.4) {
-          setCurrency("HKD");
-        } else if (latitude > 18 && latitude < 54 && longitude > 73 && longitude < 135) {
-          setCurrency("RMB");
-        } else if (latitude > 49.8 && latitude < 60.9 && longitude > -8.7 && longitude < 1.8) {
-          setCurrency("GBP");
-        } else {
-          setCurrency("USD");
-        }
-        setDetected(true);
-      },
-      () => setDetected(true),
-      { timeout: 5000 }
-    );
+    setCurrency(detectCurrencyFromTimezone());
+    setDetected(true);
   }, [detected]);
 
   const addCoins = useCallback((amount: number) => {
