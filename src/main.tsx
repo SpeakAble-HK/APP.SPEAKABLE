@@ -1,6 +1,8 @@
 import "./i18n/config";
 import "@fontsource/nunito/400.css";
 import "@fontsource/nunito/500.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/nunito/800.css";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource-variable/noto-sans-hk";
