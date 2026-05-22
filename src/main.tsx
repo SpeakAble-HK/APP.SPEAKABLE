@@ -5,7 +5,7 @@ import "@fontsource/nunito/700.css";
 import "@fontsource/nunito/800.css";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
-import "@fontsource-variable/noto-sans-hk";
+import "@fontsource-variable/noto-sans-hk/index.css";
 import "./styles/cross-browser.css";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
