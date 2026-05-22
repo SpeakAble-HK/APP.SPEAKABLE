@@ -27,16 +27,31 @@ export interface ParsedPhoneme {
  * @param phoneme - The full Jyutping syllable (e.g., "gong1", "aa3")
  * @returns Object with initial, final, and tone
  */
-export function parseJyutping(phoneme: string | string[] | null | unknown): { initial: string | null; final: string | null; tone: string | null } {
+const normalizeJyutpingInput = (phoneme: string | string[] | null | unknown): string | null => {
+  if (phoneme == null) return null;
+
   if (Array.isArray(phoneme)) {
-    phoneme = phoneme.find((item) => typeof item === 'string' && item.trim().length > 0) ?? null;
+    const flattened = phoneme.flatMap((item) => {
+      if (item == null) return [];
+      if (Array.isArray(item)) return item;
+      return [String(item)];
+    });
+    const values = flattened
+      .map((item) => String(item).trim())
+      .filter(Boolean);
+    return values.length > 0 ? values.join(',') : null;
   }
 
-  if (typeof phoneme !== 'string' || phoneme.trim().length === 0) {
+  return String(phoneme).trim() || null;
+};
+
+export function parseJyutping(phoneme: string | string[] | null | unknown): { initial: string | null; final: string | null; tone: string | null } {
+  const normalized = normalizeJyutpingInput(phoneme);
+  if (!normalized) {
     return { initial: null, final: null, tone: null };
   }
 
-  const candidate = phoneme.split(',')[0].trim();
+  const candidate = String(normalized).split(',')[0].trim();
   if (candidate.length === 0) {
     return { initial: null, final: null, tone: null };
   }

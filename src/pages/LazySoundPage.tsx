@@ -116,22 +116,28 @@ export default function LazySoundPage() {
     setAudioDuration(0);
   };
 
-  const parseJyutpingCandidates = (phoneme: string | string[] | null | unknown) => {
-    let values: string[] = [];
-
+  const flattenPhonemeValues = (phoneme: string | string[] | null | unknown): string[] => {
+    if (phoneme == null) return [];
     if (typeof phoneme === 'string') {
-      values = phoneme.split(',').map((item) => item.trim()).filter(Boolean);
-    } else if (Array.isArray(phoneme)) {
-      values = phoneme
-        .flatMap((item) => {
-          if (typeof item !== 'string') return [];
-          return item.split(',');
-        })
-        .map((item) => item.trim())
-        .filter(Boolean);
+      return phoneme.split(',').map((item) => item.trim()).filter(Boolean);
     }
+    if (Array.isArray(phoneme)) {
+      return phoneme.flatMap((item) => flattenPhonemeValues(item));
+    }
+    return [String(phoneme).trim()].filter(Boolean);
+  };
 
-    return Array.from(new Set(values)).map(parseJyutping);
+  const safeParseJyutping = (phoneme: string | string[] | null | unknown) => {
+    try {
+      return parseJyutping(phoneme as any);
+    } catch {
+      return { initial: null, final: null, tone: null };
+    }
+  };
+
+  const parseJyutpingCandidates = (phoneme: string | string[] | null | unknown) => {
+    const values = Array.from(new Set(flattenPhonemeValues(phoneme)));
+    return values.map(safeParseJyutping);
   };
 
   const formatPhonemeValue = (phoneme: string | string[] | null | unknown) => {
@@ -450,7 +456,7 @@ export default function LazySoundPage() {
                     </thead>
                     <tbody>
                       {spokenPhonemes.filter(p => p.phoneme != null).map((p, i) => {
-                        const parsed = parseJyutping(p.phoneme);
+                        const parsed = safeParseJyutping(p.phoneme);
                         return (
                           <tr key={i} className="border-b border-outline-variant/10">
                             <td className="py-3 px-2 font-bold text-lg">{p.character}</td>
