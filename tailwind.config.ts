@@ -44,9 +44,24 @@ export default {
           800: "#0E3A57",
           900: "#072438",
         },
-        sunshine: "#FFCB4D",
-        coral: "#FF8A5C",
-        mint: "#6FD4B3",
+        sunshine: {
+          DEFAULT: "hsl(var(--sunshine))",
+          soft: "hsl(var(--sunshine-soft))",
+        },
+        coral: {
+          DEFAULT: "hsl(var(--coral-bright))",
+          deep: "hsl(var(--coral-deep))",
+        },
+        mint: {
+          DEFAULT: "hsl(var(--mint-bright))",
+          soft: "hsl(var(--mint-soft))",
+        },
+        "sky-soft": "hsl(var(--sky-soft))",
+        "sky-bright": "hsl(var(--sky-bright))",
+        cream: {
+          DEFAULT: "hsl(var(--cream))",
+          deep: "hsl(var(--cream-deep))",
+        },
         ink: "#1A2541",
         slate: "#5A6378",
         mist: "#E2E8F0",
@@ -189,6 +204,8 @@ export default {
       boxShadow: {
         sm: "0 1px 2px rgba(26,37,65,0.06)",
         md: "0 4px 16px rgba(26,37,65,0.08)",
+        soft: "0 12px 32px -8px rgba(26,37,65,0.12)",
+        playful: "0 18px 40px -12px rgba(255,138,92,0.35)",
         card: "0 10px 40px rgba(0,0,0,0.04)",
         "card-hover": "0 8px 30px -8px rgba(0,100,121,0.15)",
         nav: "0 -10px 40px rgba(0,0,0,0.04)",
