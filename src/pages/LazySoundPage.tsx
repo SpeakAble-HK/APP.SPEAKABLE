@@ -116,6 +116,49 @@ export default function LazySoundPage() {
     setAudioDuration(0);
   };
 
+  const parseJyutpingCandidates = (phoneme: string | string[] | null | unknown) => {
+    let values: string[] = [];
+
+    if (typeof phoneme === 'string') {
+      values = phoneme.split(',').map((item) => item.trim()).filter(Boolean);
+    } else if (Array.isArray(phoneme)) {
+      values = phoneme
+        .flatMap((item) => {
+          if (typeof item !== 'string') return [];
+          return item.split(',');
+        })
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    return Array.from(new Set(values)).map(parseJyutping);
+  };
+
+  const formatPhonemeValue = (phoneme: string | string[] | null | unknown) => {
+    if (phoneme == null) return '—';
+    if (typeof phoneme === 'string') return phoneme;
+    if (Array.isArray(phoneme)) return phoneme.join(',');
+    return String(phoneme);
+  };
+
+  const anyJyutpingMatch = (
+    expected: ReturnType<typeof parseJyutping>[],
+    actual: ReturnType<typeof parseJyutping>[],
+    field: 'initial' | 'final' | 'tone'
+  ) => {
+    return expected.some((exp) => actual.some((act) => exp[field] !== null && exp[field] === act[field]));
+  };
+
+  const joinJyutpingField = (
+    candidates: ReturnType<typeof parseJyutping>[],
+    field: 'initial' | 'final' | 'tone'
+  ) => {
+    const values = candidates
+      .map((c) => c[field])
+      .filter((value): value is string => typeof value === 'string' && value.length > 0);
+    return Array.from(new Set(values)).join(',') || null;
+  };
+
   const formatDuration = (s: number) => {
     const m = Math.floor(s / 60);
     const sec = Math.floor(s % 60);
@@ -125,23 +168,33 @@ export default function LazySoundPage() {
   // Parse results for display
   const getResultRows = () => {
     return intendedPhonemes
-      .filter(p => p.phoneme !== null)
+      .filter(p => p.phoneme != null)
       .map((intended, i) => {
         const spoken = spokenPhonemes[i];
-        const intParsed = parseJyutping(intended.phoneme);
-        const spkParsed = spoken ? parseJyutping(spoken.phoneme) : { initial: null, final: null, tone: null };
+        const intCandidates = parseJyutpingCandidates(intended.phoneme);
+        const spkCandidates = spoken ? parseJyutpingCandidates(spoken.phoneme) : [{ initial: null, final: null, tone: null }];
+        const intParsed = {
+          initial: joinJyutpingField(intCandidates, 'initial'),
+          final: joinJyutpingField(intCandidates, 'final'),
+          tone: joinJyutpingField(intCandidates, 'tone'),
+        };
+        const spkParsed = {
+          initial: joinJyutpingField(spkCandidates, 'initial'),
+          final: joinJyutpingField(spkCandidates, 'final'),
+          tone: joinJyutpingField(spkCandidates, 'tone'),
+        };
 
-        const initialMatch = intParsed.initial === spkParsed.initial;
-        const finalMatch = intParsed.final === spkParsed.final;
-        const toneMatch = intParsed.tone === spkParsed.tone;
+        const initialMatch = anyJyutpingMatch(intCandidates, spkCandidates, 'initial');
+        const finalMatch = anyJyutpingMatch(intCandidates, spkCandidates, 'final');
+        const toneMatch = anyJyutpingMatch(intCandidates, spkCandidates, 'tone');
 
         const jyOk = (intended.jyConf ?? 1) >= CONFIDENCE_THRESHOLD;
         const toneOk = (intended.toneConf ?? 1) >= CONFIDENCE_THRESHOLD;
 
         return {
           character: intended.character,
-          expected: intended.phoneme,
-          spoken: spoken?.phoneme ?? "—",
+          expected: formatPhonemeValue(intended.phoneme),
+          spoken: formatPhonemeValue(spoken?.phoneme ?? null),
           initialOk: initialMatch && jyOk,
           finalOk: finalMatch && jyOk,
           toneOk: toneMatch && toneOk,
@@ -396,12 +449,12 @@ export default function LazySoundPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {spokenPhonemes.filter(p => p.phoneme !== null).map((p, i) => {
+                      {spokenPhonemes.filter(p => p.phoneme != null).map((p, i) => {
                         const parsed = parseJyutping(p.phoneme);
                         return (
                           <tr key={i} className="border-b border-outline-variant/10">
                             <td className="py-3 px-2 font-bold text-lg">{p.character}</td>
-                            <td className="py-3 px-2 text-center text-on-surface-variant">{p.phoneme}</td>
+                            <td className="py-3 px-2 text-center text-on-surface-variant">{formatPhonemeValue(p.phoneme)}</td>
                             <td className="py-3 px-2 text-center">
                               <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary">
                                 {parsed.initial ?? "∅"}

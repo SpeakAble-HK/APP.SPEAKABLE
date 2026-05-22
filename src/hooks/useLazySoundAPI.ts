@@ -20,6 +20,11 @@ export const useLazySoundAPI = () => {
   const [intendedPhonemes, setIntendedPhonemes] = useState<PhonemeResult[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const normalizePhoneme = (phoneme: unknown): string | null => {
+    if (phoneme === null || phoneme === undefined) return null;
+    return typeof phoneme === 'string' ? phoneme : String(phoneme);
+  };
+
   const getAuthToken = async (): Promise<string> => {
     let { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) {
@@ -78,7 +83,7 @@ export const useLazySoundAPI = () => {
 
         intended = jyutpingData.result.map(([char, phoneme]: [string, string | null]) => ({
           character: char,
-          phoneme,
+          phoneme: normalizePhoneme(phoneme),
         }));
         setIntendedPhonemes(intended);
       }
@@ -92,7 +97,7 @@ export const useLazySoundAPI = () => {
 
       let spoken: PhonemeResult[] = asrData.result.map(([char, phoneme]: [string, string | null]) => ({
         character: char,
-        phoneme,
+        phoneme: normalizePhoneme(phoneme),
       }));
 
       // Step 2b: If no reference text, use ASR transcription as self-reference
@@ -106,7 +111,7 @@ export const useLazySoundAPI = () => {
             if (jyutpingData2.success) {
               intended = jyutpingData2.result.map(([char, phoneme]: [string, string | null]) => ({
                 character: char,
-                phoneme,
+                phoneme: normalizePhoneme(phoneme),
               }));
               setIntendedPhonemes(intended);
             }
@@ -117,7 +122,10 @@ export const useLazySoundAPI = () => {
       }
 
       // Step 3: ASRPhone verification
-      const verifyText = intended.filter(p => p.phoneme !== null).map(p => p.phoneme).join(' ');
+      const verifyText = intended
+        .map(p => normalizePhoneme(p.phoneme))
+        .filter((p): p is string => p !== null)
+        .join(' ');
 
       if (verifyText) {
         const phoneFD = new FormData();
@@ -152,7 +160,7 @@ export const useLazySoundAPI = () => {
                 const c = verifyCheck[vi++];
                 return {
                   ...p,
-                  phoneme: c.predicted || p.phoneme,
+                  phoneme: normalizePhoneme(c.predicted || p.phoneme),
                   confidence: c.conf,
                   jyConf: c.jy_conf,
                   toneConf: c.tone_conf,

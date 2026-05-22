@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 export interface PhonemeResult {
   character: string;
-  phoneme: string | null;
+  phoneme: string | string[] | null;
   confidence?: number;
   jyConf?: number;
   toneConf?: number;
@@ -13,8 +13,33 @@ export interface PhonemeResult {
 
 interface ASRResult {
   success: boolean;
-  result: [string, string | null][]; // Array of [character, jyutping] pairs
+  result: [string, string | string[] | null][]; // Array of [character, jyutping] pairs
 }
+
+const normalizePhoneme = (phoneme: string | string[] | null | unknown): string | string[] | null => {
+  if (phoneme == null) return null;
+  if (typeof phoneme === 'string') return phoneme.trim() || null;
+  if (Array.isArray(phoneme)) {
+    const values = phoneme
+      .flatMap((item) => {
+        if (item == null) return [];
+        return String(item).split(',');
+      })
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return values.length > 0 ? values : null;
+  }
+  return String(phoneme).trim() || null;
+};
+
+const stringifyPhoneme = (phoneme: string | string[] | null): string | null => {
+  if (typeof phoneme === 'string') return phoneme.trim() || null;
+  if (Array.isArray(phoneme)) {
+    const joined = phoneme.map((item) => String(item).trim()).filter(Boolean).join(',');
+    return joined || null;
+  }
+  return null;
+};
 
 interface JyutpingResult {
   success: boolean;
@@ -111,7 +136,7 @@ export const usePronunciationAPI = () => {
       
       const intended: PhonemeResult[] = (jyutpingData as JyutpingResult).result.map(([char, phoneme]) => ({
         character: char,
-        phoneme: phoneme
+        phoneme: normalizePhoneme(phoneme),
       }));
       setIntendedPhonemes(intended);
       console.log('Intended Phonemes:', intended);
@@ -126,14 +151,14 @@ export const usePronunciationAPI = () => {
       
       let spoken: PhonemeResult[] = (asrData as ASRResult).result.map(([char, phoneme]) => ({
         character: char,
-        phoneme: phoneme
+        phoneme: normalizePhoneme(phoneme),
       }));
       console.log('Initial Spoken Phonemes:', spoken);
 
       // Step 3: Use ASRPhone API to get confidence scores for verification
       const verifyText = intended
-        .filter(p => p.phoneme !== null)
-        .map(p => p.phoneme)
+        .map(p => stringifyPhoneme(p.phoneme))
+        .filter((p): p is string => p !== null)
         .join(' ');
 
       if (verifyText) {
@@ -177,7 +202,7 @@ export const usePronunciationAPI = () => {
                 verifyIndex++;
                 return {
                   ...p,
-                  phoneme: confItem.predicted || p.phoneme,
+                  phoneme: normalizePhoneme(confItem.predicted || p.phoneme),
                   confidence: confItem.conf,
                   jyConf: confItem.jy_conf,
                   toneConf: confItem.tone_conf,

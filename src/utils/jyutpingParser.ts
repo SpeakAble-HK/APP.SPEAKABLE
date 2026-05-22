@@ -27,12 +27,21 @@ export interface ParsedPhoneme {
  * @param phoneme - The full Jyutping syllable (e.g., "gong1", "aa3")
  * @returns Object with initial, final, and tone
  */
-export function parseJyutping(phoneme: string | null): { initial: string | null; final: string | null; tone: string | null } {
-  if (!phoneme) {
+export function parseJyutping(phoneme: string | string[] | null | unknown): { initial: string | null; final: string | null; tone: string | null } {
+  if (Array.isArray(phoneme)) {
+    phoneme = phoneme.find((item) => typeof item === 'string' && item.trim().length > 0) ?? null;
+  }
+
+  if (typeof phoneme !== 'string' || phoneme.trim().length === 0) {
     return { initial: null, final: null, tone: null };
   }
 
-  let remaining = phoneme.toLowerCase();
+  const candidate = phoneme.split(',')[0].trim();
+  if (candidate.length === 0) {
+    return { initial: null, final: null, tone: null };
+  }
+
+  let remaining = candidate.toLowerCase();
   let initial: string | null = null;
   let final: string | null = null;
   let tone: string | null = null;
