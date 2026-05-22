@@ -76,6 +76,18 @@
 
     --bento-gap: 16px;
     --bento-radius: 20px;
+
+    /* PiPi playful palette (HSL) */
+    --cream: 42 90% 97%;
+    --cream-deep: 38 80% 93%;
+    --sunshine: 44 100% 65%;
+    --sunshine-soft: 48 100% 88%;
+    --sky-soft: 199 88% 90%;
+    --sky-bright: 199 89% 67%;
+    --mint-soft: 158 65% 88%;
+    --mint-bright: 158 55% 64%;
+    --coral-bright: 16 100% 68%;
+    --coral-deep: 12 85% 58%;
   }
 
   /* Dark Mode */
