@@ -5,3 +5,73 @@
 	background: radial-gradient(circle at center, #4FD3E0, #006699);
 }
 /* App-level overrides — kept minimal; layout widths use max-w-* mx-auto */
+
+/* AI Cloning Feature Styles */
+.ai-cloning-feature {
+	padding: 24px 0;
+	text-align: center;
+}
+.ai-cloning-title {
+	font-size: 26px;
+	color: #22c55e;
+	margin-bottom: 12px;
+}
+.ai-cloning-desc {
+	color: #444;
+	margin-bottom: 24px;
+}
+.ai-cloning-btn {
+	padding: 12px 32px;
+	font-size: 18px;
+	border-radius: 12px;
+	border: none;
+	background: #22c55e;
+	color: white;
+	font-weight: bold;
+	cursor: pointer;
+	margin: 0 8px;
+}
+.ai-cloning-btn:disabled {
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+.ai-cloning-result {
+	color: #22c55e;
+	font-weight: bold;
+	margin: 16px 0;
+}
+
+/* Detection Feature Styles */
+.detection-feature {
+	padding: 24px 0;
+	text-align: center;
+}
+.detection-title {
+	font-size: 26px;
+	color: #3b82f6;
+	margin-bottom: 12px;
+}
+.detection-desc {
+	color: #444;
+	margin-bottom: 24px;
+}
+.detection-btn {
+	padding: 12px 32px;
+	font-size: 18px;
+	border-radius: 12px;
+	border: none;
+	background: #3b82f6;
+	color: white;
+	font-weight: bold;
+	cursor: pointer;
+	margin: 0 8px;
+}
+.detection-btn:disabled {
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+.detection-result {
+	color: #3b82f6;
+	font-weight: bold;
+	margin: 16px 0;
+}
