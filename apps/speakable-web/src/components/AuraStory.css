@@ -1,0 +1,30 @@
+/* AuraStory styles (modularized for React, can be improved further) */
+.aura-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.aura-header-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #fbbf24 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+  text-shadow: 0 0 60px rgba(168, 85, 247, 0.5);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.aura-header-subtitle {
+  font-size: 1.1rem;
+  color: #fff8;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.aura-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+}
