@@ -91,6 +91,7 @@ const App = () => (
                   <Route path="/red-flags" element={<RedFlagsPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/treasure-map" element={React.createElement(require("./pages/TreasureMapPage").default)} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
