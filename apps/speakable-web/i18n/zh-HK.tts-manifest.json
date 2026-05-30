@@ -1,0 +1,28 @@
+{
+  "version": "2026-05-27.1",
+  "voice": "canto_female_01",
+  "format": "audio/mpeg",
+  "baseUrl": "https://cdn.speakable.ai/tts/zh-HK/",
+  "entries": [
+    { "key": "a1b2c3", "text": "我哋而家玩『講中個詞』，準備好未呀？", "file": "a1b2c3.mp3", "durationMs": 2600 },
+    { "key": "b2c3d4", "text": "請講出呢個詞語。", "file": "b2c3d4.mp3", "durationMs": 1100 },
+    { "key": "c3d4e5", "text": "啱晒！好叻呀！", "file": "c3d4e5.mp3", "durationMs": 950 },
+    { "key": "d4e5f6", "text": "唔係呢個音，聽下示範。", "file": "d4e5f6.mp3", "durationMs": 1700 },
+    { "key": "e5f6a7", "text": "聽唔太清楚，再講一次好嗎？", "file": "e5f6a7.mp3", "durationMs": 1800 },
+    { "key": "f6a7b8", "text": "我哋而家玩『砌句子』，用粵語講出嚟。", "file": "f6a7b8.mp3", "durationMs": 2400 },
+    { "key": "a7b8c9", "text": "請順住次序講出成句。", "file": "a7b8c9.mp3", "durationMs": 1500 },
+    { "key": "b8c9da", "text": "完全正確！", "file": "b8c9da.mp3", "durationMs": 800 },
+    { "key": "c9dae1", "text": "次序有少少亂，再試多次。", "file": "c9dae1.mp3", "durationMs": 1700 },
+    { "key": "dae1f2", "text": "差咗個語氣詞，例如「咗」或者「緊」。", "file": "dae1f2.mp3", "durationMs": 2100 },
+    { "key": "e1f2a3", "text": "連中三個！繼續加油！", "file": "e1f2a3.mp3", "durationMs": 1600 },
+    { "key": "f2a3b4", "text": "勁呀！五連勝！", "file": "f2a3b4.mp3", "durationMs": 1200 },
+    { "key": "a3b4c5", "text": "我聽唔到聲喎，講大聲啲？", "file": "a3b4c5.mp3", "durationMs": 1900 },
+    { "key": "b4c5d6", "text": "網絡有啲問題，等陣再試。", "file": "b4c5d6.mp3", "durationMs": 1800 }
+  ],
+  "dynamic": [
+    { "pattern": "差少少，個音係 {jyutping}，再試多次。", "ttl": "7d" },
+    { "pattern": "提示：第一個字係「{first_char}」。", "ttl": "7d" },
+    { "pattern": "今次拎到 {score} 分，下次再挑戰！", "ttl": "1d" },
+    { "pattern": "今次拎到 {score} 分，多謝參與！", "ttl": "1d" }
+  ]
+}

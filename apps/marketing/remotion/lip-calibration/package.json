@@ -1,0 +1,16 @@
+{
+  "name": "@speakable/remotion-lip-calibration",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "build": "remotion render src/index.ts LipCalibration out/lip-calibration_60s.mp4 --codec=h264 --fps=60",
+    "build:short": "remotion render src/index.ts LipCalibration out/lip-calibration_30s.mp4 --props='{\"duration\":30}' --codec=h264 --fps=60"
+  },
+  "dependencies": {
+    "@remotion/lottie": "^4.0.0",
+    "remotion": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}

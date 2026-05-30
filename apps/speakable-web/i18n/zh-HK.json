@@ -1,0 +1,49 @@
+{
+  "locale": "zh-HK",
+  "voice": {
+    "default": "canto_female_01",
+    "alt": "canto_male_01",
+    "rate": 1.0,
+    "pitch": 0.0
+  },
+  "common": {
+    "mic_permission_title": "需要麥克風權限",
+    "mic_permission_body": "請俾權限我哋聽你講嘢，先可以玩遊戲。",
+    "loading": "載入緊…",
+    "retry": "再試一次",
+    "exit": "離開",
+    "pause": "暫停",
+    "resume": "繼續",
+    "low_confidence": "聽唔太清楚，再講一次好嗎？",
+    "no_speech": "我聽唔到聲喎，講大聲啲？",
+    "network_error": "網絡有啲問題，等陣再試。"
+  },
+  "game1_say_the_word": {
+    "intro": "我哋而家玩『講中個詞』，準備好未呀？",
+    "prompt_say": "請講出呢個詞語。",
+    "correct": "啱晒！好叻呀！",
+    "near_tone": "差少少，個音係 {jyutping}，再試多次。",
+    "wrong": "唔係呢個音，聽下示範。",
+    "hint_first_syllable": "提示：第一個字係「{first_char}」。",
+    "streak_3": "連中三個！繼續加油！",
+    "streak_5": "勁呀！五連勝！",
+    "end_score": "今次拎到 {score} 分，下次再挑戰！"
+  },
+  "game2_build_sentence": {
+    "intro": "我哋而家玩『砌句子』，用粵語講出嚟。",
+    "prompt_say": "請順住次序講出成句。",
+    "correct": "完全正確！",
+    "partial_order": "次序有少少亂，再試多次。",
+    "missing_particle": "差咗個語氣詞，例如「咗」或者「緊」。",
+    "wrong": "再聽多次示範。",
+    "end_score": "今次拎到 {score} 分，多謝參與！"
+  },
+  "tone_feedback": {
+    "1": "高平聲",
+    "2": "高升聲",
+    "3": "中平聲",
+    "4": "低降聲",
+    "5": "低升聲",
+    "6": "低平聲"
+  }
+}
