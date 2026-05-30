@@ -18,6 +18,8 @@ import {
 } from "@/components/bilabial/bilabialUtils";
 import { BilabialGameHUD } from "@/components/bilabial/BilabialGameHUD";
 import { BILABIAL_TARGET_COUNT, useBilabialGameSession } from "@/components/bilabial/useBilabialGameSession";
+import { useAdaptationEngine } from '@/adaptation/useAdaptationEngine';
+import { useAchievements } from '@/hooks/useAchievements';
 import { SPEECH_PASS_ACCURACY_THRESHOLD } from "@/lib/speechExerciseRules";
 import pipi from "@/assets/pipi-parrot-only.png";
 import bilabialBLipDemo from "@/assets/bilabial-b-lip-demo.mp4";
@@ -50,6 +52,9 @@ function phaseLabel(phase: BilabialFlowPhase): string {
 }
 
 export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) {
+  // Adaptation engine and achievements
+  const { updateProfile } = useAdaptationEngine();
+  const { checkAndUnlock } = useAchievements();
   const { processRecording, isProcessing } = usePronunciationAPI();
   const game = useBilabialGameSession();
   const [phase, setPhase] = useState<BilabialFlowPhase>("idle");
@@ -193,6 +198,20 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
   };
 
   if (gameEnd) {
+    // On game end, update adaptation profile and check achievements
+    // Example metrics: accuracy, tap duration, jitter, etc. (customize as needed)
+    // Here, we use the last accuracy as a proxy for responseLatencyMs (customize for your real metrics)
+    updateProfile({
+      responseLatencyMs: accuracy > 0 ? Math.max(200, 1000 - accuracy * 800) : 400,
+      avgTapDurationMs: 150, // Placeholder, replace with real tap duration if available
+      avgJitterPx: 8,        // Placeholder, replace with real jitter if available
+    });
+    // Optionally, you can pass more detailed metrics if available from the game session
+    checkAndUnlock({
+      completedLessons: new Set(), // Fill with actual completed lesson IDs if available
+      totalXp: 0,                  // Fill with actual XP if tracked
+      streakDays: 0,               // Fill with actual streak if tracked
+    });
     return (
       <div className="min-h-full bg-background pb-28">
         <div className="mx-auto max-w-lg px-4 py-10 text-center">

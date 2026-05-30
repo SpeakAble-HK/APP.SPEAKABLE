@@ -61,6 +61,9 @@ function buildOptions(sp: Station2Phoneme, level: LessonLevel, itemIdx: number):
 export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) {
   const { processRecording, isProcessing } = usePronunciationAPI();
   const game = useBilabialGameSession();
+  // Adaptation engine and achievements
+  const { updateProfile } = require('@/adaptation/useAdaptationEngine').useAdaptationEngine();
+  const { checkAndUnlock } = require('@/hooks/useAchievements').useAchievements();
 
   const [meta, setMeta] = useState<MetaPhase>("select-phoneme");
   const [sp, setSp] = useState<Station2Phoneme | null>(null);
@@ -211,6 +214,18 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
   };
 
   if (gameEnd) {
+    // On game end, update adaptation profile and check achievements
+    // Example metrics: use last production accuracy as proxy for responseLatencyMs (customize as needed)
+    updateProfile && updateProfile({
+      responseLatencyMs: prodAcc > 0 ? Math.max(200, 1000 - prodAcc * 800) : 400,
+      avgTapDurationMs: 150, // Placeholder, replace with real tap duration if available
+      avgJitterPx: 8,        // Placeholder, replace with real jitter if available
+    });
+    checkAndUnlock && checkAndUnlock({
+      completedLessons: new Set(), // Fill with actual completed lesson IDs if available
+      totalXp: game.sessionCoins || 0, // Use session coins as XP proxy
+      streakDays: 0, // Fill with actual streak if tracked
+    });
     return (
       <div className="min-h-full bg-background pb-28">
         <div className="mx-auto max-w-lg px-4 py-10 text-center">

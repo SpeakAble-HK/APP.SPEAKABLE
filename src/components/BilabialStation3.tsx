@@ -37,6 +37,9 @@ function shellHintText(correct: BilabialPhonemeKey): string {
 export function BilabialStation3({ onComplete, onBack }: BilabialStation3Props) {
   const { processRecording, isProcessing } = usePronunciationAPI();
   const game = useBilabialGameSession();
+  // Adaptation engine and achievements
+  const { updateProfile } = require('@/adaptation/useAdaptationEngine').useAdaptationEngine();
+  const { checkAndUnlock } = require('@/hooks/useAchievements').useAchievements();
 
   const item: Station3Item = useMemo(() => {
     const pool = [...station3Items];
@@ -159,6 +162,17 @@ export function BilabialStation3({ onComplete, onBack }: BilabialStation3Props) 
   };
 
   if (gameEnd) {
+    // On game end, update adaptation profile and check achievements
+    updateProfile && updateProfile({
+      responseLatencyMs: acc > 0 ? Math.max(200, 1000 - acc * 800) : 400,
+      avgTapDurationMs: 150, // Placeholder, replace with real tap duration if available
+      avgJitterPx: 8,        // Placeholder, replace with real jitter if available
+    });
+    checkAndUnlock && checkAndUnlock({
+      completedLessons: new Set(), // Fill with actual completed lesson IDs if available
+      totalXp: game.sessionCoins || 0, // Use session coins as XP proxy
+      streakDays: 0, // Fill with actual streak if tracked
+    });
     return (
       <div className="min-h-full bg-background pb-28">
         <div className="mx-auto max-w-lg px-4 py-10 text-center">
