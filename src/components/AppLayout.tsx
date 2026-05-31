@@ -14,7 +14,7 @@ const TABS = [
   { id: "profile", icon: "person", label: "我的", path: "/settings" },
 ] as const;
 
-export function AppLayout({ children }: AppLayoutProps) {
+function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const isMapPage = false;
@@ -81,3 +81,5 @@ export function AppLayout({ children }: AppLayoutProps) {
     </div>
   );
 }
+
+export default AppLayout;

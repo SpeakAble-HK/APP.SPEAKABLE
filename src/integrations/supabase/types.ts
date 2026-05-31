@@ -1,3 +1,30 @@
+      calibration_audit: {
+        Row: {
+          id: string;
+          user_id: string;
+          therapist_name: string;
+          calibration_profile: Json;
+          voice_clone_url: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          therapist_name: string;
+          calibration_profile: Json;
+          voice_clone_url?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          therapist_name?: string;
+          calibration_profile?: Json;
+          voice_clone_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      }
 export type Json =
   | string
   | number

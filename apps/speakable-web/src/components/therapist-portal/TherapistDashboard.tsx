@@ -1,9 +1,11 @@
 
 import React from 'react';
+
 import StudentManagement from './StudentManagement';
 import ModuleAssignment from './ModuleAssignment';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import ReportExport from './ReportExport';
+import TherapistCalibration from './TherapistCalibration';
 
 
 const TherapistDashboard: React.FC = () => {
@@ -23,6 +25,7 @@ const TherapistDashboard: React.FC = () => {
         </ul>
         <p style={{ color: '#a855f7', marginTop: 16 }}>（所有介面及內容均為廣東話）</p>
       </div>
+      <TherapistCalibration />
       <StudentManagement />
       <ModuleAssignment />
       <AnalyticsDashboard />
