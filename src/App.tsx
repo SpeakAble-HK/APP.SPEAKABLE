@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { AppLayout } from "./components/AppLayout";
@@ -74,24 +75,27 @@ const App = () => (
                   <Route path="/st-settings" element={<STSettingsPage />} />
                 </Route>
 
-                {/* Explorer pages with learner bottom nav */}
-                <Route element={<AppLayout />}>
-                  <Route path="/explorer" element={<ExplorerDashboardPage />} />
-                  <Route path="/practice/:exerciseId" element={<ExercisePage />} />
-                  <Route path="/progress" element={<ProgressPage />} />
-                  <Route path="/echo-speech" element={<EchoSpeechPage />} />
-                  <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
-                  <Route path="/speech-quest" element={<SpeechQuestPage />} />
-                  <Route path="/lesson/:lessonId" element={<LessonPage />} />
-                  <Route path="/semantic-island" element={<SemanticIslandPage />} />
-                  <Route path="/pipi" element={<PiPiPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
-                  <Route path="/resources" element={<ResourcesPage />} />
-                  <Route path="/resources/speech-therapy-info" element={<AboutSpeechTherapyPage />} />
-                  <Route path="/red-flags" element={<RedFlagsPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="/privacy" element={<PrivacyPage />} />
-                  <Route path="/treasure-map" element={React.createElement(require("./pages/TreasureMapPage").default)} />
+                {/* Explorer pages with learner bottom nav, protected by auth */}
+                <Route element={<ProtectedRoute />}>
+                  <Route element={<AppLayout />}>
+                    <Route path="/dashboard" element={React.createElement(require("./pages/DashboardPage").default)} />
+                    <Route path="/explorer" element={<ExplorerDashboardPage />} />
+                    <Route path="/practice/:exerciseId" element={<ExercisePage />} />
+                    <Route path="/progress" element={<ProgressPage />} />
+                    <Route path="/echo-speech" element={<EchoSpeechPage />} />
+                    <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
+                    <Route path="/speech-quest" element={<SpeechQuestPage />} />
+                    <Route path="/lesson/:lessonId" element={<LessonPage />} />
+                    <Route path="/semantic-island" element={<SemanticIslandPage />} />
+                    <Route path="/pipi" element={<PiPiPage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                    <Route path="/resources" element={<ResourcesPage />} />
+                    <Route path="/resources/speech-therapy-info" element={<AboutSpeechTherapyPage />} />
+                    <Route path="/red-flags" element={<RedFlagsPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/treasure-map" element={React.createElement(require("./pages/TreasureMapPage").default)} />
+                  </Route>
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
