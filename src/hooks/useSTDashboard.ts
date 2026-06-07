@@ -12,6 +12,18 @@ export interface StudentData {
   last_active: string | null;
 }
 
+export interface CreateStudentInput {
+  email: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+  username: string;
+  date_of_birth?: string;
+  nickname?: string;
+  age?: number;
+  gender?: string;
+}
+
 export function useSTDashboard() {
   const { user } = useAuth();
   const [students, setStudents] = useState<StudentData[]>([]);
@@ -138,5 +150,19 @@ export function useSTDashboard() {
       .insert({ therapist_id: user.id, student_id: studentId, category });
   }, [user]);
 
-  return { students, loading, addStudent, removeStudent, assignCategory, refresh: fetchStudents };
+  const createStudent = useCallback(async (input: CreateStudentInput) => {
+    if (!user) return { error: new Error('Not authenticated'), data: null };
+
+    const { data: fnData, error: fnError } = await supabase.functions.invoke('create-student', {
+      body: input,
+    });
+
+    if (fnError) return { error: new Error(fnError.message || 'Failed to create student'), data: null };
+    if (fnData?.error) return { error: new Error(fnData.error), data: null };
+
+    await fetchStudents();
+    return { error: null, data: fnData?.student || null };
+  }, [user]);
+
+  return { students, loading, addStudent, createStudent, removeStudent, assignCategory, refresh: fetchStudents };
 }

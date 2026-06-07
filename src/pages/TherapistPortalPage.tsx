@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from "react";
-import { Users, BarChart3, Settings, Volume2, MapPin, TreePine, Sparkles, Bell, BookOpen, Activity, Target, Save, GraduationCap, Star, TrendingUp } from "lucide-react";
+import { Users, BarChart3, Settings, Volume2, MapPin, TreePine, Sparkles, Bell, BookOpen, Activity, Target, Save, GraduationCap, Star, TrendingUp, UserPlus } from "lucide-react";
 import styles from "./TherapistPortalPage.module.css";
 import { PatientHeader } from "@/components/PatientHeader";
 import { PhoneticAnalysis } from "@/components/PhoneticAnalysis";
@@ -78,7 +78,7 @@ function StudentAvatar({ name }: { name: string }) {
 }
 
 export default function TherapistPortalPage() {
-	const { students, loading: studentsLoading } = useSTDashboard();
+	const { students, loading: studentsLoading, createStudent } = useSTDashboard();
 	const [selectedSchool, setSelectedSchool] = useState(SCHOOL_OPTIONS[0]);
 	const [selectedStudentId, setSelectedStudentId] = useState("");
 	const [voiceWord, setVoiceWordState] = useState(getVoiceCloneWord());
@@ -87,6 +87,53 @@ export default function TherapistPortalPage() {
 	const [journeyUnlocked, setJourneyUnlockedState] = useState(getAuraJourneyUnlocked());
 	const [unlockChimeEnabled, setUnlockChimeEnabled] = useState(getMissionUnlockChimeEnabled());
 	const [status, setStatus] = useState("");
+
+	const [showCreateForm, setShowCreateForm] = useState(false);
+	const [createLoading, setCreateLoading] = useState(false);
+	const [createError, setCreateError] = useState("");
+	const [createSuccess, setCreateSuccess] = useState("");
+	const [form, setForm] = useState({
+		email: "",
+		password: "",
+		first_name: "",
+		last_name: "",
+		username: "",
+		date_of_birth: "",
+		nickname: "",
+		age: "",
+		gender: "",
+	});
+
+	const handleCreateStudent = async () => {
+		if (!form.email || !form.password || !form.username) {
+			setCreateError("必須填寫電郵、密碼及用戶名稱");
+			return;
+		}
+		setCreateLoading(true);
+		setCreateError("");
+		setCreateSuccess("");
+
+		const { error, data } = await createStudent({
+			email: form.email,
+			password: form.password,
+			first_name: form.first_name || undefined,
+			last_name: form.last_name || undefined,
+			username: form.username,
+			date_of_birth: form.date_of_birth || undefined,
+			nickname: form.nickname || undefined,
+			age: form.age ? parseInt(form.age, 10) : undefined,
+			gender: form.gender || undefined,
+		});
+
+		setCreateLoading(false);
+		if (error) {
+			setCreateError(error.message);
+		} else {
+			setCreateSuccess(`已建立學生帳號：${data?.username || form.username}`);
+			setForm({ email: "", password: "", first_name: "", last_name: "", username: "", date_of_birth: "", nickname: "", age: "", gender: "" });
+			setShowCreateForm(false);
+		}
+	};
 
 	const displayStudents = useMemo(() => {
 		if (!studentsLoading && students.length === 0) {
@@ -221,6 +268,44 @@ export default function TherapistPortalPage() {
 							</select>
 						</div>
 					</>
+				)}
+
+				<div style={{ marginTop: 16 }}>
+					<button
+						className={styles.addBtn}
+						onClick={() => { setShowCreateForm(!showCreateForm); setCreateError(""); setCreateSuccess(""); }}
+						type="button"
+					>
+						<UserPlus size={16} />
+						{showCreateForm ? "隱藏建立學生" : "建立新學生帳號"}
+					</button>
+				</div>
+
+				{showCreateForm && (
+					<div style={{ marginTop: 16, padding: 20, background: "#f8fafc", borderRadius: 12, border: "1px solid #e2e8f0" }}>
+						<p style={{ fontSize: 14, fontWeight: 600, color: "#0f172a", marginBottom: 12 }}>新學生資料</p>
+						<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+							<input className={styles.addInput} style={{ width: "100%" }} placeholder="電郵 *" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+							<input className={styles.addInput} style={{ width: "100%" }} placeholder="密碼 *" type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+							<input className={styles.addInput} style={{ width: "100%" }} placeholder="用戶名稱 *" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
+							<input className={styles.addInput} style={{ width: "100%" }} placeholder="暱稱" value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
+							<input className={styles.addInput} style={{ width: "100%" }} placeholder="名字" value={form.first_name} onChange={e => setForm({ ...form, first_name: e.target.value })} />
+							<input className={styles.addInput} style={{ width: "100%" }} placeholder="姓氏" value={form.last_name} onChange={e => setForm({ ...form, last_name: e.target.value })} />
+							<input className={styles.addInput} style={{ width: "100%" }} placeholder="出生日期" type="date" value={form.date_of_birth} onChange={e => setForm({ ...form, date_of_birth: e.target.value })} />
+							<input className={styles.addInput} style={{ width: "100%" }} placeholder="年齡" type="number" value={form.age} onChange={e => setForm({ ...form, age: e.target.value })} />
+							<select className={styles.addInput} style={{ width: "100%" }} value={form.gender} onChange={e => setForm({ ...form, gender: e.target.value })}>
+								<option value="">性別</option>
+								<option value="M">男</option>
+								<option value="F">女</option>
+								<option value="other">其他</option>
+							</select>
+						</div>
+						{createError && <p className={styles.statusError} style={{ marginTop: 12 }}>{createError}</p>}
+						{createSuccess && <div className={styles.statusSuccess} style={{ marginTop: 12 }}><Sparkles size={16} />{createSuccess}</div>}
+						<button className={styles.addBtn} style={{ marginTop: 12 }} onClick={handleCreateStudent} disabled={createLoading} type="button">
+							{createLoading ? "建立中..." : "確認建立"}
+						</button>
+					</div>
 				)}
 			</section>
 
