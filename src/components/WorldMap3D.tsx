@@ -1,143 +1,173 @@
-import React, { useRef, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stars, Html } from '@react-three/drei';
-import * as THREE from 'three';
-
-// Example island positions and marker data
-type Marker = {
-  id: string;
-  position: [number, number, number];
-  label: string;
-  icon: string;
-  onClick?: () => void;
-};
-
-const markers: Marker[] = [
-  {
-    id: 'cooking',
-    position: [-6, 0, 4],
-    label: '🍳 Cooking Mama',
-    icon: 'https://img.icons8.com/color/96/chef-hat.png',
-  },
-  {
-    id: 'space',
-    position: [0, 0, 8],
-    label: '🚀 Space Mountain',
-    icon: 'https://img.icons8.com/color/96/rocket.png',
-  },
-  {
-    id: 'kart',
-    position: [7, 0, -2],
-    label: '🏎️ Aura Kart',
-    icon: 'https://img.icons8.com/color/96/racing-car.png',
-  },
-  // Add more markers as needed
-];
-
-function Island({ position, color = '#4FD3E0' }: { position: [number, number, number]; color?: string }) {
-  return (
-    <mesh position={position} castShadow receiveShadow>
-      <sphereGeometry args={[1.2, 32, 32]} />
-      <meshStandardMaterial color={color} />
-    </mesh>
-  );
-}
-
-function MarkerBillboard({ marker }: { marker: Marker }) {
-  // Billboard effect: always face camera
-  const ref = useRef<THREE.Mesh>(null!);
-  useEffect(() => {
-    // Optionally animate or pulse
-  }, []);
-  return (
-    <group position={marker.position}>
-      <mesh ref={ref} onClick={marker.onClick}>
-        <sphereGeometry args={[0.5, 24, 24]} />
-        <meshStandardMaterial color="#fff" emissive="#ff6b6b" emissiveIntensity={0.2} />
-      </mesh>
-      {/* Icon as sprite */}
-      <sprite scale={[1.2, 1.2, 1]} position={[0, 1, 0]}>
-        <spriteMaterial attach="material" map={new THREE.TextureLoader().load(marker.icon)} />
-      </sprite>
-      {/* Label */}
-      <Html position={[0, 2, 0]} center style={{ pointerEvents: 'none', color: '#2c3e50', fontWeight: 'bold', background: 'white', borderRadius: 8, padding: '2px 8px', fontSize: 14 }}>{marker.label}</Html>
-    </group>
-  );
-}
-
+import { useEffect } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
+import { OrbitControls, Stars, useFBX, useGLTF } from '@react-three/drei';
 type WorldMap3DProps = {
   cameraLanded?: boolean;
   selectedModality?: string | null;
   disableInteraction?: boolean;
   featureResult?: string | null;
+  calibrationData?: Record<string, unknown> | null;
+  voiceCloneData?: Record<string, unknown> | null;
 };
 
-import { useThree } from '@react-three/fiber';
-import { useFrame } from '@react-three/fiber';
+function ForestGLTFModel() {
+  const gltf = useGLTF('/assets/o_donkey_forest_river.gltf');
+  return <primitive object={gltf.scene} scale={[0.1, 0.1, 0.1]} />;
+}
 
-const FIRST_MARKER_POS = markers[0]?.position || [0, 0, 0];
+function BirdhouseInteriorModel() {
+  const interior = useFBX('/assets/inhouse-livingroom/InteriorTest.fbx');
+  return <primitive object={interior} position={[0, -0.35, 0]} rotation={[0, 0.1, 0]} scale={0.04} />;
+}
 
-function CameraAnimator({ landed }: { landed: boolean }) {
+function CameraSetup() {
   const { camera } = useThree();
-  // Animate camera to first marker when landed
   useEffect(() => {
-    if (!landed) return;
-    // Animate from current to target
-    let frame: number;
-    const start = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
-    const end = { x: FIRST_MARKER_POS[0], y: 5, z: FIRST_MARKER_POS[2] + 8 };
-    let t = 0;
-    function animate() {
-      t += 0.03;
-      if (t > 1) t = 1;
-      camera.position.x = start.x + (end.x - start.x) * t;
-      camera.position.y = start.y + (end.y - start.y) * t;
-      camera.position.z = start.z + (end.z - start.z) * t;
-      camera.lookAt(FIRST_MARKER_POS[0], FIRST_MARKER_POS[1], FIRST_MARKER_POS[2]);
-      if (t < 1) {
-        frame = requestAnimationFrame(animate);
-      }
-    }
-    animate();
-    return () => cancelAnimationFrame(frame);
-    // eslint-disable-next-line
-  }, [landed]);
+    camera.position.set(0, 8, 14);
+    camera.lookAt(0, 0, 0);
+  }, [camera]);
   return null;
 }
 
-export default function WorldMap3D({ cameraLanded = false, selectedModality, disableInteraction = false, featureResult }: WorldMap3DProps) {
+export default function WorldMap3D({
+  cameraLanded,
+  selectedModality,
+  disableInteraction,
+  featureResult,
+  calibrationData,
+  voiceCloneData,
+}: WorldMap3DProps) {
+  void cameraLanded;
+
   return (
-    <div className="worldmap3d-bg">
-      <Canvas camera={{ position: [0, 10, 20], fov: 50 }} shadows>
-        <ambientLight intensity={0.7} />
-        <directionalLight position={[10, 20, 10]} intensity={1.2} castShadow />
-        {/* Ocean surface */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
-          <circleGeometry args={[15, 64]} />
-          <meshStandardMaterial color="#0099CC" transparent opacity={0.85} />
-        </mesh>
-        {/* Islands */}
-        {markers.map((marker) => (
-          <Island key={marker.id} position={marker.position} />
-        ))}
-        {/* Markers */}
-        {markers.map((marker) => (
-          <MarkerBillboard key={marker.id} marker={marker} />
-        ))}
-        {/* Stars and controls */}
-        <Stars radius={40} depth={50} count={2000} factor={4} fade />
+    <div
+      className="worldmap3d-bg"
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: 960,
+        aspectRatio: '4 / 3',
+        margin: '0 auto',
+        background: '#000',
+        borderRadius: 16,
+        overflow: 'hidden',
+        boxShadow: '0 4px 32px #0003',
+        minHeight: 480,
+      }}
+    >
+      <Canvas
+        camera={{ position: [0, 8, 14], fov: 50 }}
+        style={{ width: '100%', height: '100%', display: 'block', background: '#000' }}
+        shadows
+      >
+        <ambientLight intensity={1.0} />
+        <directionalLight
+          position={[20, 40, 20]}
+          intensity={2.0}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+        />
+        <ForestGLTFModel />
+        <BirdhouseInteriorModel />
+        <Stars radius={60} depth={80} count={3000} factor={6} fade />
         <OrbitControls enablePan enableZoom enableRotate enabled={!disableInteraction} />
-        <CameraAnimator landed={cameraLanded} />
+        <CameraSetup />
       </Canvas>
-      {/* Optionally show selected modality as overlay */}
+
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          background: 'rgba(255,255,255,0.95)',
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          boxShadow: '0 -2px 12px #0002',
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          padding: '12px 0',
+          zIndex: 20,
+        }}
+      >
+        <button style={{ background: 'none', border: 'none', fontSize: 22, color: '#0099CC', fontWeight: 'bold', cursor: 'pointer' }}>🏠 首頁</button>
+        <button style={{ background: 'none', border: 'none', fontSize: 22, color: '#16a34a', fontWeight: 'bold', cursor: 'pointer' }}>🗺️ 地圖</button>
+        <button style={{ background: 'none', border: 'none', fontSize: 22, color: '#f59e42', fontWeight: 'bold', cursor: 'pointer' }}>⭐ 任務</button>
+        <button style={{ background: 'none', border: 'none', fontSize: 22, color: '#a855f7', fontWeight: 'bold', cursor: 'pointer' }}>⚙️ 設定</button>
+      </div>
+
       {selectedModality && (
-        <div style={{ position: 'absolute', top: 20, left: 20, background: 'rgba(255,255,255,0.9)', borderRadius: 12, padding: '8px 20px', fontWeight: 'bold', color: '#0099CC', fontSize: 18, zIndex: 5 }}>
-          Modality: {selectedModality}
+        <div
+          style={{
+            position: 'absolute',
+            top: 20,
+            left: 20,
+            background: 'rgba(255,255,255,0.9)',
+            borderRadius: 12,
+            padding: '8px 20px',
+            fontWeight: 'bold',
+            color: '#0099CC',
+            fontSize: 18,
+            zIndex: 5,
+          }}
+        >
+          模式：{selectedModality}
         </div>
       )}
+
       {featureResult && (
-        <div style={{ position: 'absolute', top: 60, left: 20, background: 'rgba(255,255,255,0.95)', borderRadius: 12, padding: '8px 20px', fontWeight: 'bold', color: '#16a34a', fontSize: 16, zIndex: 5, boxShadow: '0 2px 8px #16a34a22' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: 60,
+            left: 20,
+            background: 'rgba(255,255,255,0.95)',
+            borderRadius: 12,
+            padding: '8px 20px',
+            fontWeight: 'bold',
+            color: '#16a34a',
+            fontSize: 16,
+            zIndex: 5,
+            boxShadow: '0 2px 8px #16a34a22',
+          }}
+        >
           {featureResult}
+        </div>
+      )}
+
+      {calibrationData && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 100,
+            left: 20,
+            background: '#e0f7fa',
+            borderRadius: 8,
+            padding: '6px 14px',
+            fontSize: 13,
+            zIndex: 5,
+          }}
+        >
+          校準：{JSON.stringify(calibrationData)}
+        </div>
+      )}
+
+      {voiceCloneData && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 140,
+            left: 20,
+            background: '#f3e8ff',
+            borderRadius: 8,
+            padding: '6px 14px',
+            fontSize: 13,
+            zIndex: 5,
+          }}
+        >
+          聲音複製：{JSON.stringify(voiceCloneData)}
         </div>
       )}
     </div>

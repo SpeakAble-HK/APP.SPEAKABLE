@@ -1,0 +1,21 @@
+.mascot-flyin-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-cloud, #f8fafc);
+}
+.mascot-flyin-img {
+  width: 220px;
+  height: 220px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  transition: transform 1s cubic-bezier(0.4,0,0.2,1), opacity 1s cubic-bezier(0.4,0,0.2,1);
+}
+.mascot-flyin-img.enter {
+  transform: translateY(0) scale(1.1);
+  opacity: 1;
+}
+.mascot-flyin-img.exit {
+  transform: translateY(-8rem) scale(0.75);
+  opacity: 0;
+}

@@ -1,65 +1,93 @@
 import React, { useState } from "react";
-import WorldMap3D from "@/components/WorldMap3D";
-import AICloningFeature from "@/components/AICloningFeature";
-import DetectionFeature from "@/components/DetectionFeature";
+import { useLocation } from "react-router-dom";
+import TreasureMap from "@/components/TreasureMap";
+import { IntroSequence } from "@/components/IntroSequence";
+import PirateTreasureMapPreview from "@/components/PirateTreasureMapPreview";
+import { shouldShowMissionPopup, setMissionPopupShown } from "@/lib/missionPopupSession";
 
 export default function TreasureMapPage() {
-  const [modality, setModality] = useState<string | null>(null);
-  const [showFeatureModal, setShowFeatureModal] = useState(false);
-  const [cameraLanded, setCameraLanded] = useState(false);
-  const [featureResult, setFeatureResult] = useState<string | null>(null);
+  const location = useLocation();
+  const routeState = location.state as { skipIntro?: boolean; skipMissionPopup?: boolean } | null;
+  const [showIntro, setShowIntro] = useState(() => !routeState?.skipIntro);
+  const [showPopup, setShowPopup] = useState(() => !routeState?.skipMissionPopup && shouldShowMissionPopup());
 
-  // Handler for selecting a modality
-  const handleSelect = (mod: string) => {
-    setModality(mod);
-    setShowFeatureModal(true);
-  };
-
-  // Handler for closing the feature modal and landing the camera
-  const handleFeatureModalComplete = (result: string) => {
-    setFeatureResult(result);
-    setShowFeatureModal(false);
-    setTimeout(() => setCameraLanded(true), 300);
+  const closePopup = () => {
+    setMissionPopupShown();
+    setShowPopup(false);
   };
 
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-      {/* Modal overlay for modality selection */}
-      {!modality && (
-        <div style={{
-          position: 'absolute', zIndex: 10, inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <div style={{ background: 'white', borderRadius: 24, padding: 40, minWidth: 320, textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
-            <h2 style={{ fontSize: 28, color: '#0099CC', marginBottom: 16 }}>Choose Your Modality</h2>
-            <p style={{ color: '#444', marginBottom: 32 }}>Before you begin your adventure, select a mode:</p>
-            <button onClick={() => handleSelect('AI Cloning')} style={{ margin: 8, padding: '16px 32px', fontSize: 18, borderRadius: 12, border: 'none', background: '#22c55e', color: 'white', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 8px #22c55e44' }}>🧬 AI Cloning</button>
-            <button onClick={() => handleSelect('Detection')} style={{ margin: 8, padding: '16px 32px', fontSize: 18, borderRadius: 12, border: 'none', background: '#3b82f6', color: 'white', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 8px #3b82f644' }}>🕵️ Detection</button>
+    <div className="relative">
+      {showIntro && <IntroSequence onFinish={() => setShowIntro(false)} />}
+      <div style={{ padding: 32 }}>
+        {showPopup && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 50,
+              background: "rgba(2, 6, 23, 0.65)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 16,
+            }}
+          >
+            <div
+              style={{
+                width: "min(680px, 100%)",
+                maxHeight: "90vh",
+                overflow: "auto",
+                borderRadius: 20,
+                background: "#ffffff",
+                padding: 22,
+                boxShadow: "0 24px 70px rgba(15, 23, 42, 0.28)",
+              }}
+            >
+              <PirateTreasureMapPreview />
+              <div style={{ fontSize: 14, color: "#0369a1", fontWeight: 800, marginBottom: 8 }}>
+                皮皮旅程開放
+              </div>
+              <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 10, color: "#0f172a" }}>
+                皮皮旅程
+              </h2>
+              <p style={{ color: "#334155", marginBottom: 16, lineHeight: 1.7 }}>
+                皮皮小幫手會先幫你準備好，再帶你進入 3D 旅程地圖。跟住發光路線完成廣東話發音挑戰，逐個收集歷險印記。
+              </p>
+              <div
+                style={{
+                  borderRadius: 14,
+                  border: "1px solid #bae6fd",
+                  background: "linear-gradient(135deg, #ecfeff 0%, #fff7ed 100%)",
+                  padding: 14,
+                  marginBottom: 16,
+                  color: "#334155",
+                  lineHeight: 1.7,
+                }}
+              >
+                點擊目前發光嘅歷險印記開始任務；答啱題目就會去下一站。
+              </div>
+              <button
+                type="button"
+                onClick={closePopup}
+                style={{
+                  borderRadius: 12,
+                  background: "#0284c7",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 16px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                進入皮皮旅程
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Feature modal for selected modality */}
-      {showFeatureModal && (
-        <div style={{
-          position: 'absolute', zIndex: 20, inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <div style={{ background: 'white', borderRadius: 24, padding: 40, minWidth: 340, textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
-            {modality === 'AI Cloning' ? (
-              <AICloningFeature onComplete={handleFeatureModalComplete} />
-            ) : (
-              <DetectionFeature onComplete={handleFeatureModalComplete} />
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Pass cameraLanded, modality, and featureResult to WorldMap3D */}
-      <WorldMap3D
-        cameraLanded={!!cameraLanded}
-        selectedModality={modality}
-        disableInteraction={!cameraLanded}
-        featureResult={featureResult}
-      />
+        <TreasureMap />
+      </div>
     </div>
   );
 }

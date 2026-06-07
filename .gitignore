@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Generated synthetic data (regenerate with npm run nepa:generate)
+data/synthetic/*.json
+!data/synthetic/.gitkeep

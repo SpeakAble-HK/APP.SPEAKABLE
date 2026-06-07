@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface CreditsScreenProps {
   visible: boolean;
@@ -6,37 +6,22 @@ interface CreditsScreenProps {
 }
 
 export const CreditsScreen: React.FC<CreditsScreenProps> = ({ visible, onReplay }) => (
-  <div className={`credits-screen fixed inset-0 flex flex-col items-center justify-center z-50 bg-gradient-to-b from-purple-900 to-blue-900 text-white transition-opacity duration-1000 ${visible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-    <div className="credits-content text-center animate-scrollCredits">
-      <h1 className="credits-title text-5xl font-bold mb-8 bg-gradient-to-r from-yellow-400 to-yellow-100 bg-clip-text text-transparent">AURA</h1>
-      <div className="credits-section mb-8">
-        <div className="credits-role text-base font-semibold tracking-widest uppercase bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Starring</div>
-        <div className="credits-name text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-100 bg-clip-text text-transparent">Aura</div>
-      </div>
-      <div className="credits-section mb-8">
-        <div className="credits-role text-base font-semibold tracking-widest uppercase bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Created By</div>
-        <div className="credits-name text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-100 bg-clip-text text-transparent">You & Aura</div>
-      </div>
-      <div className="credits-section mb-8">
-        <div className="credits-role text-base font-semibold tracking-widest uppercase bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Music & Sound</div>
-        <div className="credits-name text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-100 bg-clip-text text-transparent">The Universe</div>
-      </div>
-      <div className="credits-section mb-8">
-        <div className="credits-role text-base font-semibold tracking-widest uppercase bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Visual Effects</div>
-        <div className="credits-name text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-100 bg-clip-text text-transparent">Dreams & Imagination</div>
-      </div>
-      <div className="credits-section mb-8">
-        <div className="credits-role text-base font-semibold tracking-widest uppercase bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Special Thanks</div>
-        <div className="credits-name text-2xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-100 bg-clip-text text-transparent">Every Dreamer</div>
-      </div>
-      <p className="credits-thanks text-lg mt-12 bg-gradient-to-r from-indigo-200 to-blue-200 bg-clip-text text-transparent">
-        "The journey through the unknown is not about the destination,<br />
-        but about the courage to take the first step.<br /><br />
-        Thank you for joining Aura on this adventure."
+  <div
+    className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[linear-gradient(180deg,#082f2b_0%,#020617_100%)] px-6 text-center text-white transition-opacity duration-700 ${
+      visible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+    }`}
+  >
+    <div className="max-w-2xl">
+      <div className="mb-5 text-sm font-bold uppercase tracking-[0.22em] text-emerald-200">旅程完成</div>
+      <h1 className="mb-5 font-display text-5xl font-bold text-amber-100 md:text-7xl">靈光旅程</h1>
+      <p className="mb-8 text-lg leading-8 text-white/80">
+        皮皮遇到不少朋友，包括奧拉同字寶。大家一齊完成言語治療歷險，準備每日練少少。
       </p>
-      <div className="credits-end text-2xl font-bold mt-16 bg-gradient-to-r from-yellow-400 to-yellow-100 bg-clip-text text-transparent">✨ THE END ✨</div>
-      <button className="mt-10 px-6 py-2 bg-yellow-400 text-black rounded-full font-bold shadow-lg hover:bg-yellow-300" onClick={onReplay}>
-        Replay Journey
+      <button
+        className="rounded-full bg-amber-300 px-7 py-3 font-bold text-slate-950 shadow-xl transition hover:bg-emerald-300"
+        onClick={onReplay}
+      >
+        重新播放
       </button>
     </div>
   </div>

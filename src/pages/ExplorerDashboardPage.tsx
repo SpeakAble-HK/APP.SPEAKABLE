@@ -173,7 +173,7 @@ function ExerciseCard({ exercise, unlocked, unlockedAfter, onStart, isZh }: Exer
         transition-all duration-200
         ${unlocked
           ? "hover:border-sky-400 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(79,180,232,0.12)]"
-          : "opacity-70"
+          : "opacity-85"
         }
       `}
     >

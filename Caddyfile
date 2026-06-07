@@ -1,0 +1,3 @@
+app.speakable.hk {
+    reverse_proxy speakable:80
+}

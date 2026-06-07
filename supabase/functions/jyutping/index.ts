@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
-const API_BASE_URL = "http://comp.naozumi.me"
+const API_BASE_URL = Deno.env.get("SPEAKABLE_API_URL") || "http://localhost:8100"
 const MAX_TEXT_LENGTH = 5000
 
 function sanitizeText(text: string): string {

@@ -403,11 +403,9 @@ interface LanguageProviderProps {
 const VALID_LANGUAGES: Language[] = ["en-GB", "zh-TW", "zh-CN"];
 
 function readStoredLanguage(initialLanguage: Language): Language {
-  const pref = localStorage.getItem("preferred_language");
-  if (pref && VALID_LANGUAGES.includes(pref as Language)) return pref as Language;
-  const app = localStorage.getItem("app_language");
-  if (app && VALID_LANGUAGES.includes(app as Language)) return app as Language;
-  return initialLanguage;
+  // Force Cantonese-first UX for this deployment.
+  void initialLanguage;
+  return "zh-TW";
 }
 
 export function LanguageProvider({ children, initialLanguage = "zh-TW" }: LanguageProviderProps) {
@@ -416,19 +414,21 @@ export function LanguageProvider({ children, initialLanguage = "zh-TW" }: Langua
   );
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem("preferred_language", lang);
-    localStorage.setItem("app_language", lang);
+    // Keep API shape but pin runtime language to Cantonese.
+    void lang;
+    setLanguageState("zh-TW");
+    localStorage.setItem("preferred_language", "zh-TW");
+    localStorage.setItem("app_language", "zh-TW");
   };
 
   const t = (key: string): string => {
-    return translations[language][key] || translations["en-GB"][key] || key;
+    return translations["zh-TW"][key] || translations["en-GB"][key] || key;
   };
 
   const t3 = (en: string, tw: string, cn: string): string => {
-    if (language === "en-GB") return en;
-    if (language === "zh-TW") return tw;
-    return cn;
+    void en;
+    void cn;
+    return tw;
   };
 
   return (

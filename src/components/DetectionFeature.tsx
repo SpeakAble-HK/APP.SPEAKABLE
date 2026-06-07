@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getUserProfile } from "@/lib/userProfileStore";
-import "../App.css";
+import styles from "./FeatureModal.module.css";
 
 // Simulate an async API call for Detection
 export default function DetectionFeature({ onComplete }: { onComplete: (result: string) => void }) {
@@ -22,28 +22,28 @@ export default function DetectionFeature({ onComplete }: { onComplete: (result: 
         spoken_phonemes: [],
       });
       if (error) {
-        setResult('Error: ' + error.message);
+        setResult('偵測失敗：' + error.message);
       } else {
-        setResult('Detection Complete! No issues found.');
+        setResult('偵測完成！系統已記錄你嘅發音結果。');
       }
     } catch (e: any) {
-      setResult('Error: ' + (e?.message || 'Unknown error'));
+      setResult('偵測失敗：' + (e?.message || '未知錯誤'));
     }
     setLoading(false);
   };
 
   return (
-    <div className="detection-feature">
-      <h2 className="detection-title">🕵️ Detection</h2>
-      <p className="detection-desc">Start the detection process. (Replace with your real UI/API)</p>
+    <div className={styles["detection-feature"]}>
+      <h2 className={styles["detection-title"]}>🕵️ AI 發音偵測</h2>
+      <p className={styles["detection-desc"]}>開始進行發音偵測，分析你嘅粵語發音表現。</p>
       {!result ? (
-        <button className="detection-btn" onClick={handleStart} disabled={loading}>
-          {loading ? 'Detecting...' : 'Start Detection'}
+        <button className={styles["detection-btn"]} onClick={handleStart} disabled={loading}>
+          {loading ? '偵測中...' : '開始偵測'}
         </button>
       ) : (
         <>
-          <div className="detection-result">{result}</div>
-          <button className="detection-btn" onClick={() => onComplete(result)}>Continue</button>
+          <div className={styles["detection-result"]}>{result}</div>
+          <button className={styles["detection-btn"]} onClick={() => onComplete(result)}>完成並返回</button>
         </>
       )}
     </div>

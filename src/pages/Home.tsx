@@ -1,4 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import heroStyles from "./HeroLanding.module.css";
+import heroVideo from "@/assets/hero_video.mp4";
+import homeSectionStyles from "./HomeSection.module.css";
 import type { ComponentType, MouseEvent, SVGProps } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -145,31 +148,81 @@ function SunshineWave() {
 
 /* ─── Home ────────────────────────────────────────────────────── */
 
+import { useNavigate } from "react-router-dom";
 export default function Home() {
   const { t } = useTranslation();
+  // Hero video/fade state
+  const [videoDone, setVideoDone] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     document.title = "SpeakAble HK · Daily Cantonese speech practice";
-  }, []);
+    const overlayTimer = window.setTimeout(() => setOverlayVisible(true), 500);
+    if (videoDone) {
+      setTimeout(() => setFadeOut(true), 300); // slight delay for smoothness
+    }
+    return () => window.clearTimeout(overlayTimer);
+  }, [videoDone]);
+
+  const handleVideoEnd = () => {
+    setVideoDone(true);
+  };
+
+  const handleSignIn = () => {
+    window.location.href = "/auth";
+  };
 
   return (
     <div className="min-h-screen bg-white font-body text-ink">
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-pill focus:bg-ink focus:px-4 focus:py-2 focus:text-white"
-      >
-        {t("a11y.skipToContent")}
-      </a>
-      <SiteHeader />
-      <main id="main">
-        <Hero />
-        <TrustBar />
-        <SchoolsSection />
-        <ProfessionalsSection />
-        <FamiliesSection />
-        <PilotSection />
-      </main>
-      <SiteFooter />
+      {/* Hero video banner section */}
+      <div className={heroStyles["hero-bg"]}>
+        <div className={heroStyles["hero-stage"]}>
+          <video
+            ref={videoRef}
+            className={heroStyles["hero-video"] + (fadeOut ? " " + heroStyles["fade-out"] : "")}
+            src={heroVideo}
+            autoPlay
+            muted
+            playsInline
+            onEnded={handleVideoEnd}
+            onError={handleVideoEnd}
+          />
+          <div className={heroStyles["hero-fg"] + (overlayVisible ? " " + heroStyles["visible"] : "")}
+            aria-live="polite"
+          >
+            <div className={heroStyles["hero-overlay-card"]}>
+              <div className={heroStyles["hero-title"]}>SpeakAble Hong Kong</div>
+              <p className={heroStyles["hero-subtitle"]}>透過導向式冒險、聲音複製同互動任務，循序漸進練好廣東話發音。</p>
+              <button className={heroStyles["hero-signin-btn"]} onClick={handleSignIn}>
+                登入
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Main dashboard content after hero */}
+      {videoDone && fadeOut && (
+        <>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-pill focus:bg-ink focus:px-4 focus:py-2 focus:text-white"
+          >
+            {t("a11y.skipToContent")}
+          </a>
+          <SiteHeader />
+          <main id="main">
+            <Hero />
+            <TrustBar />
+            <SchoolsSection />
+            <ProfessionalsSection />
+            <FamiliesSection />
+            <PilotSection />
+          </main>
+          <SiteFooter />
+        </>
+      )}
     </div>
   );
 }
@@ -224,6 +277,25 @@ function SiteHeader() {
                 </a>
               </li>
             ))}
+            {/* Aura links */}
+            <li>
+              <Link
+                to="/aura-story"
+                className="inline-flex min-h-tap items-center text-small font-semibold text-purple-600 hover:text-purple-800 focus-visible:text-purple-800 focus-visible:outline-none border border-purple-100 rounded px-3 py-1 ml-2 bg-purple-50/60"
+                style={{ transition: 'background 0.2s, color 0.2s' }}
+              >
+                Aura Story
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/aura-journey"
+                className="inline-flex min-h-tap items-center text-small font-semibold text-sky-600 hover:text-sky-800 focus-visible:text-sky-800 focus-visible:outline-none border border-sky-100 rounded px-3 py-1 ml-2 bg-sky-50/60"
+                style={{ transition: 'background 0.2s, color 0.2s' }}
+              >
+                Aura Journey
+              </Link>
+            </li>
           </ul>
         </nav>
 
@@ -269,18 +341,23 @@ function SiteHeader() {
           </Button>
 
           {/* Hamburger — mobile only */}
-          <button
-            type="button"
-            className="inline-flex min-h-tap min-w-tap items-center justify-center rounded-md text-slate transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 md:hidden"
-            onClick={() => setMenuOpen((v) => !v)}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-nav"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-          >
-            {menuOpen
-              ? <X className="size-5" aria-hidden="true" />
-              : <Menu className="size-5" aria-hidden="true" />}
-          </button>
+          {(() => {
+            const ariaLabel = menuOpen ? "Close menu" : "Open menu";
+            return (
+              <button
+                type="button"
+                className="inline-flex min-h-tap min-w-tap items-center justify-center rounded-md text-slate transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 md:hidden"
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-expanded={menuOpen ? 'true' : 'false'}
+                aria-controls="mobile-nav"
+                aria-label={ariaLabel}
+              >
+                {menuOpen
+                  ? <X className="size-5" aria-hidden="true" />
+                  : <Menu className="size-5" aria-hidden="true" />}
+              </button>
+            );
+          })()}
         </div>
       </div>
 
@@ -508,8 +585,7 @@ function ProfessionalsSection() {
       {/* Organic blob top-left */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 bg-mint/20"
-        style={{ borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%" }}
+        className={homeSectionStyles["organic-blob"]}
       />
 
       <div className="relative mx-auto max-w-6xl px-6 py-24">
@@ -630,8 +706,8 @@ function PilotSection() {
             </a>
           </Button>
         </div>
-        <p className="mt-5 flex items-center justify-center gap-2 text-small text-white/60">
-          <img src={pipiHeroUrl} alt="" className="h-5 w-5 object-contain opacity-60" />
+        <p className="mt-5 flex items-center justify-center gap-2 text-small text-white/80">
+          <img src={pipiHeroUrl} alt="" className="h-5 w-5 object-contain opacity-80" />
           {t("footer.note")}
         </p>
       </div>
@@ -646,7 +722,7 @@ function SiteFooter() {
 
   return (
     <footer className="border-t border-sunshine/25 bg-ink">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-10 text-small text-white/55 md:grid-cols-3 md:items-center">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-6 py-10 text-small text-white/75 md:grid-cols-3 md:items-center">
         {/* Left: brand mark */}
         <div className="flex items-center gap-2.5">
           <img src={logoUrl} alt="" className="h-6 w-6 rounded-md" />

@@ -1,0 +1,257 @@
+{
+    "m_Shader": {
+        "Name": "FX/Water",
+        "IsNull": false,
+        "m_FileID": 1,
+        "m_PathID": 1
+    },
+    "m_SavedProperties": {
+        "m_TexEnvs": [
+            {
+                "Key": "_BumpMap",
+                "Value": {
+                    "m_Texture": {
+                        "Name": "Waterbump",
+                        "IsNull": false,
+                        "m_FileID": 2,
+                        "m_PathID": 1
+                    },
+                    "m_Scale": {
+                        "X": 1.0,
+                        "Y": 1.0
+                    },
+                    "m_Offset": {
+                        "X": 0.0,
+                        "Y": 0.0
+                    }
+                }
+            },
+            {
+                "Key": "_Fresnel",
+                "Value": {
+                    "m_Texture": {
+                        "Name": "Water Fresnel",
+                        "IsNull": false,
+                        "m_FileID": 3,
+                        "m_PathID": 1
+                    },
+                    "m_Scale": {
+                        "X": 1.0,
+                        "Y": 1.0
+                    },
+                    "m_Offset": {
+                        "X": 0.0,
+                        "Y": 0.0
+                    }
+                }
+            },
+            {
+                "Key": "_MainTex",
+                "Value": {
+                    "m_Texture": {
+                        "Name": "Water fallback",
+                        "IsNull": false,
+                        "m_FileID": 4,
+                        "m_PathID": 1
+                    },
+                    "m_Scale": {
+                        "X": 1.0,
+                        "Y": 1.0
+                    },
+                    "m_Offset": {
+                        "X": 0.0,
+                        "Y": 0.0
+                    }
+                }
+            },
+            {
+                "Key": "_ReflectionTex",
+                "Value": {
+                    "m_Texture": {
+                        "Name": "",
+                        "IsNull": true,
+                        "m_FileID": 0,
+                        "m_PathID": 0
+                    },
+                    "m_Scale": {
+                        "X": 1.0,
+                        "Y": 1.0
+                    },
+                    "m_Offset": {
+                        "X": 0.0,
+                        "Y": 0.0
+                    }
+                }
+            },
+            {
+                "Key": "_ReflectiveColor",
+                "Value": {
+                    "m_Texture": {
+                        "Name": "oceangradient",
+                        "IsNull": false,
+                        "m_FileID": 5,
+                        "m_PathID": 1
+                    },
+                    "m_Scale": {
+                        "X": 1.0,
+                        "Y": 1.0
+                    },
+                    "m_Offset": {
+                        "X": 0.0,
+                        "Y": 0.0
+                    }
+                }
+            },
+            {
+                "Key": "_ReflectiveColorCube",
+                "Value": {
+                    "m_Texture": {
+                        "Name": "",
+                        "IsNull": false,
+                        "m_FileID": 6,
+                        "m_PathID": 1
+                    },
+                    "m_Scale": {
+                        "X": 1.0,
+                        "Y": 1.0
+                    },
+                    "m_Offset": {
+                        "X": 0.0,
+                        "Y": 0.0
+                    }
+                }
+            },
+            {
+                "Key": "_RefractionTex",
+                "Value": {
+                    "m_Texture": {
+                        "Name": "",
+                        "IsNull": true,
+                        "m_FileID": 0,
+                        "m_PathID": 0
+                    },
+                    "m_Scale": {
+                        "X": 1.0,
+                        "Y": 1.0
+                    },
+                    "m_Offset": {
+                        "X": 0.0,
+                        "Y": 0.0
+                    }
+                }
+            }
+        ],
+        "m_Ints": null,
+        "m_Floats": [
+            {
+                "Key": "_ReflDistort",
+                "Value": 1.5
+            },
+            {
+                "Key": "_RefrDistort",
+                "Value": 0.5892857
+            },
+            {
+                "Key": "_WaveScale",
+                "Value": 0.06875
+            }
+        ],
+        "m_Colors": [
+            {
+                "Key": "WaveSpeed",
+                "Value": {
+                    "R": -5.0,
+                    "G": 0.0,
+                    "B": 4.0,
+                    "A": 0.0
+                }
+            },
+            {
+                "Key": "_BumpMap_ST",
+                "Value": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 0.0,
+                    "A": 0.0
+                }
+            },
+            {
+                "Key": "_Fresnel_ST",
+                "Value": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 0.0,
+                    "A": 0.0
+                }
+            },
+            {
+                "Key": "_HorizonColor",
+                "Value": {
+                    "R": 0.172,
+                    "G": 0.463,
+                    "B": 0.435,
+                    "A": 1.0
+                }
+            },
+            {
+                "Key": "_MainTex_ST",
+                "Value": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 0.0,
+                    "A": 0.0
+                }
+            },
+            {
+                "Key": "_ReflectionTex_ST",
+                "Value": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 0.0,
+                    "A": 0.0
+                }
+            },
+            {
+                "Key": "_ReflectiveColorCube_ST",
+                "Value": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 0.0,
+                    "A": 0.0
+                }
+            },
+            {
+                "Key": "_ReflectiveColor_ST",
+                "Value": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 0.0,
+                    "A": 0.0
+                }
+            },
+            {
+                "Key": "_RefrColor",
+                "Value": {
+                    "R": 0.9372549,
+                    "G": 0.9372549,
+                    "B": 0.9372549,
+                    "A": 1.0
+                }
+            },
+            {
+                "Key": "_RefractionTex_ST",
+                "Value": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 0.0,
+                    "A": 0.0
+                }
+            }
+        ]
+    },
+    "m_Name": "Daylight Water",
+    "m_PathID": 1,
+    "type": "Material",
+    "classID": 21,
+    "byteSize": 804
+}

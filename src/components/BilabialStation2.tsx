@@ -8,6 +8,7 @@ import { RecordingModule } from "@/components/bilabial/RecordingModule";
 import { AIFeedbackModule } from "@/components/bilabial/AIFeedbackModule";
 import { speakWithClonedVoice, generateClonedAudioBlob } from "@/components/bilabial/clonedVoiceTTS";
 import { getDemoClip, saveDemoClip } from "@/components/bilabial/demoPipeline";
+import { useTherapistCalibration } from "@/adaptation/useTherapistCalibration";
 import {
   computeAccuracyFromResult,
   matchingWrongMessage,
@@ -16,6 +17,8 @@ import {
 import { BilabialGameHUD } from "@/components/bilabial/BilabialGameHUD";
 import { BILABIAL_TARGET_COUNT, useBilabialGameSession } from "@/components/bilabial/useBilabialGameSession";
 import { SPEECH_PASS_ACCURACY_THRESHOLD } from "@/lib/speechExerciseRules";
+import { useAdaptationEngine } from "@/adaptation/useAdaptationEngine";
+import { useAchievements } from "@/hooks/useAchievements";
 import pipi from "@/assets/pipi-parrot-only.png";
 
 interface BilabialStation2Props {
@@ -59,11 +62,12 @@ function buildOptions(sp: Station2Phoneme, level: LessonLevel, itemIdx: number):
 }
 
 export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) {
+  // Fetch latest therapist calibration/voice clone data (gold standard)
+  const { data: calibrationData } = useTherapistCalibration();
   const { processRecording, isProcessing } = usePronunciationAPI();
   const game = useBilabialGameSession();
-  // Adaptation engine and achievements
-  const { updateProfile } = require('@/adaptation/useAdaptationEngine').useAdaptationEngine();
-  const { checkAndUnlock } = require('@/hooks/useAchievements').useAchievements();
+  const { updateProfile } = useAdaptationEngine();
+  const { checkAndUnlock } = useAchievements();
 
   const [meta, setMeta] = useState<MetaPhase>("select-phoneme");
   const [sp, setSp] = useState<Station2Phoneme | null>(null);
@@ -118,11 +122,23 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
     bump();
   };
 
+  // Play reference audio: prefer gold standard from calibration, fallback to Hon9Kon9ize pipeline
   const playTarget = async () => {
     if (!targetWord || isPlaying) return;
     setIsPlaying(true);
     try {
-      await speakWithClonedVoice(targetWord);
+      // Prefer gold standard reference audio from calibrationData
+      if (calibrationData && calibrationData.voice_clone_url) {
+        const audio = new Audio(calibrationData.voice_clone_url);
+        await new Promise<void>((resolve, reject) => {
+          audio.onended = resolve;
+          audio.onerror = reject;
+          audio.play();
+        });
+      } else {
+        // Fallback: use Hon9Kon9ize pipeline (existing logic)
+        await speakWithClonedVoice(targetWord);
+      }
     } finally {
       setIsPlaying(false);
     }
@@ -181,19 +197,24 @@ export function BilabialStation2({ onComplete, onBack }: BilabialStation2Props) 
     } else {
       game.registerWrong();
       setProdHint("請留意聲母。");
-      // Check cache first, then generate + cache if missing
-      const cacheKey = `ref_${targetWord}`;
-      getDemoClip(cacheKey).then(async (cached) => {
-        if (cached && cached.size > 200) {
-          setFailClone(URL.createObjectURL(cached));
-          return;
-        }
-        const refBlob = await generateClonedAudioBlob(targetWord);
-        if (refBlob) {
-          await saveDemoClip(cacheKey, refBlob);
-          setFailClone(URL.createObjectURL(refBlob));
-        }
-      });
+      // Prefer gold standard reference audio from calibrationData
+      if (calibrationData && calibrationData.voice_clone_url) {
+        setFailClone(calibrationData.voice_clone_url);
+      } else {
+        // Fallback: Check cache first, then generate + cache if missing (Hon9Kon9ize pipeline)
+        const cacheKey = `ref_${targetWord}`;
+        getDemoClip(cacheKey).then(async (cached) => {
+          if (cached && cached.size > 200) {
+            setFailClone(URL.createObjectURL(cached));
+            return;
+          }
+          const refBlob = await generateClonedAudioBlob(targetWord);
+          if (refBlob) {
+            await saveDemoClip(cacheKey, refBlob);
+            setFailClone(URL.createObjectURL(refBlob));
+          }
+        });
+      }
       setFailUser(URL.createObjectURL(audioBlob));
     }
     setItemPhase("prod_feedback");

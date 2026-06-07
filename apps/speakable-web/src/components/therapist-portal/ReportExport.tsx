@@ -1,7 +1,6 @@
-import React from 'react';
-
 
 import React, { useState } from 'react';
+// import './ReportExport.css';
 
 const students = [
   { id: 1, name: '陳小明' },
@@ -27,19 +26,31 @@ const ReportExport: React.FC = () => {
     <section style={{ marginBottom: 32 }}>
       <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#6366f1', marginBottom: 12 }}>📤 報告匯出</h2>
       <p style={{ color: '#6b7280', marginBottom: 8 }}>匯出學生學習及使用數據報告。</p>
-      <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 1px 4px #e5e7eb' }}>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ marginRight: 8 }}>選擇學生：</label>
-          <select value={selectedStudent} onChange={e => setSelectedStudent(Number(e.target.value))} style={{ marginRight: 16 }}>
+      <div className="report-export-container">
+        <div className="report-export-controls">
+          <label htmlFor="student-select" className="report-export-label">選擇學生：</label>
+          <select
+            id="student-select"
+            value={selectedStudent}
+            onChange={e => setSelectedStudent(Number(e.target.value))}
+            className="report-export-select"
+            aria-label="選擇學生"
+          >
             {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
-          <label style={{ marginRight: 8 }}>格式：</label>
-          <select value={selectedFormat} onChange={e => setSelectedFormat(e.target.value)} style={{ marginRight: 16 }}>
+          <label htmlFor="format-select" className="report-export-label">格式：</label>
+          <select
+            id="format-select"
+            value={selectedFormat}
+            onChange={e => setSelectedFormat(e.target.value)}
+            className="report-export-select"
+            aria-label="選擇格式"
+          >
             {formats.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
           </select>
-          <button onClick={handleExport}>匯出</button>
+          <button className="report-export-btn" onClick={handleExport}>匯出</button>
         </div>
-        {message && <div style={{ color: '#22c55e', fontWeight: 600 }}>{message}</div>}
+        {message && <div className="report-export-message">{message}</div>}
       </div>
     </section>
   );

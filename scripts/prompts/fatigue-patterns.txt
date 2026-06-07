@@ -1,0 +1,79 @@
+You are a Cantonese speech-language pathologist generating fatigue pattern data for SpeakAble's NEPA neural network.
+
+## SpeakAble Pilot Context
+
+SpeakAble pilot sessions are:
+- SLP-supervised, on a tablet
+- 8-15 minutes per session (clinic protocol)
+- Children practise a fixed set of Cantonese words
+- The app gives visual feedback (animations, PiPi the parrot)
+- NEPA detects fatigue by monitoring phoneme accuracy decline within a session
+
+## What NEPA Tracks for Fatigue
+
+When a child gets tired during a session:
+- Accuracy on complex phonemes drops first (tones, affricates)
+- Then accuracy on simpler phonemes drops (stops, nasals)
+- NEPA records: when fatigue started (fatigue_at_minute), which phonemes are affected
+- The SLP can see fatigue warnings on the therapist dashboard
+
+## Clinical Data: Attention Span by Age (Hong Kong norms)
+
+| Age | Sustained Attention | Fatigue Onset (70-80% of span) |
+|-----|-------------------|-------------------------------|
+| 4-6 | 5-8 min | 4-6 min |
+| 7-9 | 10-15 min | 8-12 min |
+| 10-12 | 15-20 min | 12-16 min |
+
+## Phonemes Most Affected by Fatigue (in order of vulnerability)
+
+1. **Tones** (especially tone_2 and tone_5 — require pitch control)
+2. **Affricates** /z/ /c/ (require precise timing)
+3. **Nasals in final position** /m/ /ng/ (require sustained voicing)
+4. **Labial-velars** /gw/ /kw/ (require coordination)
+5. **Fricatives** /s/ /f/ /h/ (require steady airflow)
+6. **Stops** /b/ /p/ /d/ /t/ (most resilient — brief, ballistic)
+
+## Diagnosis Adjustments
+
+| Diagnosis | Fatigue Onset | Severity |
+|-----------|-------------|----------|
+| typical | Baseline | Mild-moderate |
+| speech_delay | 20% earlier | More severe |
+| phonological_disorder | 30% earlier | Severe |
+| articulation_disorder | 10% earlier | Moderate (motor fatigue) |
+| cas | 40% earlier | Very severe (motor planning fatigue) |
+
+## Recovery Patterns
+
+- 2-3 min break → 50% recovery
+- 5 min break → 80% recovery
+- 10 min break → 95% recovery
+- Full recovery requires a new session
+
+## Task
+
+Generate fatigue patterns for ALL combinations of:
+- Age groups: 4-6, 7-9, 10-12
+- Diagnoses: typical, speech_delay, phonological_disorder, articulation_disorder, cas
+
+Return a JSON array. Each entry:
+```json
+{
+  "age_group": "4-6",
+  "onset_minutes": 5.5,
+  "severity": "moderate",
+  "affected_phonemes": ["/z/", "/c/", "tone_2", "tone_5"],
+  "recovery_minutes": 3
+}
+```
+
+Rules:
+1. onset_minutes must be within attention span range for the age group
+2. severity: "mild" for typical, "moderate" for speech_delay/articulation, "severe" for cas/phonological
+3. affected_phonemes: list the phonemes that decline first (tones first, then complex, then simple)
+4. recovery_minutes: 2-5 for mild, 3-7 for moderate, 5-10 for severe
+5. Generate at least 15 entries (all age × diagnosis combinations)
+6. Use SpeakAble-relevant phoneme keys: /b/ /p/ /m/ /d/ /t/ /n/ tone_1..tone_6 etc.
+
+Return ONLY valid JSON array.

@@ -1,12 +1,147 @@
-// Scene data for Aura Journey cinematic experience
-export const auraJourneyScenes = [
+// Scene data for the Cantonese cinematic Aura Journey experience.
+export type AuraJourneyScene = {
+  chapter: string;
+  title: string;
+  subtitle: string;
+  therapistGoal: string;
+  cinematicPrompt: string;
+  voicePrompt: string;
+  adaptationKey: string;
+  voiceText: string;
+  video: string;
+};
+
+export const auraJourneyScenes: AuraJourneyScene[] = [
   {
-    video: 'https://pfst.cf2.poecdn.net/base/video/d5652d65ed189d52128e5af282585c4e3278fe07b321c7b679b10ed0bb79b675',
-    chapter: 'Chapter I',
-    title: 'The Awakening',
-    subtitle: 'Where Aura first opens their eyes',
-    voicePrompt: 'Record your first greeting as Aura.',
-    adaptationKey: 'scene1',
+    chapter: "第 1 章",
+    title: "皮皮歷險記：金色小路",
+    subtitle: "熱身、聆聽、輪流講句子",
+    therapistGoal: "清楚講「我見到……」，練習等待同完整句子。",
+    cinematicPrompt: "皮皮行入金色小路，遇到新朋友奧拉。奧拉用柔和藍光帶皮皮睇花、樹同路牌。",
+    voicePrompt: "跟住講：皮皮見到黃花。奧拉帶皮皮行金色小路。",
+    adaptationKey: "sentence_turn_taking",
+    voiceText: "皮皮見到黃花。奧拉帶皮皮行金色小路。",
+    video: "https://pfst.cf2.poecdn.net/base/video/31992cb74e141d4eb7139f8ceba2ccac94697f0eddbabe4b379a95cd3152eb7f",
   },
-  // ...add more scenes as needed
+  {
+    chapter: "第 2 章",
+    title: "皮皮歷險記：氣球任務",
+    subtitle: "分類、選擇、清楚回答",
+    therapistGoal: "聽指令後選擇形狀，回答「呢個係……」。",
+    cinematicPrompt: "水上樂園升起好多氣球，皮皮要幫回聲船長搵出圓形氣球。",
+    voicePrompt: "跟住講：呢個係圓形氣球。皮皮用水炮射中目標。",
+    adaptationKey: "shape_request_response",
+    voiceText: "呢個係圓形氣球。皮皮用水炮射中目標。",
+    video: "https://pfst.cf2.poecdn.net/base/video/04ab7f3cfe0406b9aa199cb446a874b11d6ccfd39f2f123683fc0a1f0fa17fea",
+  },
+  {
+    chapter: "第 3 章",
+    title: "皮皮歷險記：雲上朋友",
+    subtitle: "描述物件、擴展詞彙",
+    therapistGoal: "用「我見到一朵……」加形容詞描述畫面。",
+    cinematicPrompt: "皮皮同奧拉坐上雲朵，遇到好多雲朋友，雲朵一時似船，一時似星星。",
+    voicePrompt: "跟住講：我見到一朵白色軟綿綿嘅雲。",
+    adaptationKey: "descriptive_language",
+    voiceText: "我見到一朵白色軟綿綿嘅雲。",
+    video: "https://pfst.cf2.poecdn.net/base/video/396b47c93d9f0b6f691e9f16ce2aa1d06377ac23a6380f13b7ee3bda4ae0b3d1",
+  },
+  {
+    chapter: "第 4 章",
+    title: "皮皮歷險記：迷宮停一停",
+    subtitle: "跟從步驟、等待輪候",
+    therapistGoal: "跟從「停、聽、講」三步，練習方向詞。",
+    cinematicPrompt: "皮皮同奧拉入咗發光迷宮，每個路口都要聽完指令先行。",
+    voicePrompt: "跟住講：皮皮停一停，聽一聽，然後向左行。",
+    adaptationKey: "following_directions",
+    voiceText: "皮皮停一停，聽一聽，然後向左行。",
+    video: "https://pfst.cf2.poecdn.net/base/video/a9bfe3edf41c4fb5b8490757fc767cff3d90e2b62392f67ae2faf76d030b442c",
+  },
+  {
+    chapter: "第 5 章",
+    title: "皮皮歷險記：元音火車",
+    subtitle: "聽音、模仿、分辨長短音",
+    therapistGoal: "慢速聽音同模仿，留意口形同聲音長短。",
+    cinematicPrompt: "奧拉車長帶皮皮去元音火車站，火車要靠清楚聲音先可以開車。",
+    voicePrompt: "跟住講：皮皮聽清楚，再慢慢講一次。",
+    adaptationKey: "vowel_imitation",
+    voiceText: "皮皮聽清楚，再慢慢講一次。",
+    video: "https://pfst.cf2.poecdn.net/base/video/ea43122355a75ef8285891fae01ae984c06ccde69876a7e292f9c8524caa6af5",
+  },
+  {
+    chapter: "第 6 章",
+    title: "皮皮歷險記：字寶聲音山",
+    subtitle: "聲母練習、合成音節",
+    therapistGoal: "由單一聲音合成詞語，練習開頭聲。",
+    cinematicPrompt: "皮皮遇到新朋友字寶，兩個一齊行過魔法圖書館同聲音山。",
+    voicePrompt: "跟住講：巴、包、波。皮皮同字寶砌聲音。",
+    adaptationKey: "initial_sound_blending",
+    voiceText: "巴、包、波。皮皮同字寶砌聲音。",
+    video: "https://pfst.cf2.poecdn.net/base/video/e3b0268eb998372cc99df9a572f5418e9edba47b987f89d10429f26af8970ee5",
+  },
+  {
+    chapter: "第 7 章",
+    title: "皮皮歷險記：字寶搵返聲音",
+    subtitle: "音量控制、輪流發聲",
+    therapistGoal: "分辨細聲、正常聲、大聲，使用合適音量。",
+    cinematicPrompt: "字寶嘅聲音電池冇電，皮皮陪佢去五個地方收集聲音珠。",
+    voicePrompt: "跟住用正常聲講：我準備好輪到我講。",
+    adaptationKey: "voice_volume_turns",
+    voiceText: "我準備好輪到我講。",
+    video: "https://pfst.cf2.poecdn.net/base/video/d5652d65ed189d52128e5af282585c4e3278fe07b321c7b679b10ed0bb79b675",
+  },
+  {
+    chapter: "第 8 章",
+    title: "皮皮歷險記：詞語拯救隊",
+    subtitle: "押韻、詞語配對、合作",
+    therapistGoal: "聽詞尾聲音，判斷兩個詞聽落似唔似。",
+    cinematicPrompt: "齒輪花園啲詞語亂晒，奧拉、字寶同皮皮一齊幫忙修理。",
+    voicePrompt: "跟住講：花同瓜聽落似。車同蛇聽落唔似。",
+    adaptationKey: "rhyme_matching",
+    voiceText: "花同瓜聽落似。車同蛇聽落唔似。",
+    video: "https://pfst.cf2.poecdn.net/base/video/4e5b7a7d05a6d087efb1d37f14b927cacc285ec6a4f1a2249694b8d4f751576b",
+  },
+  {
+    chapter: "第 9 章",
+    title: "皮皮歷險記：大詞切細細",
+    subtitle: "音節拍手、長詞拆解",
+    therapistGoal: "用拍手拆開長詞，再合成完整詞語。",
+    cinematicPrompt: "蒸汽站有個好長嘅詞卡住咗，皮皮要將大詞切成細細份。",
+    voicePrompt: "跟住講：大、象，大象。香、蕉，香蕉。",
+    adaptationKey: "syllable_segmentation",
+    voiceText: "大、象，大象。香、蕉，香蕉。",
+    video: "https://pfst.cf2.poecdn.net/base/video/473e985339173555d42d714d9fb52015d3284742688ff42d7f89925dbf4c721e",
+  },
+  {
+    chapter: "第 10 章",
+    title: "皮皮歷險記：專心小船",
+    subtitle: "專注聆聽、情緒調節",
+    therapistGoal: "慢呼吸後覆述短句重點。",
+    cinematicPrompt: "小船遇到大霧，皮皮要望住指南針，聽完一句指令先行一步。",
+    voicePrompt: "跟住講：皮皮慢慢呼吸，小船向前行。",
+    adaptationKey: "calm_listening",
+    voiceText: "皮皮慢慢呼吸，小船向前行。",
+    video: "https://pfst.cf2.poecdn.net/base/video/3931023e5b4216db68bc2a47abde63400bf26a0a35bed00522625f06b8be035d",
+  },
+  {
+    chapter: "第 11 章",
+    title: "皮皮歷險記：三個再試一次",
+    subtitle: "錯誤修正、鼓勵再嘗試",
+    therapistGoal: "聽到錯句後再講一次正確句，建立自我修正。",
+    cinematicPrompt: "皮皮、奧拉同字寶經過三個地方，途中有幾次講錯音，但大家一齊再試一次。",
+    voicePrompt: "跟住講：我講錯咗都可以再試一次。",
+    adaptationKey: "repair_attempts",
+    voiceText: "我講錯咗都可以再試一次。",
+    video: "https://pfst.cf2.poecdn.net/base/video/3db0f2673b4a679547e87cef38bd97be0de6c8d784b46c491df80371d95b833d",
+  },
+  {
+    chapter: "第 12 章",
+    title: "皮皮歷險記：畢業魔法棒",
+    subtitle: "複習、泛化、家居練習",
+    therapistGoal: "重溫聽、講、等、再試一次，帶到日常練習。",
+    cinematicPrompt: "奧拉送俾皮皮一支畢業魔法棒，提醒佢將治療室學到嘅技巧帶返屋企。",
+    voicePrompt: "跟住講：皮皮遇到不少朋友，包括奧拉同字寶。",
+    adaptationKey: "home_practice_transfer",
+    voiceText: "皮皮遇到不少朋友，包括奧拉同字寶。每日練少少，我會越講越清楚。",
+    video: "https://pfst.cf2.poecdn.net/base/video/dbfe24d46945bb8b07c7ad5c1789065578a619ebe6bfd55fdf7cb3ced60952ed",
+  },
 ];

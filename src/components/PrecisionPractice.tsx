@@ -150,7 +150,7 @@ export function PrecisionPractice({ audioUrl, waveformData, errorMarkers = [], c
             >
               <AlertTriangle className="h-3 w-3" />
               {marker.label}
-              {slowMode && <span className="text-[10px] opacity-70">0.5x</span>}
+              {slowMode && <span className="text-[10px] opacity-90">0.5x</span>}
             </button>
           ))}
         </div>

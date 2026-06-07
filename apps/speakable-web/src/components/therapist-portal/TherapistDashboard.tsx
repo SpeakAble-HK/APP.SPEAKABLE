@@ -2,6 +2,7 @@
 import React from 'react';
 
 import StudentManagement from './StudentManagement';
+import SchoolManagement from './SchoolManagement';
 import ModuleAssignment from './ModuleAssignment';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import ReportExport from './ReportExport';
@@ -26,6 +27,7 @@ const TherapistDashboard: React.FC = () => {
         <p style={{ color: '#a855f7', marginTop: 16 }}>（所有介面及內容均為廣東話）</p>
       </div>
       <TherapistCalibration />
+      <SchoolManagement />
       <StudentManagement />
       <ModuleAssignment />
       <AnalyticsDashboard />

@@ -33,14 +33,14 @@ export function DailyChallengesCard({ challenges, completedIds }: Props) {
         {challenges.map(ch => {
           const done = completedIds.has(ch.id);
           return (
-            <div key={ch.id} className={`flex items-start gap-2.5 ${done ? "opacity-60" : ""}`}>
+            <div key={ch.id} className={`flex items-start gap-2.5 ${done ? "opacity-85" : ""}`}>
               {done ? (
                 <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />
               ) : (
                 <Circle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
               )}
               <div className="flex-1 min-w-0">
-                <p className={`text-xs font-extrabold ${done ? "text-muted-foreground line-through" : "text-foreground"}`}>
+                <p className={`text-xs font-extrabold ${done ? "text-foreground line-through" : "text-foreground"}`}>
                   {ch.emoji} {getTitle(ch)}
                 </p>
                 <p className="text-[11px] text-muted-foreground">{getDesc(ch)}</p>

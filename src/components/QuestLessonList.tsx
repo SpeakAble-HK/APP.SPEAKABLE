@@ -74,7 +74,7 @@ export function QuestLessonList({ world, worldIndex, onSelectLesson, onBack, all
                         ? "border-success/30 bg-success/5 cursor-pointer hover:bg-success/10"
                         : isCurrent
                         ? "border-primary/40 bg-card hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
-                        : "border-border bg-muted/30 cursor-not-allowed opacity-60"
+                        : "border-border bg-muted/20 cursor-not-allowed opacity-85"
                     }`}
                   >
                     <p className="text-sm font-extrabold text-foreground leading-tight">{lesson.sentence}</p>

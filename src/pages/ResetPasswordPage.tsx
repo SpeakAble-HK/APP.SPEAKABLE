@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,8 +13,6 @@ const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const isEn = language === 'en-GB';
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -38,11 +35,11 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error(isEn ? 'Passwords do not match' : '密碼不一致');
+      toast.error('密碼不一致');
       return;
     }
     if (!PASSWORD_REGEX.test(password)) {
-      toast.error(isEn ? 'Password does not meet requirements' : '密碼不符合要求');
+      toast.error('密碼不符合要求');
       return;
     }
     setIsSubmitting(true);
@@ -70,8 +67,8 @@ export default function ResetPasswordPage() {
               <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center mx-auto mb-5">
                 <CheckCircle2 className="h-7 w-7 text-green-500" />
               </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">{isEn ? 'Password updated' : '密碼已更新'}</h1>
-              <p className="text-sm text-muted-foreground">{isEn ? 'Redirecting you to the app...' : '正在為您跳轉...'}</p>
+              <h1 className="text-2xl font-bold text-foreground mb-2">密碼已更新</h1>
+              <p className="text-sm text-muted-foreground">正在為你跳轉...</p>
             </div>
           ) : (
             <>
@@ -79,12 +76,12 @@ export default function ResetPasswordPage() {
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <KeyRound className="h-6 w-6 text-primary" />
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">{isEn ? 'Set new password' : '設定新密碼'}</h1>
-                <p className="text-sm text-muted-foreground mt-1">{isEn ? 'Choose a strong password for your account' : '為您的帳號選擇一個強密碼'}</p>
+                <h1 className="text-2xl font-bold text-foreground">設定新密碼</h1>
+                <p className="text-sm text-muted-foreground mt-1">為你的帳號設定一個高強度密碼。</p>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="new-password" className="text-xs font-medium">{isEn ? 'New password' : '新密碼'}</Label>
+                  <Label htmlFor="new-password" className="text-xs font-medium">新密碼</Label>
                   <div className="relative">
                     <Input id="new-password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl pr-10" placeholder="••••••••" />
                     <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" onClick={() => setShowPassword(!showPassword)}>
@@ -93,12 +90,12 @@ export default function ResetPasswordPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="confirm-password" className="text-xs font-medium">{isEn ? 'Confirm password' : '確認密碼'}</Label>
+                  <Label htmlFor="confirm-password" className="text-xs font-medium">確認密碼</Label>
                   <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-11 rounded-xl" placeholder="••••••••" />
                 </div>
-                <p className="text-[11px] text-muted-foreground">{isEn ? 'Min 6 chars: uppercase, lowercase, number, special character.' : '至少6個字符：大寫、小寫、數字和特殊字符。'}</p>
+                <p className="text-[11px] text-muted-foreground">至少6個字符：大寫、小寫、數字和特殊字符。</p>
                 <Button type="submit" className="w-full h-11 rounded-xl font-semibold text-base" disabled={isSubmitting || !password || !confirmPassword}>
-                  {isSubmitting ? (isEn ? 'Updating...' : '更新中...') : (isEn ? 'Update password' : '更新密碼')}
+                  {isSubmitting ? '更新中...' : '更新密碼'}
                 </Button>
               </form>
             </>

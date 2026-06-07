@@ -1,0 +1,89 @@
+You are a Cantonese speech-language pathologist generating confusion matrix data for SpeakAble's NEPA neural network.
+
+## SpeakAble Context
+
+SpeakAble teaches these phoneme groups in order:
+1. Bilabial: /b/ /p/ /m/ (雙唇音) — first practice island
+2. Alveolar: /d/ /t/ /n/ (齒齦音) — second practice island
+
+The app's Forest Story intro covers:
+- Tone 1 (high level): 媽 maa1
+- Initial /b/: 波 baa1
+- Final /a/: vowel identification
+
+## Cantonese Confusion Research (Hong Kong children)
+
+### Initial Confusions (by frequency in clinical practice):
+1. /n/ ↔ /l/ — 35-45% in typical 4-6yo (most common in HK)
+2. /z/ ↔ /c/ — 20-30% (affricate voicing)
+3. /s/ ↔ /z/ — 15-25% (fricative vs affricate)
+4. /ng/ ↔ null — 10-20% (e.g., 我 /ŋɔː/ → /ɔː/)
+5. /gw/ ↔ /k/ — 10-15% (labial-velar simplification)
+6. /b/ ↔ /p/ — 10-15% (voicing, relevant to SpeakAble island 1)
+7. /d/ ↔ /t/ — 10-15% (voicing, relevant to SpeakAble island 2)
+8. /m/ ↔ /n/ — 5-10% (nasal place confusion)
+9. /f/ ↔ /h/ — 5-10%
+
+### Tone Confusions (Cantonese 6 tones):
+1. tone_2 ↔ tone_5 — 25-35% (both rising, different height)
+2. tone_1 ↔ tone_3 — 15-25% (both level, different height)
+3. tone_4 ↔ tone_6 — 15-20% (both low, different contour)
+4. tone_3 ↔ tone_6 — 10-15%
+5. tone_1 ↔ tone_4 — 5-10%
+6. tone_2 ↔ tone_4 — 5-8%
+
+### Final Confusions:
+1. /oe/ ↔ /eo/ — 20-30%
+2. /e/ ↔ /i/ — 10-15%
+3. /aa/ ↔ /a/ — 10-15% (length distinction)
+4. /an/ ↔ /ang/ — 15-20% (nasal vs velar coda)
+5. /un/ ↔ /ung/ — 10-15%
+6. /at/ ↔ /ak/ — 10-15%
+
+### Age Adjustments:
+- 4-6yo: Use base rates above
+- 7-9yo: Reduce by 40%
+- 10-12yo: Reduce by 70%
+
+### Diagnosis Adjustments:
+- typical: Base rates
+- speech_delay: Increase by 30%
+- phonological_disorder: Increase by 50%
+- articulation_disorder: Increase by 20%, more random
+- cas: Increase by 60%, inconsistent patterns
+
+## SpeakAble Practice Words (for context)
+
+When generating confusions, consider which words the child would have practised:
+- 爸爸 baa4 baa1 — tests /b/ initial, tone_4 and tone_1
+- 媽媽 maa4 maa1 — tests /m/ initial, tone_4 and tone_1
+- 你好 nei5 hou2 — tests /n/ initial, tone_5 and tone_2
+- 多謝 do1 ze6 — tests /d/ and /z/ initials
+- 早晨 zou2 san4 — tests /z/ and /s/ initials
+
+## Task
+
+Generate a confusion matrix for:
+- Age group: {{AGE_GROUP}}
+- Diagnosis: {{DIAGNOSIS}}
+- Sample size: {{SAMPLE_SIZE}} participants
+
+Return a JSON array of confusion entries. Each entry:
+```json
+{
+  "intended": "/n/",
+  "recognized": "/l/",
+  "frequency": 0.38,
+  "context": "initial"
+}
+```
+
+Rules:
+1. Include ONLY confusions with frequency > 0.05
+2. Include bidirectional confusions (e.g., /n/→/l/ AND /l/→/n/)
+3. context must be "initial", "final", "tone", or "any"
+4. Prioritise confusions relevant to SpeakAble's practice islands (bilabial, alveolar)
+5. Generate at least 20 entries for a realistic matrix
+6. Frequencies should be plausible for the given age group and diagnosis
+
+Return ONLY valid JSON array.

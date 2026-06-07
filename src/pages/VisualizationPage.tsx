@@ -421,7 +421,7 @@ const VisualizationPage = () => {
             <div className="space-y-6">
               {/* Recording controls */}
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                <h3 className="font-semibold text-foreground mb-4">Record Your Voice</h3>
+                <h3 className="font-semibold text-foreground mb-4">錄製你的聲音</h3>
                 <div className="flex items-center gap-3">
                   {!isRecording ? (
                     <Button
@@ -430,7 +430,7 @@ const VisualizationPage = () => {
                       variant="default"
                     >
                       <Mic className="h-4 w-4" />
-                      Start Recording
+                      開始錄音
                     </Button>
                   ) : (
                     <Button
@@ -439,7 +439,7 @@ const VisualizationPage = () => {
                       className="gap-2"
                     >
                       <Square className="h-4 w-4" />
-                      Stop
+                      停止
                     </Button>
                   )}
                   {hasRecording && !isRecording && (
@@ -455,12 +455,12 @@ const VisualizationPage = () => {
                 {isRecording && (
                   <div className="flex items-center gap-2 mt-3 text-sm text-destructive">
                     <span className="w-2 h-2 rounded-full bg-destructive animate-pulse"></span>
-                    Recording...
+                    錄音中...
                   </div>
                 )}
                 {hasRecording && !isRecording && (
                   <p className="mt-3 text-sm text-muted-foreground">
-                    Recording saved. Click play to listen.
+                    錄音已儲存，按播放鍵可即時重聽。
                   </p>
                 )}
               </div>

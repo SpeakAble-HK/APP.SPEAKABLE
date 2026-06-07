@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import logoUrl from "@/assets/logo.png";
 import pipiUrl from "@/assets/pipi-hero.png";
+import styles from "./RoleSelectionPage.module.css";
 
 type LangCode = "zh-HK" | "zh-CN" | "en";
 
@@ -71,27 +72,19 @@ interface RoleCardProps {
 
 function RoleCard({ theme, Icon, title, description, btnLabel, onClick }: RoleCardProps) {
   const tk = THEME_TOKENS[theme];
-
-  function handleKey(e: KeyboardEvent<HTMLDivElement>) {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onClick();
-    }
-  }
-
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={onClick}
-      onKeyDown={handleKey}
       className={[
-        "group flex cursor-pointer flex-col items-center rounded-lg border p-8 text-center",
+        "group flex flex-col items-center rounded-lg border p-8 text-center cursor-pointer",
         "transition-all duration-200 hover:-translate-y-1 hover:shadow-md",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600",
         tk.cardBg,
         tk.cardBorder,
+        styles["role-card-btn"]
       ].join(" ")}
+      aria-label={title}
     >
       {/* Icon circle */}
       <div
@@ -106,21 +99,18 @@ function RoleCard({ theme, Icon, title, description, btnLabel, onClick }: RoleCa
       <p className="mb-6 min-h-[3.5rem] text-small leading-relaxed text-slate">
         {description}
       </p>
-
-      {/* CTA button — stopPropagation prevents double-firing from the card click */}
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onClick(); }}
+      <span
         className={[
           "w-full min-h-tap rounded-pill px-6 py-3 text-small font-medium",
           "transition-all duration-150 hover:scale-[1.02] active:scale-[0.98]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600",
           tk.btnCls,
+          styles["role-card-label"]
         ].join(" ")}
       >
         {btnLabel}
-      </button>
-    </div>
+      </span>
+    </button>
   );
 }
 
@@ -167,7 +157,7 @@ export default function RoleSelectionPage() {
 
   const handleRoleSelect = (role: "student" | "professional") => {
     localStorage.setItem("speakable_role", role);
-    if (role === "student") navigate("/adventure-start");
+    if (role === "student") navigate("/auth");
     else navigate("/st-dashboard");
   };
 
@@ -235,8 +225,7 @@ export default function RoleSelectionPage() {
           <img
             src={pipiUrl}
             alt="PiPi 皮皮"
-            className="mx-auto mb-6 block h-44 w-44 animate-pipi-bob object-contain drop-shadow-md"
-            style={{ marginLeft: "calc(50% - 88px + 10px)" }}
+            className={["mx-auto mb-6 block h-44 w-44 animate-pipi-bob object-contain drop-shadow-md", styles["pipi-hero-img"]].join(" ")}
           />
           <h1 className="mb-3 font-display text-[36px] font-medium leading-tight tracking-tight text-ink">
             {t("roleSelect.title")}

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { AnimatedBubbles } from './AnimatedBubbles';
-import { IntroScreen } from './IntroScreen';
-import { ChapterCard } from './ChapterCard';
-import { SceneIndicator } from './SceneIndicator';
-import { CreditsScreen } from './CreditsScreen';
-import { AuraVideoPlayer } from './AuraVideoPlayer';
-import { VoiceCloningPrompt } from './VoiceCloningPrompt';
-import { auraJourneyScenes } from './auraJourneyScenes';
-import { useAuraJourneyState } from './useAuraJourneyState';
-import { useVoiceCloning } from './useVoiceCloning';
+import React, { useState } from "react";
+import { AnimatedBubbles } from "./AnimatedBubbles";
+import { IntroScreen } from "./IntroScreen";
+import { ChapterCard } from "./ChapterCard";
+import { SceneIndicator } from "./SceneIndicator";
+import { CreditsScreen } from "./CreditsScreen";
+import { AuraVideoPlayer } from "./AuraVideoPlayer";
+import { VoiceCloningPrompt } from "./VoiceCloningPrompt";
+import { auraJourneyScenes } from "./auraJourneyScenes";
+import { useAuraJourneyState } from "./useAuraJourneyState";
+import { useVoiceCloning } from "./useVoiceCloning";
 
 export const AuraJourneyExperience: React.FC = () => {
   const state = useAuraJourneyState();
@@ -26,49 +26,76 @@ export const AuraJourneyExperience: React.FC = () => {
     recordVoice,
   } = state;
   const [showVoicePrompt, setShowVoicePrompt] = useState(false);
+  const [paused, setPaused] = useState(false);
   const voice = useVoiceCloning();
+  const { audioUrl, reset: resetVoice } = voice;
 
   const scene = auraJourneyScenes[currentScene];
 
-  // Handlers
-  const handleStart = () => setShowIntro(false);
-  const handlePlayPause = () => {};
-  const handleEnded = () => setShowVoicePrompt(true);
+  React.useEffect(() => {
+    if (!showChapter) return;
+    const timer = window.setTimeout(() => setShowChapter(false), 1400);
+    return () => window.clearTimeout(timer);
+  }, [showChapter, setShowChapter]);
+
+  const handleStart = () => {
+    setShowIntro(false);
+    setShowChapter(true);
+    setPaused(false);
+  };
+  const handlePlayPause = () => setPaused((value) => !value);
+  const handleEnded = () => {
+    setPaused(false);
+    setShowVoicePrompt(true);
+  };
   const handleNext = () => {
     setShowVoicePrompt(false);
+    setPaused(false);
     nextScene();
   };
-  const handlePrev = () => prevScene();
+  const handlePrev = () => {
+    setShowVoicePrompt(false);
+    setPaused(false);
+    prevScene();
+  };
   const handleProgress = () => {};
 
   const handleRecord = async () => {
     await voice.startRecording(scene.voicePrompt, scene.voiceText || scene.title);
-    // Wait for audioUrl to be set, then play and continue
-    // This is handled by useEffect below
   };
 
-  // When voice.audioUrl is set after recording, play it and continue
   React.useEffect(() => {
-    if (voice.audioUrl) {
-      recordVoice(currentScene, voice.audioUrl);
-      setShowVoicePrompt(false);
-      nextScene();
+    if (audioUrl) {
+      recordVoice(currentScene, audioUrl);
+      const audio = new Audio(audioUrl);
+      audio.onended = () => {
+        resetVoice();
+        setShowVoicePrompt(false);
+        nextScene();
+      };
+      audio.play().catch(() => {
+        resetVoice();
+        setShowVoicePrompt(false);
+        nextScene();
+      });
     }
-  }, [voice.audioUrl]);
+  }, [audioUrl, currentScene, nextScene, recordVoice, resetVoice]);
 
   const handleSkip = () => {
     setShowVoicePrompt(false);
+    setPaused(false);
     nextScene();
   };
 
   const handleReplay = () => {
     setShowCredits(false);
     setShowIntro(true);
+    setPaused(false);
     state.setCurrentScene(0);
   };
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-gradient-to-br from-purple-900 to-blue-900 overflow-hidden">
+    <div className="relative h-full min-h-screen w-full overflow-hidden bg-slate-950">
       <AnimatedBubbles />
       {showIntro && <IntroScreen onStart={handleStart} />}
       <ChapterCard
@@ -80,7 +107,11 @@ export const AuraJourneyExperience: React.FC = () => {
       <SceneIndicator title={scene.title} visible={!showIntro && !showChapter && !showCredits} />
       <AuraVideoPlayer
         src={scene.video}
-        playing={!showIntro && !showChapter && !showCredits && !showVoicePrompt}
+        chapter={scene.chapter}
+        title={scene.title}
+        cinematicPrompt={scene.cinematicPrompt}
+        therapistGoal={scene.therapistGoal}
+        playing={!showIntro && !showChapter && !showCredits && !showVoicePrompt && !paused}
         onPlayPause={handlePlayPause}
         onEnded={handleEnded}
         onNext={handleNext}
@@ -90,6 +121,7 @@ export const AuraJourneyExperience: React.FC = () => {
       {showVoicePrompt && (
         <VoiceCloningPrompt
           prompt={scene.voicePrompt}
+          targetText={scene.voiceText}
           onRecord={handleRecord}
           onSkip={handleSkip}
           recording={voice.recording}

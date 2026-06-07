@@ -8,7 +8,7 @@ export function GlobalHeader() {
   const location = useLocation();
   const { coins, xp } = useCurrency();
 
-  const isMapPage = location.pathname === "/explorer";
+  const isMapPage = location.pathname === "/explorer" || location.pathname === "/dashboard";
   const isHomePage = location.pathname === "/";
   const showBack = !isHomePage && !isMapPage;
 

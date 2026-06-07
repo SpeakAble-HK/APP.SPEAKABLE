@@ -10,7 +10,7 @@ const ProtectedRoute: React.FC = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen text-lg text-gray-500">Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen text-lg font-semibold text-slate-700">Loading...</div>;
   }
 
   if (!user) {

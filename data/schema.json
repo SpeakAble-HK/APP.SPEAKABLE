@@ -1,0 +1,280 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SpeakAble Pilot Synthetic Training Data",
+  "description": "Matches NEPA API shapes + pilot consent model. Generated data can be fed directly into NEPA training or used as mock data.",
+
+  "definitions": {
+
+    "ParticipantCode": {
+      "type": "string",
+      "pattern": "^p-[0-9]{4}$",
+      "description": "Anonymised pilot participant code (e.g. p-0001). Never a real name."
+    },
+
+    "PhonemeKey": {
+      "type": "string",
+      "description": "NEPA phoneme identifier. Initials: /b/ /p/ /m/ /f/ /d/ /t/ /n/ /l/ /g/ /k/ /ng/ /h/ /gw/ /kw/ /w/ /z/ /c/ /s/ /j/. Tones: tone_1..tone_6. Finals: /aa/ /a/ /e/ /i/ /o/ /u/ /oe/ /eo/ /yu/ etc."
+    },
+
+    "JyutpingSyllable": {
+      "type": "string",
+      "pattern": "^[a-z]+[1-6]$",
+      "description": "Single jyutping syllable with tone number, e.g. baa4, maa1, nei5"
+    },
+
+    "PhonemeProfileEntry": {
+      "type": "object",
+      "required": ["accuracy", "trend"],
+      "properties": {
+        "accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "trend": { "type": "string", "enum": ["improving", "stable", "declining"] },
+        "confusion": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PhonemeKey" }
+        },
+        "fatigue_delta": { "type": "number", "minimum": -1, "maximum": 1 }
+      },
+      "description": "Matches NEPA phoneme_profile[phoneme_key] shape exactly."
+    },
+
+    "PhonemeEvent": {
+      "type": "object",
+      "required": ["phoneme", "start_ms", "end_ms", "confidence", "phoneme_type"],
+      "properties": {
+        "phoneme": { "type": "string" },
+        "start_ms": { "type": "number", "minimum": 0 },
+        "end_ms": { "type": "number", "minimum": 0 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "phoneme_type": { "type": "string", "enum": ["initial", "final", "tone", "coda"] }
+      },
+      "description": "Matches SpeakAble PronunciationAPI PhonemeEvent interface."
+    },
+
+    "WordAttempt": {
+      "type": "object",
+      "required": ["word_id", "hanzi", "intended_jyutping", "spoken_jyutping", "confidence", "jy_conf", "tone_conf", "is_low_confidence", "events"],
+      "properties": {
+        "word_id": { "type": "string", "description": "Reference to canto_lexicon.seed.json word ID" },
+        "hanzi": { "type": "string" },
+        "intended_jyutping": { "type": "string" },
+        "spoken_jyutping": { "type": ["string", "null"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "jy_conf": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tone_conf": { "type": "number", "minimum": 0, "maximum": 1 },
+        "is_low_confidence": { "type": "boolean" },
+        "events": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PhonemeEvent" }
+        }
+      },
+      "description": "One attempt at one word. Matches WordResult from usePronunciationAPI."
+    },
+
+    "PilotSession": {
+      "type": "object",
+      "required": ["session_id", "participant_code", "timestamp", "duration_minutes", "slp_id", "word_attempts"],
+      "properties": {
+        "session_id": { "type": "string", "pattern": "^sess-[0-9]{4}-[0-9]{3}$" },
+        "participant_code": { "$ref": "#/definitions/ParticipantCode" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "duration_minutes": { "type": "number", "minimum": 1, "maximum": 30 },
+        "slp_id": { "type": "string", "description": "Supervising SLP identifier" },
+        "words_practised": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Word IDs from canto_lexicon.seed.json"
+        },
+        "word_attempts": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/WordAttempt" }
+        },
+        "overall_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "fatigue_detected": { "type": "boolean" },
+        "fatigue_at_minute": { "type": ["number", "null"], "minimum": 0 },
+        "exercises_completed": { "type": "integer", "minimum": 0 }
+      },
+      "description": "One pilot therapy session. Matches what the app collects per consent form section 3."
+    },
+
+    "NEPAWorldModel": {
+      "type": "object",
+      "required": ["user_id", "phoneme_profile", "total_attempts", "fatigue", "next_best_exercise"],
+      "properties": {
+        "user_id": { "$ref": "#/definitions/ParticipantCode" },
+        "phoneme_profile": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/PhonemeProfileEntry" },
+          "description": "Keyed by PhonemeKey. Matches NEPA /api/v1/world-model response."
+        },
+        "total_attempts": { "type": "integer", "minimum": 0 },
+        "fatigue": {
+          "type": "object",
+          "properties": {
+            "started_at_ms": { "type": ["number", "null"] }
+          }
+        },
+        "next_best_exercise": {
+          "type": "object",
+          "properties": {
+            "target_phonemes": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/PhonemeKey" }
+            }
+          }
+        }
+      },
+      "description": "Exact shape of NEPA /api/v1/world-model/{patient_id} response (inner world_model object)."
+    },
+
+    "NEPADashboardSummary": {
+      "type": "object",
+      "required": ["user_id", "total_sessions", "overall_accuracy", "phoneme_breakdown", "recent_history", "fatigue_status"],
+      "properties": {
+        "user_id": { "$ref": "#/definitions/ParticipantCode" },
+        "name": { "type": "string", "description": "Display name — for pilot, same as participant_code" },
+        "total_sessions": { "type": "integer", "minimum": 0 },
+        "overall_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "phoneme_breakdown": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "accuracy": { "type": "number" },
+              "trend": { "type": "string" },
+              "errors": { "type": "integer" }
+            }
+          }
+        },
+        "recent_history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "timestamp": { "type": "string" }
+            }
+          }
+        },
+        "fatigue_status": {
+          "type": "object",
+          "properties": {
+            "detected": { "type": "boolean" }
+          }
+        }
+      },
+      "description": "Exact shape of NEPA /api/v1/dashboard/{patient_id} response (inner summary object)."
+    },
+
+    "ExerciseRecommendation": {
+      "type": "object",
+      "required": ["exercise_type", "target_phonemes", "difficulty", "description"],
+      "properties": {
+        "exercise_type": {
+          "type": "string",
+          "enum": ["tone_drill", "minimal_pair", "syllable_repeat", "word_practice", "sentence_build"]
+        },
+        "target_phonemes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PhonemeKey" }
+        },
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "description": { "type": "string" }
+      },
+      "description": "Matches NEPA /api/v1/exercise/recommend response items."
+    },
+
+    "ConsentRecord": {
+      "type": "object",
+      "required": ["participant_code", "pilot_consent", "training_consent", "consent_date", "slp_id"],
+      "properties": {
+        "participant_code": { "$ref": "#/definitions/ParticipantCode" },
+        "pilot_consent": { "type": "boolean", "description": "Consent to participate (sections 1-4 of consent form)" },
+        "training_consent": { "type": "boolean", "description": "Separate consent for recordings used to improve models (section 5)" },
+        "consent_date": { "type": "string", "format": "date" },
+        "slp_id": { "type": "string" },
+        "age_group": { "type": "string", "enum": ["4-6", "7-9", "10-12"] },
+        "diagnosis": {
+          "type": "string",
+          "enum": ["typical", "speech_delay", "phonological_disorder", "articulation_disorder", "cas"]
+        },
+        "native_language": { "type": "string", "enum": ["cantonese", "putonghua", "bilingual"] }
+      },
+      "description": "Pilot consent record. training_consent=false means this participant's data CANNOT enter the training set."
+    },
+
+    "ConfusionEntry": {
+      "type": "object",
+      "required": ["intended", "recognized", "frequency", "context"],
+      "properties": {
+        "intended": { "$ref": "#/definitions/PhonemeKey" },
+        "recognized": { "$ref": "#/definitions/PhonemeKey" },
+        "frequency": { "type": "number", "minimum": 0, "maximum": 1 },
+        "context": { "type": "string", "enum": ["initial", "final", "tone", "any"] }
+      }
+    },
+
+    "FatiguePattern": {
+      "type": "object",
+      "required": ["age_group", "onset_minutes", "severity"],
+      "properties": {
+        "age_group": { "type": "string", "enum": ["4-6", "7-9", "10-12"] },
+        "onset_minutes": { "type": "number", "minimum": 1, "maximum": 30 },
+        "severity": { "type": "string", "enum": ["mild", "moderate", "severe"] },
+        "affected_phonemes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PhonemeKey" }
+        },
+        "recovery_minutes": { "type": "number", "minimum": 1, "maximum": 10 }
+      }
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["generated_at", "generator", "count"],
+      "properties": {
+        "generated_at": { "type": "string", "format": "date-time" },
+        "generator": { "type": "string" },
+        "model": { "type": "string" },
+        "count": { "type": "integer" },
+        "pilot_id": { "type": "string", "description": "Pilot programme identifier" }
+      }
+    },
+    "consent_records": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ConsentRecord" }
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["participant_code", "consent", "world_model", "dashboard", "sessions"],
+        "properties": {
+          "participant_code": { "$ref": "#/definitions/ParticipantCode" },
+          "consent": { "$ref": "#/definitions/ConsentRecord" },
+          "world_model": { "$ref": "#/definitions/NEPAWorldModel" },
+          "dashboard": { "$ref": "#/definitions/NEPADashboardSummary" },
+          "recommendations": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/ExerciseRecommendation" }
+          },
+          "sessions": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/PilotSession" }
+          }
+        }
+      }
+    },
+    "confusion_matrices": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ConfusionEntry" }
+    },
+    "fatigue_patterns": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/FatiguePattern" }
+    }
+  }
+}

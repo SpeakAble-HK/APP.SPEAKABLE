@@ -370,7 +370,7 @@ export function BilabialStation1({ onComplete, onBack }: BilabialStation1Props) 
                   type="button"
                   disabled={isDemoPlaying}
                   onClick={() => void runDemo()}
-                  className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-primary/10 py-4 font-headline text-base font-extrabold text-primary shadow-sm transition hover:bg-primary/15 active:scale-[0.98] disabled:opacity-60"
+                  className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-primary/10 py-4 font-headline text-base font-extrabold text-primary shadow-sm transition hover:bg-primary/15 active:scale-[0.98] disabled:opacity-85"
                 >
                   <MaterialIcon icon="volume_up" className="text-2xl" filled />
                   {demoDone ? "再聽一次示範" : "播放示範音"}

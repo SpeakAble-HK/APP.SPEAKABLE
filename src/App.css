@@ -17,7 +17,8 @@
 	margin-bottom: 12px;
 }
 .ai-cloning-desc {
-	color: #444;
+	color: #1f2937;
+	font-weight: 500;
 	margin-bottom: 24px;
 }
 .ai-cloning-btn {
@@ -52,7 +53,8 @@
 	margin-bottom: 12px;
 }
 .detection-desc {
-	color: #444;
+	color: #1f2937;
+	font-weight: 500;
 	margin-bottom: 24px;
 }
 .detection-btn {

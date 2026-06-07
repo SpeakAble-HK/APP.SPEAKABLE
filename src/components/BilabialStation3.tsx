@@ -12,6 +12,8 @@ import { AIFeedbackModule } from "@/components/bilabial/AIFeedbackModule";
 import { BilabialGameHUD } from "@/components/bilabial/BilabialGameHUD";
 import { BILABIAL_TARGET_COUNT, useBilabialGameSession } from "@/components/bilabial/useBilabialGameSession";
 import { SPEECH_PASS_ACCURACY_THRESHOLD } from "@/lib/speechExerciseRules";
+import { useAdaptationEngine } from "@/adaptation/useAdaptationEngine";
+import { useAchievements } from "@/hooks/useAchievements";
 import pipi from "@/assets/pipi-parrot-only.png";
 
 interface BilabialStation3Props {
@@ -37,9 +39,8 @@ function shellHintText(correct: BilabialPhonemeKey): string {
 export function BilabialStation3({ onComplete, onBack }: BilabialStation3Props) {
   const { processRecording, isProcessing } = usePronunciationAPI();
   const game = useBilabialGameSession();
-  // Adaptation engine and achievements
-  const { updateProfile } = require('@/adaptation/useAdaptationEngine').useAdaptationEngine();
-  const { checkAndUnlock } = require('@/hooks/useAchievements').useAchievements();
+  const { updateProfile } = useAdaptationEngine();
+  const { checkAndUnlock } = useAchievements();
 
   const item: Station3Item = useMemo(() => {
     const pool = [...station3Items];

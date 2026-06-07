@@ -1,0 +1,332 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://speakablehk.com/schemas/utterance-analysis-1.2.0.json",
+  "title": "UtteranceAnalysis",
+  "description": "SpeakAble 1.2 Unified Utterance Analysis Schema — contract between ASR 1.2, TTS 1.2, SNN/NEPA, and Fusion API",
+  "type": "object",
+  "required": ["schema_version", "analysis_id", "timestamp", "input", "phonemes", "syllables", "timing", "tone", "smoothness_score", "articulation_score", "tone_accuracy_score", "scores", "errors", "metadata"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.2.0",
+      "description": "Schema version for forward compatibility"
+    },
+    "analysis_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this analysis"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when analysis was performed"
+    },
+    "input": {
+      "type": "object",
+      "required": ["audio_duration_ms", "intended_text", "intended_jyutping", "sample_rate_hz"],
+      "properties": {
+        "audio_url": { "type": "string", "format": "uri" },
+        "audio_duration_ms": { "type": "number", "minimum": 0 },
+        "intended_text": { "type": "string" },
+        "intended_jyutping": { "type": "string", "pattern": "^[a-z]+[1-6](\\s+[a-z]+[1-6])*$" },
+        "sample_rate_hz": { "type": "integer", "enum": [8000, 16000, 22050, 44100, 48000] }
+      }
+    },
+    "phonemes": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/PhonemeAnalysis" }
+    },
+    "syllables": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/SyllableAnalysis" }
+    },
+    "timing": {
+      "type": "object",
+      "required": ["total_duration_ms", "speech_onset_ms", "speech_offset_ms", "pauses", "speech_rate_syllables_per_sec"],
+      "properties": {
+        "total_duration_ms": { "type": "number", "minimum": 0 },
+        "speech_onset_ms": { "type": "number", "minimum": 0 },
+        "speech_offset_ms": { "type": "number", "minimum": 0 },
+        "pauses": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/TimingSpan" }
+        },
+        "speech_rate_syllables_per_sec": { "type": "number", "minimum": 0 }
+      }
+    },
+    "tone": {
+      "type": "object",
+      "required": ["overall_accuracy", "per_tone", "confusions"],
+      "properties": {
+        "overall_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "per_tone": {
+          "type": "object",
+          "patternProperties": {
+            "^tone_[1-6]$": {
+              "type": "object",
+              "required": ["accuracy", "count"],
+              "properties": {
+                "accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+                "count": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        },
+        "confusions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["expected", "detected", "count"],
+            "properties": {
+              "expected": { "$ref": "#/definitions/ToneLabel" },
+              "detected": { "$ref": "#/definitions/ToneLabel" },
+              "count": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "smoothness_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "articulation_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "tone_accuracy_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "scores": { "$ref": "#/definitions/UtteranceScores" },
+    "errors": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ErrorInstance" }
+    },
+    "metadata": { "$ref": "#/definitions/FusionMetadata" }
+  },
+  "definitions": {
+    "PhonemeType": {
+      "type": "string",
+      "enum": ["initial", "final", "tone", "coda"]
+    },
+    "ToneLabel": {
+      "type": "string",
+      "enum": ["tone_1", "tone_2", "tone_3", "tone_4", "tone_5", "tone_6"]
+    },
+    "PhonemeId": {
+      "type": "object",
+      "required": ["symbol", "type"],
+      "properties": {
+        "symbol": { "type": "string" },
+        "type": { "$ref": "#/definitions/PhonemeType" },
+        "tone": { "$ref": "#/definitions/ToneLabel" },
+        "jyutping": { "type": "string" }
+      }
+    },
+    "TimingSpan": {
+      "type": "object",
+      "required": ["start_ms", "end_ms", "duration_ms"],
+      "properties": {
+        "start_ms": { "type": "number", "minimum": 0 },
+        "end_ms": { "type": "number", "minimum": 0 },
+        "duration_ms": { "type": "number", "minimum": 0 }
+      }
+    },
+    "PitchPoint": {
+      "type": "object",
+      "required": ["time_ms", "hz"],
+      "properties": {
+        "time_ms": { "type": "number", "minimum": 0 },
+        "hz": { "type": "number", "minimum": 0 }
+      }
+    },
+    "ToneContour": {
+      "type": "object",
+      "required": ["tone", "points", "start_hz", "end_hz", "peak_hz", "direction"],
+      "properties": {
+        "tone": { "$ref": "#/definitions/ToneLabel" },
+        "points": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PitchPoint" }
+        },
+        "start_hz": { "type": "number" },
+        "end_hz": { "type": "number" },
+        "peak_hz": { "type": "number" },
+        "direction": {
+          "type": "string",
+          "enum": ["rising", "falling", "level", "dipping", "rising_falling"]
+        }
+      }
+    },
+    "PhonemeAnalysis": {
+      "type": "object",
+      "required": ["phoneme", "position", "syllable_index", "timing", "confidence", "is_correct"],
+      "properties": {
+        "phoneme": { "$ref": "#/definitions/PhonemeId" },
+        "position": { "type": "integer", "minimum": 0 },
+        "syllable_index": { "type": "integer", "minimum": 0 },
+        "timing": { "$ref": "#/definitions/TimingSpan" },
+        "expected_timing": { "$ref": "#/definitions/TimingSpan" },
+        "timing_deviation_ms": { "type": "number" },
+        "timing_status": {
+          "type": "string",
+          "enum": ["early", "on_time", "late", "too_long", "too_short"]
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "is_correct": { "type": "boolean" },
+        "tone": {
+          "type": "object",
+          "required": ["detected", "expected", "accuracy", "is_correct"],
+          "properties": {
+            "detected": { "$ref": "#/definitions/ToneLabel" },
+            "expected": { "$ref": "#/definitions/ToneLabel" },
+            "contour": { "$ref": "#/definitions/ToneContour" },
+            "expected_contour": { "$ref": "#/definitions/ToneContour" },
+            "accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+            "is_correct": { "type": "boolean" }
+          }
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "asr": {
+              "type": "object",
+              "required": ["confidence", "is_correct"],
+              "properties": {
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "is_correct": { "type": "boolean" }
+              }
+            },
+            "snn": {
+              "type": "object",
+              "required": ["confidence", "timing_deviation_ms"],
+              "properties": {
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "timing_deviation_ms": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "SyllableAnalysis": {
+      "type": "object",
+      "required": ["syllable_index", "hanzi", "intended_jyutping", "spoken_jyutping", "confidence", "jy_conf", "tone_conf", "is_low_confidence", "phonemes", "timing"],
+      "properties": {
+        "syllable_index": { "type": "integer", "minimum": 0 },
+        "hanzi": { "type": "string" },
+        "intended_jyutping": { "type": "string" },
+        "spoken_jyutping": { "type": "string" },
+        "initial": { "$ref": "#/definitions/PhonemeAnalysis" },
+        "final": { "$ref": "#/definitions/PhonemeAnalysis" },
+        "tone_analysis": {
+          "type": "object",
+          "properties": {
+            "detected": { "$ref": "#/definitions/ToneLabel" },
+            "expected": { "$ref": "#/definitions/ToneLabel" },
+            "contour": { "$ref": "#/definitions/ToneContour" },
+            "expected_contour": { "$ref": "#/definitions/ToneContour" },
+            "accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+            "is_correct": { "type": "boolean" }
+          }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "jy_conf": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tone_conf": { "type": "number", "minimum": 0, "maximum": 1 },
+        "is_low_confidence": { "type": "boolean" },
+        "phonemes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PhonemeAnalysis" }
+        },
+        "timing": { "$ref": "#/definitions/TimingSpan" }
+      }
+    },
+    "UtteranceScores": {
+      "type": "object",
+      "required": ["overall", "articulation", "tone_accuracy", "smoothness", "rhythm", "initial_accuracy", "final_accuracy", "tone_accuracy_breakdown"],
+      "properties": {
+        "overall": { "type": "number", "minimum": 0, "maximum": 1 },
+        "articulation": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tone_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "smoothness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "rhythm": { "type": "number", "minimum": 0, "maximum": 1 },
+        "initial_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "final_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tone_accuracy_breakdown": {
+          "type": "object",
+          "patternProperties": {
+            "^tone_[1-6]$": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "ErrorCategory": {
+      "type": "string",
+      "enum": ["articulation", "tone", "timing", "omission", "insertion", "substitution"]
+    },
+    "ErrorInstance": {
+      "type": "object",
+      "required": ["category", "syllable_index", "position", "severity"],
+      "properties": {
+        "category": { "$ref": "#/definitions/ErrorCategory" },
+        "phoneme": { "$ref": "#/definitions/PhonemeId" },
+        "syllable_index": { "type": "integer", "minimum": 0 },
+        "position": { "type": "integer", "minimum": 0 },
+        "expected": { "type": "string" },
+        "actual": { "type": "string" },
+        "severity": {
+          "type": "string",
+          "enum": ["minor", "moderate", "major"]
+        },
+        "suggestion": { "type": "string" }
+      }
+    },
+    "ASRMetadata": {
+      "type": "object",
+      "required": ["model_version", "phoneme_timestamps", "tone_classification", "noise_robustness", "child_speech_optimized"],
+      "properties": {
+        "model_version": { "type": "string" },
+        "phoneme_timestamps": { "type": "boolean" },
+        "tone_classification": { "type": "boolean" },
+        "noise_robustness": { "type": "boolean" },
+        "child_speech_optimized": { "type": "boolean" },
+        "wer": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tone_wer": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "TTSMetadata": {
+      "type": "object",
+      "required": ["model_version", "voice_variant", "expected_timing_profile", "tone_contour_source"],
+      "properties": {
+        "model_version": { "type": "string" },
+        "voice_variant": {
+          "type": "string",
+          "enum": ["child_friendly", "slow", "normal", "fast"]
+        },
+        "expected_timing_profile": { "type": "string" },
+        "tone_contour_source": {
+          "type": "string",
+          "enum": ["canonical", "personalized"]
+        }
+      }
+    },
+    "SNNMetadata": {
+      "type": "object",
+      "required": ["model_version", "inference_time_ms", "stdp_weight", "fatigue_detected"],
+      "properties": {
+        "model_version": { "type": "string" },
+        "inference_time_ms": { "type": "number", "minimum": 0 },
+        "stdp_weight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "fatigue_detected": { "type": "boolean" },
+        "fatigue_onset_ms": { "type": "number", "minimum": 0 }
+      }
+    },
+    "FusionMetadata": {
+      "type": "object",
+      "required": ["pipeline_version", "asr", "tts", "snn", "fusion_strategy", "processing_time_ms"],
+      "properties": {
+        "pipeline_version": { "type": "string" },
+        "asr": { "$ref": "#/definitions/ASRMetadata" },
+        "tts": { "$ref": "#/definitions/TTSMetadata" },
+        "snn": { "$ref": "#/definitions/SNNMetadata" },
+        "fusion_strategy": {
+          "type": "string",
+          "enum": ["weighted_average", "voting", "neural"]
+        },
+        "processing_time_ms": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

@@ -8,10 +8,10 @@ const AuraStory: React.FC = () => {
     <div className="max-w-[1400px] mx-auto relative z-10 p-6">
       <div className="text-center mb-10">
         <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400 bg-clip-text text-transparent mb-2 drop-shadow-[0_0_60px_rgba(168,85,247,0.5)] tracking-tight leading-tight">
-          ✨ Aura 故事 ✨
+          皮皮小助手
         </h1>
         <p className="text-lg text-white/80 font-medium tracking-wide">
-          閱讀同學習嘅奇妙冒險
+          跟皮皮隊長完成發音，成為一個厲害的小演講家。
         </p>
       </div>
       {/* Accessibility bar, chapter grid, video player, parent portal, etc. will be migrated here */}

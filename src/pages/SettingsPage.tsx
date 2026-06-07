@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User, Mic, Bell, Volume2, ChevronRight, LogOut,
-  Sun, Moon, Globe, Shield,
+  Sun, Moon, Globe, Shield, Map,
 } from "lucide-react";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -53,6 +53,7 @@ function InlineToggle({ checked, onToggle }: { checked: boolean; onToggle: () =>
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={checked ? "Turn off" : "Turn on"}
       onClick={onToggle}
       className={`relative w-12 h-7 rounded-pill transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 shrink-0 ${
         checked ? "bg-sky-400" : "bg-mist"
@@ -163,6 +164,18 @@ export default function SettingsPage() {
               <Mic className="h-4 w-4" />
             </IconCircle>
             <span className="flex-1 text-small font-medium text-ink">重新錄音</span>
+            <ChevronRight className="h-4 w-4 text-slate shrink-0" />
+          </SettingRow>
+
+          {/* Re-do onboarding */}
+          <SettingRow onClick={() => {
+            localStorage.removeItem("speakable-onboarding-complete");
+            navigate("/onboarding");
+          }}>
+            <IconCircle bg="bg-[#EDE9FE]" color="text-purple-500">
+              <Map className="h-4 w-4" />
+            </IconCircle>
+            <span className="flex-1 text-small font-medium text-ink">重新新手教學</span>
             <ChevronRight className="h-4 w-4 text-slate shrink-0" />
           </SettingRow>
 

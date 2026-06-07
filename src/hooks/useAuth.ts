@@ -21,12 +21,52 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // In development, check for mock user in localStorage
+    if (import.meta.env.MODE === 'development') {
+      const mockProfileRaw = localStorage.getItem('speakable-user-profile-v1');
+      if (mockProfileRaw) {
+        const mockProfile = JSON.parse(mockProfileRaw);
+        // Fake a minimal user object compatible with Supabase User
+        setUser({
+          id: mockProfile.user_id || 'mock-user-123',
+          email: 'mock@speakable.hk',
+          aud: 'authenticated',
+          role: 'authenticated',
+          app_metadata: {},
+          user_metadata: {},
+          identities: [],
+          created_at: '',
+          confirmed_at: '',
+          last_sign_in_at: '',
+          updated_at: '',
+          phone: '',
+          email_confirmed_at: '',
+          factors: [],
+          phone_confirmed_at: '',
+          banned_until: '',
+          reauthentication_at: '',
+        });
+        setProfile({
+          id: mockProfile.user_id || 'mock-user-123',
+          user_id: mockProfile.user_id || 'mock-user-123',
+          display_name: mockProfile.display_name || 'Mock User',
+          first_name: mockProfile.first_name || 'Mock',
+          last_name: mockProfile.last_name || 'User',
+          username: mockProfile.username || 'mockuser',
+          date_of_birth: mockProfile.date_of_birth || null,
+          preferred_language: mockProfile.preferred_language || null,
+          avatar_url: mockProfile.avatar_url || null,
+        });
+        setLoading(false);
+        return;
+      }
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
         // Defer profile fetch to avoid deadlock
         if (session?.user) {
           setTimeout(() => {

@@ -1,0 +1,36 @@
+/* Fade-in animation */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 1.2s ease-in forwards;
+}
+
+/* Logo fade-in with scale */
+@keyframes logo-fade-in {
+  0% { opacity: 0; transform: scale(0.8) rotate(-10deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+.animate-logo-fade-in {
+  animation: logo-fade-in 1.2s 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 3D curve SVG animation */
+@keyframes curve-draw {
+  to { stroke-dashoffset: 0; }
+}
+.animate-curve {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: curve-draw 1.5s 1s ease-out forwards;
+}
+
+/* Auth form pop-in */
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-pop-in {
+  animation: pop-in 0.7s 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}

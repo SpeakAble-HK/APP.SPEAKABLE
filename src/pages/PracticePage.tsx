@@ -20,13 +20,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserStats } from "@/hooks/useUserStats";
 import { usePracticeSession, QuestionResult } from "@/hooks/usePracticeSession";
 import { usePronunciationResults } from "@/hooks/usePronunciationResults";
 import { getTodaysTopic, getTopicTitle, getTopicDescription, PracticeTopic } from "@/data/practiceTopics";
+import { getMiniGameConfig, isQuizGameEnabled } from "@/lib/miniGameConfigStore";
+import DetectionFeature from "@/components/DetectionFeature";
+import AICloningFeature from "@/components/AICloningFeature";
 import { toast } from "sonner";
+
+type MissionKey = "detect" | "clone" | null;
+
+const FOREST_SEALS: { id: string; label: string; emoji: string }[] = [
+  { id: "seal-1", label: "歷險印記 1", emoji: "✨" },
+  { id: "seal-2", label: "歷險印記 2", emoji: "✨" },
+  { id: "seal-3", label: "歷險印記 3", emoji: "✨" },
+  { id: "seal-4", label: "歷險印記 4", emoji: "✨" },
+  { id: "seal-5", label: "歷險印記 5", emoji: "✨" },
+  { id: "seal-6", label: "歷險印記 6", emoji: "✨" },
+];
+
+const MAP_MINI_GAMES: { id: string; name: string; emoji: string }[] = [
+  { id: "game-tone", name: "聲調快拍", emoji: "🎯" },
+  { id: "game-mouth", name: "口型對對碰", emoji: "👄" },
+  { id: "game-rhythm", name: "節奏跟讀賽", emoji: "🥁" },
+];
 
 const ALLOWED_AUDIO_TYPES = ['audio/webm', 'audio/wav', 'audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/m4a'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -37,12 +58,15 @@ const PracticePage = () => {
   const navigate = useNavigate();
   const { t, t3, language } = useLanguage();
   const { user } = useAuth();
+  const miniGameConfig = user?.id ? getMiniGameConfig(user.id) : null;
+  const visibleMiniGames = MAP_MINI_GAMES.filter((g) => isQuizGameEnabled(miniGameConfig, g.id));
   const { stats } = useUserStats();
   const { saveResult } = usePronunciationResults();
   
   const [step, setStep] = useState<PracticeStep>('language');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('yue'); // Cantonese default
   const [topic] = useState<PracticeTopic>(getTodaysTopic());
+  const [activeMission, setActiveMission] = useState<MissionKey>(null);
   
   // Audio recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -357,6 +381,86 @@ const PracticePage = () => {
             </CardContent>
           </Card>
 
+          {/* Initial Missions */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-foreground mb-3">
+              {t3('Initial Missions', '初始任務', '初始任务')}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setActiveMission('detect')}
+                className="text-left rounded-xl border-2 border-primary/30 bg-primary/5 hover:border-primary hover:bg-primary/10 transition-all p-5"
+              >
+                <div className="text-3xl mb-2">🕵️</div>
+                <div className="font-semibold text-foreground">
+                  {t3('AI Pronunciation Detection', 'AI 發音偵測', 'AI 发音侦测')}
+                </div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {t3('Analyze your Cantonese pronunciation with AI.', '用 AI 分析你嘅粵語發音。', '用 AI 分析你的粤语发音。')}
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMission('clone')}
+                className="text-left rounded-xl border-2 border-primary/30 bg-primary/5 hover:border-primary hover:bg-primary/10 transition-all p-5"
+              >
+                <div className="text-3xl mb-2">🎤</div>
+                <div className="font-semibold text-foreground">
+                  {t3('Voice Cloning', '聲音複製', '声音复制')}
+                </div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {t3('Train a personal voice model for practice.', '訓練屬於你嘅個人聲音模型。', '训练属于你的个人声音模型。')}
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* 印記 + Mini-Games Grid (from Enchanted Forest) */}
+          <Card className="card-shadow mb-6">
+            <CardHeader>
+              <CardTitle>{t3('Adventure Seals & Mini-Games', '歷險印記 與 迷你遊戲', '历险印记 与 迷你游戏')}</CardTitle>
+              <CardDescription>
+                {t3('Tap a seal or mini-game to open the treasure map.', '點擊印記或迷你遊戲，前往寶藏地圖。', '点击印记或迷你游戏，前往宝藏地图。')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4">
+                <div className="text-sm font-medium text-muted-foreground mb-2">{t3('Seals', '印記', '印记')}</div>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {FOREST_SEALS.map((seal) => (
+                    <button
+                      key={seal.id}
+                      type="button"
+                      onClick={() => navigate('/treasure-map')}
+                      className="flex flex-col items-center justify-center rounded-xl border border-border bg-card hover:border-primary hover:bg-primary/5 transition-all p-3 aspect-square"
+                      aria-label={seal.label}
+                    >
+                      <div className="text-2xl">{seal.emoji}</div>
+                      <div className="text-[11px] text-muted-foreground mt-1 text-center">{seal.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground mb-2">{t3('Mini-Games', '迷你遊戲', '迷你游戏')}</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {visibleMiniGames.map((game) => (
+                    <button
+                      key={game.id}
+                      type="button"
+                      onClick={() => navigate('/treasure-map')}
+                      className="flex items-center gap-3 rounded-xl border border-border bg-card hover:border-primary hover:bg-primary/5 transition-all p-3 text-left"
+                    >
+                      <div className="text-2xl">{game.emoji}</div>
+                      <div className="font-medium text-foreground">{game.name}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Language Selection */}
           <Card className="card-shadow">
             <CardHeader>
@@ -410,6 +514,25 @@ const PracticePage = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Mission Modals */}
+        <Dialog open={activeMission !== null} onOpenChange={(open) => !open && setActiveMission(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {activeMission === 'detect'
+                  ? t3('AI Pronunciation Detection', 'AI 發音偵測', 'AI 发音侦测')
+                  : t3('Voice Cloning', '聲音複製', '声音复制')}
+              </DialogTitle>
+            </DialogHeader>
+            {activeMission === 'detect' && (
+              <DetectionFeature onComplete={() => setActiveMission(null)} />
+            )}
+            {activeMission === 'clone' && (
+              <AICloningFeature onComplete={() => setActiveMission(null)} />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

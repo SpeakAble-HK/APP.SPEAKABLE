@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { auraJourneyScenes } from './auraJourneyScenes';
+import { useCallback, useState } from "react";
+import { auraJourneyScenes } from "./auraJourneyScenes";
 
 export function useAuraJourneyState() {
   const [currentScene, setCurrentScene] = useState(0);
@@ -8,25 +8,32 @@ export function useAuraJourneyState() {
   const [showCredits, setShowCredits] = useState(false);
   const [voiceData, setVoiceData] = useState<Record<number, string>>({});
 
-  function nextScene() {
-    if (currentScene < auraJourneyScenes.length - 1) {
-      setCurrentScene(currentScene + 1);
-      setShowChapter(true);
-    } else {
+  const nextScene = useCallback(() => {
+    setCurrentScene((scene) => {
+      if (scene < auraJourneyScenes.length - 1) {
+        setShowChapter(true);
+        return scene + 1;
+      }
+
       setShowCredits(true);
-    }
-  }
+      return scene;
+    });
+  }, []);
 
-  function prevScene() {
-    if (currentScene > 0) {
-      setCurrentScene(currentScene - 1);
-      setShowChapter(true);
-    }
-  }
+  const prevScene = useCallback(() => {
+    setCurrentScene((scene) => {
+      if (scene > 0) {
+        setShowChapter(true);
+        return scene - 1;
+      }
 
-  function recordVoice(sceneIdx: number, url: string) {
+      return scene;
+    });
+  }, []);
+
+  const recordVoice = useCallback((sceneIdx: number, url: string) => {
     setVoiceData((prev) => ({ ...prev, [sceneIdx]: url }));
-  }
+  }, []);
 
   return {
     currentScene,

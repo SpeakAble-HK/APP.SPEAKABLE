@@ -11,3 +11,5 @@ project_id = "shuhmvmdkjspgawygqyf"
     verify_jwt = false
   [functions.voice-clone]
     verify_jwt = false
+  [functions.openrouter-insight]
+    verify_jwt = false

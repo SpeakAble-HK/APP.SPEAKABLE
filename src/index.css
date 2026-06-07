@@ -8,7 +8,7 @@
   :root {
     /* Surface / Background */
     --background: 210 50% 97%;
-    --foreground: 203 9% 18%;
+    --foreground: 203 22% 14%;
 
     /* Card */
     --card: 0 0% 100%;
@@ -29,7 +29,7 @@
 
     /* Muted — surface-container */
     --muted: 207 18% 91%;
-    --muted-foreground: 207 5% 36%;
+    --muted-foreground: 207 22% 20%;
 
     /* Accent — tertiary-container gold */
     --accent: 45 100% 50%;
@@ -44,7 +44,7 @@
     --success-foreground: 0 0% 100%;
 
     /* Borders & inputs */
-    --border: 202 5% 68%;
+    --border: 202 10% 56%;
     --input: 205 16% 87%;
     --ring: 190 100% 24%;
 
@@ -109,7 +109,7 @@
     --secondary-foreground: 27 100% 23%;
 
     --muted: 203 14% 18%;
-    --muted-foreground: 210 5% 55%;
+    --muted-foreground: 210 18% 78%;
 
     --accent: 45 80% 45%;
     --accent-foreground: 45 100% 93%;
@@ -120,8 +120,8 @@
     --success: 142 60% 50%;
     --success-foreground: 0 0% 100%;
 
-    --border: 203 12% 22%;
-    --input: 203 12% 22%;
+    --border: 203 14% 30%;
+    --input: 203 14% 28%;
     --ring: 193 89% 60%;
 
     --sidebar-background: 203 18% 12%;
@@ -180,8 +180,33 @@
     @apply bg-background text-foreground font-body antialiased;
     font-size: 16px;
     line-height: 1.6;
+    font-weight: 450;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  p,
+  li,
+  label,
+  th,
+  td,
+  input,
+  textarea,
+  select,
+  button {
+    color: hsl(var(--foreground));
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 0.9;
+  }
+
+  .text-muted,
+  .muted,
+  small {
+    color: hsl(var(--muted-foreground));
   }
 
   :lang(zh),
@@ -202,6 +227,14 @@
 
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  @media (prefers-contrast: more) {
+    :root {
+      --foreground: 203 25% 10%;
+      --muted-foreground: 207 22% 18%;
+      --border: 202 14% 42%;
+    }
   }
 }
 
@@ -304,6 +337,44 @@
   }
   .mascot-bounce {
     animation: mascot-bounce 2s ease-in-out infinite;
+  }
+
+  .pipi-fly-home-card {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid hsl(var(--border) / 0.45);
+    background: linear-gradient(180deg, #bdeafe 0%, #f5fbff 100%);
+    box-shadow: 0 18px 44px rgba(0, 100, 121, 0.12);
+  }
+  .pipi-fly-home-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 42%),
+      radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.3), transparent 34%);
+    pointer-events: none;
+  }
+  .pipi-fly-home-image {
+    height: 100%;
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    animation: pipi-fly-home 7s ease-in-out infinite;
+    transform-origin: 58% 45%;
+  }
+  @keyframes pipi-fly-home {
+    0% {
+      transform: scale(1.04) translate3d(-1.4%, 0.8%, 0);
+    }
+    48% {
+      transform: scale(1.1) translate3d(1.2%, -1.4%, 0);
+    }
+    100% {
+      transform: scale(1.04) translate3d(-1.4%, 0.8%, 0);
+    }
   }
 
   /* ── Infinite Scroll Banner ── */

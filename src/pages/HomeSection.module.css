@@ -1,0 +1,12 @@
+.organic-blob {
+  pointer-events: none;
+  position: absolute;
+  left: -5rem;
+  top: -5rem;
+  height: 18rem;
+  width: 18rem;
+  background: var(--color-mint, #A7F3D0);
+  opacity: 0.2;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  z-index: 0;
+}

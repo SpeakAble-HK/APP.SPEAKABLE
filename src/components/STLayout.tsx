@@ -9,6 +9,8 @@ interface STLayoutProps {
 
 const TABS = [
   { id: "dashboard", icon: "dashboard", label: "儀表板", path: "/st-dashboard" },
+  { id: "nepa", icon: "psychology", label: "NEPA", path: "/st-nepa" },
+  { id: "game-builder", icon: "auto_awesome", label: "遊戲工坊", path: "/st-game-builder" },
   { id: "accounts", icon: "folder_shared", label: "個案管理", path: "/st-accounts" },
   { id: "settings", icon: "settings", label: "設定", path: "/st-settings" },
 ] as const;
@@ -50,12 +52,12 @@ export function STLayout({ children }: STLayoutProps) {
               onClick={() => navigate(tab.path)}
               className={`flex flex-col items-center justify-center px-4 py-2 transition-all duration-150 active:scale-90 rounded-lg ${
                 active
-                  ? "bg-cyan-100 text-cyan-800"
-                  : "text-slate-400 hover:text-cyan-500"
+                    ? "bg-cyan-100 text-cyan-950"
+                    : "text-slate-600 hover:text-cyan-700"
               }`}
             >
               <MaterialIcon icon={tab.icon} filled={active} className="text-xl" />
-              <span className="font-body text-[10px] font-medium mt-0.5">{tab.label}</span>
+                <span className="font-body text-[10px] font-semibold mt-0.5">{tab.label}</span>
             </button>
           );
         })}

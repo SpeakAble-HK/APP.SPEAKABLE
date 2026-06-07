@@ -1,7 +1,5 @@
-/* Syali Studio Component Styles (scoped for demo)
-   You can further modularize or use CSS-in-JS as needed. */
 .syalistudio-root, .syali-studio-root {
-  font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  font-family: 'Noto Sans HK', 'Segoe UI', Arial, sans-serif;
   color: #f0e6ff;
   background: linear-gradient(135deg, #2c1e3e, #4a2f6c);
   padding: 24px;
@@ -41,6 +39,13 @@
   padding: 20px;
   margin-bottom: 24px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.syali-card h3 {
+  margin-top: 0;
+}
+.syali-card p {
+  color: rgba(240, 230, 255, 0.82);
+  line-height: 1.6;
 }
 .syali-input-group {
   display: flex;
@@ -84,23 +89,86 @@
   flex: 2 1 350px;
   min-width: 320px;
 }
-.camera-view {
+.starter-word-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.starter-word-grid button {
   width: 100%;
-  aspect-ratio: 16/9;
-  background: #000;
-  border-radius: 8px;
+  min-height: 92px;
+  border-radius: 12px;
+  border: 2px solid #a259ff;
+  background: #2c1e3e;
+  color: #fff;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
-  border: 2px dashed #a259ff;
-  margin: 18px 0;
+  gap: 6px;
+  transition: background 0.2s, border 0.2s, transform 0.2s;
 }
-.camera-view .tracking-text {
-  color: #28a745;
-  font-size: 1.3rem;
-  font-weight: bold;
+.starter-word-grid button span {
+  font-size: 1.55rem;
+  font-weight: 800;
+}
+.starter-word-grid button small {
+  color: #d9acff;
+  font-weight: 700;
+}
+.starter-word-grid button.active,
+.starter-word-grid button:hover {
+  background: #a259ff;
+  border-color: #d9acff;
+  transform: translateY(-1px);
+}
+.starter-word-grid button.active small,
+.starter-word-grid button:hover small {
+  color: #fff;
+}
+.model-note {
+  border: 1px solid rgba(217, 172, 255, 0.5);
+  background: rgba(44, 30, 62, 0.72);
+  border-radius: 10px;
+  padding: 12px;
+  line-height: 1.6;
+  font-weight: 700;
+}
+.ai-model-panel {
+  min-height: 210px;
+  border-radius: 16px;
+  border: 2px dashed #a259ff;
+  background:
+    radial-gradient(circle at 50% 15%, rgba(162, 89, 255, 0.25), transparent 34%),
+    #05040a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  text-align: left;
+  margin: 18px 0;
+  color: #f0e6ff;
+}
+.ai-model-panel svg {
+  color: #d9acff;
+}
+.ai-model-title {
+  color: #b7f7d4;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.ai-model-word {
+  margin-top: 6px;
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: #fff;
+}
+.ai-model-subtitle {
+  margin-top: 4px;
+  color: #d9acff;
+  font-weight: 800;
 }
 .practice-levels {
   display: flex;
@@ -127,6 +195,15 @@
 .practice-word-area {
   text-align: center;
   margin: 18px 0;
+}
+.recording-controls {
+  text-align: center;
+  margin: 18px 0;
+}
+.recording-controls p {
+  min-height: 28px;
+  margin: 10px 0 0;
+  font-weight: 700;
 }
 .practice-word-display {
   font-size: 2rem;
@@ -163,6 +240,33 @@
   font-size: 2rem;
   color: #fff;
 }
+.playback-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0;
+}
+.playback-actions button {
+  min-height: 44px;
+  border: 1px solid #a259ff;
+  border-radius: 10px;
+  background: #2c1e3e;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s, opacity 0.2s;
+}
+.playback-actions button:hover:not(:disabled) {
+  background: #a259ff;
+}
+.playback-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 .stats-grid {
   display: flex;
   gap: 12px;
@@ -184,7 +288,27 @@
   font-size: 0.9rem;
   color: #a259ff;
 }
+.parallel-analysis {
+  margin-top: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(183, 247, 212, 0.42);
+  background: rgba(5, 4, 10, 0.38);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  color: rgba(240, 230, 255, 0.9);
+  line-height: 1.55;
+}
+.parallel-analysis strong {
+  color: #b7f7d4;
+}
 @media (max-width: 700px) {
   .syali-main { flex-direction: column; gap: 0; }
   .syali-practice, .syali-left-panel { min-width: 0; }
+  .playback-actions { grid-template-columns: 1fr; }
+  .ai-model-panel {
+    min-height: 180px;
+    text-align: center;
+    flex-direction: column;
+  }
 }

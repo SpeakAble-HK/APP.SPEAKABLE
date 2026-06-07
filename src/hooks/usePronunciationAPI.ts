@@ -1,6 +1,13 @@
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useRef } from 'react';
 import { toast } from 'sonner';
+
+export interface PhonemeEvent {
+  phoneme: string;
+  start_ms: number;
+  end_ms: number;
+  confidence: number;
+  phoneme_type: string;
+}
 
 export interface PhonemeResult {
   character: string;
@@ -11,54 +18,22 @@ export interface PhonemeResult {
   isLowConfidence?: boolean;
 }
 
-interface ASRResult {
-  success: boolean;
-  result: [string, string | string[] | null][]; // Array of [character, jyutping] pairs
-}
-
-const normalizePhoneme = (phoneme: string | string[] | null | unknown): string | string[] | null => {
-  if (phoneme == null) return null;
-  if (typeof phoneme === 'string') return phoneme.trim() || null;
-  if (Array.isArray(phoneme)) {
-    const values = phoneme
-      .flatMap((item) => {
-        if (item == null) return [];
-        return String(item).split(',');
-      })
-      .map((item) => item.trim())
-      .filter(Boolean);
-    return values.length > 0 ? values : null;
-  }
-  return String(phoneme).trim() || null;
-};
-
-const stringifyPhoneme = (phoneme: string | string[] | null): string | null => {
-  if (typeof phoneme === 'string') return phoneme.trim() || null;
-  if (Array.isArray(phoneme)) {
-    const joined = phoneme.map((item) => String(item).trim()).filter(Boolean).join(',');
-    return joined || null;
-  }
-  return null;
-};
-
-interface JyutpingResult {
-  success: boolean;
-  result: [string, string | null][]; // Array of [character, jyutping] pairs
-}
-
-interface ASRPhoneVerifyItem {
-  verify: string;
-  predicted: string;
-  match: boolean;
-  conf: number;
+interface WordResult {
+  character: string;
+  intended_jyutping: string | null;
+  spoken_jyutping: string | null;
+  confidence: number;
   jy_conf: number;
   tone_conf: number;
+  is_low_confidence: boolean;
+  events: PhonemeEvent[];
 }
 
-interface ASRPhoneResult {
+interface SynthesizeResponse {
   success: boolean;
-  predicted: string;
-  verify_check: ASRPhoneVerifyItem[];
+  audio_base64: string;
+  content_type: string;
+  size: number;
 }
 
 interface VoiceCloneResult {
@@ -69,57 +44,43 @@ interface VoiceCloneResult {
 }
 
 const CONFIDENCE_THRESHOLD = 0.5;
+const API_BASE_URL = import.meta.env.VITE_NEPA_URL || 'http://localhost:8100';
 
-export const usePronunciationAPI = () => {
+function normalizePhoneme(value: string | string[] | null | unknown): string | string[] | null {
+  if (value == null) return null;
+  if (typeof value === 'string') return value.trim() || null;
+  if (Array.isArray(value)) {
+    return value.map((v) => v.trim()).filter(Boolean) as string[];
+  }
+  return null;
+}
+
+function audioBlobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      resolve(result.split(',')[1]);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+export function usePronunciationAPI() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [spokenPhonemes, setSpokenPhonemes] = useState<PhonemeResult[]>([]);
   const [intendedPhonemes, setIntendedPhonemes] = useState<PhonemeResult[]>([]);
   const [voiceCloneResult, setVoiceCloneResult] = useState<VoiceCloneResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const calibratorWeight = useRef(0.3);
 
-  const getAuthToken = async (): Promise<string> => {
-    let { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
-      // Create anonymous session for guests — edge functions need a valid JWT
-      const { data, error } = await supabase.auth.signInAnonymously();
-      if (error || !data.session?.access_token) {
-        throw new Error('Unable to start session. Please try again.');
-      }
-      session = data.session;
-    }
-    return session.access_token;
-  };
-
-  const invokeFunction = async (functionName: string, formData: FormData) => {
-    const token = await getAuthToken();
-    const projectUrl = import.meta.env.VITE_SUPABASE_URL;
-    const url = `${projectUrl}/functions/v1/${functionName}`;
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      },
-      // Do NOT set Content-Type — browser sets multipart boundary automatically
-      body: formData,
-    });
-
-    if (!response.ok) {
-      let errorMsg = `Request failed (${response.status})`;
-      try {
-        const errorData = await response.json();
-        if (errorData?.error) errorMsg = errorData.error;
-      } catch {
-        errorMsg = response.statusText || errorMsg;
-      }
-      throw new Error(errorMsg);
-    }
-
-    return response.json();
-  };
-
-  const processRecording = async (audioBlob: Blob, intendedText: string, language: string = 'yue') => {
+  const processRecording = async (
+    audioBlob: Blob,
+    intendedText: string,
+    _language: string = 'yue',
+    patientId?: string,
+  ) => {
     setIsProcessing(true);
     setError(null);
     setSpokenPhonemes([]);
@@ -127,127 +88,97 @@ export const usePronunciationAPI = () => {
     setVoiceCloneResult(null);
 
     try {
-      // Step 1: Get intended phonemes from jyutping API
-      const jyutpingFormData = new FormData();
-      jyutpingFormData.append('text', intendedText);
+      // Call the Speakable Core phonemes endpoint via multipart upload
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
 
-      const jyutpingData = await invokeFunction('jyutping', jyutpingFormData);
-      if (!jyutpingData.success) throw new Error(jyutpingData.error || 'Jyutping conversion failed');
-      
-      const intended: PhonemeResult[] = (jyutpingData as JyutpingResult).result.map(([char, phoneme]) => ({
-        character: char,
-        phoneme: normalizePhoneme(phoneme),
-      }));
-      setIntendedPhonemes(intended);
-      console.log('Intended Phonemes:', intended);
+      const response = await fetch(`${API_BASE_URL}/api/v1/speech/phonemes`, {
+        method: 'POST',
+        body: formData,
+      });
 
-      // Step 2: Send audio to ASR endpoint to get spoken phonemes
-      const asrFormData = new FormData();
-      asrFormData.append('audio', audioBlob, 'recording.webm');
-      asrFormData.append('language', language);
+      const words: WordResult[] = [];
 
-      const asrData = await invokeFunction('asr', asrFormData);
-      if (!asrData.success) throw new Error(asrData.error || 'ASR failed');
-      
-      let spoken: PhonemeResult[] = (asrData as ASRResult).result.map(([char, phoneme]) => ({
-        character: char,
-        phoneme: normalizePhoneme(phoneme),
-      }));
-      console.log('Initial Spoken Phonemes:', spoken);
+      if (response.ok) {
+        const result = await response.json();
+        const phonemeArray = result.phonemes || [];
 
-      // Step 3: Use ASRPhone API to get confidence scores for verification
-      const verifyText = intended
-        .map(p => stringifyPhoneme(p.phoneme))
-        .filter((p): p is string => p !== null)
-        .join(' ');
+        const intendedChars = intendedText.split('').map((ch, i) => ({
+          character: ch,
+          phoneme: (phonemeArray[i] as any)?.phoneme || null,
+        }));
+        setIntendedPhonemes(
+          intendedChars.map((c) => ({
+            character: c.character,
+            phoneme: normalizePhoneme(c.phoneme),
+          }))
+        );
 
-      if (verifyText) {
-        const asrPhoneFormData = new FormData();
-        asrPhoneFormData.append('audio', audioBlob, 'recording.webm');
-        asrPhoneFormData.append('verify_text', verifyText);
+        const spoken: PhonemeResult[] = phonemeArray.map((p: any) => ({
+          character: p.phoneme || '',
+          phoneme: p.phoneme || null,
+          confidence: p.confidence || 0,
+          jyConf: p.confidence || 0,
+          toneConf: 0,
+          isLowConfidence: (p.confidence || 0) < CONFIDENCE_THRESHOLD,
+        }));
+        setSpokenPhonemes(spoken);
 
+        phonemeArray.forEach((p: any, i: number) => {
+          words.push({
+            character: intendedChars[i]?.character || '',
+            intended_jyutping: intendedChars[i]?.phoneme as string || null,
+            spoken_jyutping: p.phoneme || null,
+            confidence: p.confidence || 0,
+            jy_conf: p.confidence || 0,
+            tone_conf: 0,
+            is_low_confidence: (p.confidence || 0) < CONFIDENCE_THRESHOLD,
+            events: [],
+          });
+        });
+      } else {
+        throw new Error(`Phoneme processing failed (${response.status})`);
+      }
+
+      // Voice clone via Supabase edge function
+      let clone: VoiceCloneResult | null = null;
+      if (intendedText.trim().length > 0) {
         try {
-          const asrPhoneData = await invokeFunction('asrphone', asrPhoneFormData);
+          const synthResponse = await fetch(`${API_BASE_URL}/api/v1/speech/synthesize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: intendedText,
+              voice_id: 'default',
+              prompt_audio_base64: await audioBlobToBase64(audioBlob),
+              prompt_text: intendedText,
+              ...(patientId ? { patient_id: patientId } : {}),
+            }),
+          });
 
-          if (asrPhoneData?.success && asrPhoneData?.verify_check) {
-            const verifyCheck = (asrPhoneData as ASRPhoneResult).verify_check;
-            console.log('ASRPhone Confidence Data:', verifyCheck);
-
-            // Update intended phonemes with confidence data
-            let verifyIndex = 0;
-            const updatedIntended: PhonemeResult[] = intended.map((p) => {
-              if (p.phoneme !== null && verifyIndex < verifyCheck.length) {
-                const confItem = verifyCheck[verifyIndex];
-                verifyIndex++;
-                return {
-                  ...p,
-                  confidence: confItem.conf,
-                  jyConf: confItem.jy_conf,
-                  toneConf: confItem.tone_conf,
-                  isLowConfidence: confItem.conf < CONFIDENCE_THRESHOLD || 
-                                   confItem.jy_conf < CONFIDENCE_THRESHOLD || 
-                                   confItem.tone_conf < CONFIDENCE_THRESHOLD
-                };
-              }
-              return p;
-            });
-            setIntendedPhonemes(updatedIntended);
-            console.log('Updated Intended Phonemes with Confidence:', updatedIntended);
-
-            // Update spoken phonemes based on predictions
-            verifyIndex = 0;
-            spoken = spoken.map((p) => {
-              if (p.phoneme !== null && verifyIndex < verifyCheck.length) {
-                const confItem = verifyCheck[verifyIndex];
-                verifyIndex++;
-                return {
-                  ...p,
-                  phoneme: normalizePhoneme(confItem.predicted || p.phoneme),
-                  confidence: confItem.conf,
-                  jyConf: confItem.jy_conf,
-                  toneConf: confItem.tone_conf,
-                  isLowConfidence: confItem.conf < CONFIDENCE_THRESHOLD || 
-                                   confItem.jy_conf < CONFIDENCE_THRESHOLD || 
-                                   confItem.tone_conf < CONFIDENCE_THRESHOLD
-                };
-              }
-              return p;
-            });
+          if (synthResponse.ok) {
+            const synthData: SynthesizeResponse = await synthResponse.json();
+            if (synthData.success) {
+              clone = {
+                success: true,
+                audio_base64: synthData.audio_base64,
+                content_type: synthData.content_type,
+                size: synthData.size,
+              };
+              setVoiceCloneResult(clone);
+            }
           }
-        } catch (phoneErr) {
-          console.warn('ASRPhone API error (continuing without confidence):', phoneErr);
+        } catch (synthErr) {
+          console.warn('Synthesis unavailable, skipping voice clone:', synthErr);
         }
       }
 
-      setSpokenPhonemes(spoken);
-      console.log('Final Spoken Phonemes:', spoken);
-
-      // Step 4: Generate voice clone with correct pronunciation (only if ASR returned results)
-      const transcribedText = spoken.map(p => p.character).join('');
-      
-      let clone: VoiceCloneResult | null = null;
-      if (transcribedText.trim().length > 0) {
-        const ttsFormData = new FormData();
-        ttsFormData.append('text', intendedText);
-        ttsFormData.append('prompt_text', transcribedText);
-        ttsFormData.append('prompt_audio', audioBlob, 'recording.webm');
-
-        const cloneData = await invokeFunction('voice-clone', ttsFormData);
-        if (!cloneData.success) throw new Error(cloneData.error || 'Voice clone failed');
-        
-        clone = cloneData as VoiceCloneResult;
-        setVoiceCloneResult(clone);
-        console.log('Voice Clone Result:', clone);
-      } else {
-        console.warn('Skipping voice clone: ASR returned no transcription');
-      }
-
-      return { spoken, intended, clone };
+      return { spoken: spokenPhonemes, intended: intendedPhonemes, clone };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
-      console.error('Processing error:', err);
-      toast.error(errorMessage);
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      setError(message);
+      console.error('Phoneme processing error:', err);
+      toast.error(message);
       return null;
     } finally {
       setIsProcessing(false);
@@ -269,4 +200,4 @@ export const usePronunciationAPI = () => {
     error,
     getGeneratedAudioUrl,
   };
-};
+}

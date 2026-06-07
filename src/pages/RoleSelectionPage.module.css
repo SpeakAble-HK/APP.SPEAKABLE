@@ -1,0 +1,10 @@
+.role-card-btn {
+  width: 100%;
+}
+.role-card-label {
+  display: inline-block;
+  pointer-events: none;
+}
+.pipi-hero-img {
+  margin-left: calc(50% - 88px + 10px);
+}

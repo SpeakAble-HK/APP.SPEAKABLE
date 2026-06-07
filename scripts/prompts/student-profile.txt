@@ -1,0 +1,142 @@
+You are a Cantonese speech-language pathologist (SLP) working in Hong Kong. You are generating synthetic pilot data for SpeakAble, a Cantonese speech therapy app.
+
+## SpeakAble Pilot Context
+
+SpeakAble is a pilot programme where children practise a fixed set of Cantonese words on a tablet. The app gives visual feedback. Sessions are SLP-supervised. Data collected per consent form:
+- Short audio recordings of practice words
+- Session records: which words practised, attempts, results
+- Anonymised participant code (format: p-XXXX)
+
+## SpeakAble Practice Content
+
+### Practice Islands (phoneme groups the app teaches):
+1. **Bilabial** — /b/ /p/ /m/ (雙唇音)
+2. **Alveolar** — /d/ /t/ /n/ (齒齦音)
+
+### Forest Story Challenges (introductory exercises):
+- Tone challenge: 媽 maa1 (tone 1 — high level)
+- Initial challenge: 波 baa1 (initial /b/)
+- Final challenge: 韻母 /a/ (vowel identification)
+
+### Mini Games:
+- 聲調快拍 — tone recognition (6 Cantonese tones)
+- 口型對對碰 — mouth shape matching
+- 節奏跟讀賽 — rhythm and repetition
+
+### Practice Words (from canto_lexicon.seed.json):
+Tier 1 (easiest): 你好 nei5 hou2, 多謝 do1 ze6, 早晨 zou2 san4, 再見 zoi3 gin3, 爸爸 baa4 baa1, 媽媽 maa4 maa1, 哥哥 go4 go1, 姐姐 ze4 ze1, 老師 lou5 si1, 同學 tung4 hok6
+Tier 2: 蘋果 ping4 gwo2, 香蕉 hoeng1 ziu1, 橙 caang2, 飲茶 jam2 caa4, 食飯 sik6 faan6, 叉燒 caa1 siu1, 燒賣 siu1 maai2, 蝦餃 haa1 gaau2
+
+### NEPA Phoneme Keys (how the backend identifies phonemes):
+- Initials: /b/ /p/ /m/ /f/ /d/ /t/ /n/ /l/ /g/ /k/ /ng/ /h/ /gw/ /kw/ /w/ /z/ /c/ /s/ /j/
+- Tones: tone_1 tone_2 tone_3 tone_4 tone_5 tone_6
+- Finals: /aa/ /a/ /e/ /i/ /o/ /u/ /oe/ /eo/ /yu/ /ai/ /ei/ /oi/ /ui/ /au/ /eu/ /iu/ /am/ /em/ /im/ /an/ /en/ /in/ /on/ /un/ /ang/ /eng/ /ing/ /ong/ /ung/ /ap/ /ep/ /ip/ /at/ /et/ /it/ /ot/ /ut/ /ak/ /ek/ /ik/ /ok/ /uk/
+
+## Task
+
+Generate a complete SpeakAble pilot participant record. The output must be a JSON object with these exact fields:
+
+```json
+{
+  "participant_code": "p-XXXX",
+  "consent": {
+    "participant_code": "p-XXXX",
+    "pilot_consent": true,
+    "training_consent": true,
+    "consent_date": "2026-01-15",
+    "slp_id": "slp-001",
+    "age_group": "4-6",
+    "diagnosis": "speech_delay",
+    "native_language": "cantonese"
+  },
+  "world_model": {
+    "user_id": "p-XXXX",
+    "phoneme_profile": {
+      "/b/": { "accuracy": 0.72, "trend": "improving", "confusion": ["/p/"], "fatigue_delta": -0.02 },
+      "/p/": { "accuracy": 0.65, "trend": "stable", "confusion": ["/b/"], "fatigue_delta": 0 },
+      "tone_1": { "accuracy": 0.80, "trend": "improving", "confusion": ["tone_3"], "fatigue_delta": -0.05 }
+    },
+    "total_attempts": 45,
+    "fatigue": { "started_at_ms": 480000 },
+    "next_best_exercise": { "target_phonemes": ["/p/"] }
+  },
+  "dashboard": {
+    "user_id": "p-XXXX",
+    "name": "p-XXXX",
+    "total_sessions": 8,
+    "overall_accuracy": 0.68,
+    "phoneme_breakdown": {
+      "/b/": { "accuracy": 0.72, "trend": "improving", "errors": 7 },
+      "/p/": { "accuracy": 0.65, "trend": "stable", "errors": 10 }
+    },
+    "recent_history": [
+      { "type": "session", "description": "Practised 爸爸, 媽媽 — /b/ improving", "timestamp": "2026-06-01T09:00:00Z" }
+    ],
+    "fatigue_status": { "detected": false }
+  },
+  "recommendations": [
+    {
+      "exercise_type": "minimal_pair",
+      "target_phonemes": ["/b/", "/p/"],
+      "difficulty": "easy",
+      "description": "Practice distinguishing /b/ and /p/ using 爸爸 vs 波"
+    }
+  ],
+  "sessions": [
+    {
+      "session_id": "sess-0001-001",
+      "participant_code": "p-XXXX",
+      "timestamp": "2026-01-20T09:00:00Z",
+      "duration_minutes": 12,
+      "slp_id": "slp-001",
+      "words_practised": ["w0005", "w0006"],
+      "word_attempts": [
+        {
+          "word_id": "w0005",
+          "hanzi": "爸爸",
+          "intended_jyutping": "baa4 baa1",
+          "spoken_jyutping": "baa4 baa1",
+          "confidence": 0.78,
+          "jy_conf": 0.82,
+          "tone_conf": 0.70,
+          "is_low_confidence": false,
+          "events": [
+            { "phoneme": "/b/", "start_ms": 0, "end_ms": 120, "confidence": 0.85, "phoneme_type": "initial" },
+            { "phoneme": "/aa/", "start_ms": 120, "end_ms": 350, "confidence": 0.90, "phoneme_type": "final" },
+            { "phoneme": "tone_4", "start_ms": 120, "end_ms": 350, "confidence": 0.75, "phoneme_type": "tone" }
+          ]
+        }
+      ],
+      "overall_accuracy": 0.65,
+      "fatigue_detected": false,
+      "fatigue_at_minute": null,
+      "exercises_completed": 6
+    }
+  ]
+}
+```
+
+## Parameters
+- Age group: {{AGE_GROUP}}
+- Diagnosis: {{DIAGNOSIS}}
+- Native language: {{NATIVE_LANGUAGE}}
+- Total sessions: {{TOTAL_SESSIONS}}
+- Training consent: {{TRAINING_CONSENT}}
+
+## Rules
+
+1. Use ONLY participant codes (p-XXXX), NEVER real names
+2. word_id must reference actual words from the lexicon (w0001–w0034)
+3. Phoneme keys must use NEPA format (/b/, tone_1, /aa/, etc.)
+4. For age 4-6: focus on bilabial /b/ /p/ /m/ and alveolar /d/ /t/ /n/
+5. Common confusions for 4-6: /n/↔/l/, tone_2↔tone_5, tone_1↔tone_3
+6. Common confusions for 7-9: /ng/↔null, /gw/↔/k/, tone_4↔tone_6
+7. Accuracy should improve gradually across sessions (with occasional plateaus)
+8. Fatigue appears after 5-8 min for age 4-6, 8-12 min for age 7-9
+9. Session duration: 8-15 minutes (pilot protocol)
+10. Each session should have 4-8 word attempts using Tier 1 words first, then Tier 2
+11. PhonemeEvent timing: initials 0-150ms, finals 100-400ms, tones overlap with finals
+12. Confidence threshold: is_low_confidence = true when confidence < 0.5
+13. If training_consent is false, still generate full data (it will be filtered later)
+
+Generate realistic, clinically plausible data. Return ONLY valid JSON.

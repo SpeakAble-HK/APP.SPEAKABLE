@@ -8,7 +8,7 @@ interface AppLayoutProps {
 }
 
 const TABS = [
-  { id: "practice", icon: "target", label: "練習", path: "/explorer" },
+  { id: "practice", icon: "target", label: "練習", path: "/dashboard" },
   { id: "nest", icon: "home_max", label: "小窩", path: "/pipi" },
   { id: "progress", icon: "bar_chart", label: "記錄", path: "/progress" },
   { id: "profile", icon: "person", label: "我的", path: "/settings" },
@@ -18,11 +18,13 @@ function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const isMapPage = false;
+  const hideNav = location.pathname === "/therapist-portal";
 
   const isActive = (id: string) => {
     if (id === "practice")
       return (
         location.pathname === "/explorer" ||
+        location.pathname === "/dashboard" ||
         location.pathname.startsWith("/practice/") ||
         location.pathname.startsWith("/speech-quest") ||
         location.pathname.startsWith("/lesson") ||
@@ -43,11 +45,12 @@ function AppLayout({ children }: AppLayoutProps) {
       <GlobalHeader />
       <main
         id="main-content"
-        className="flex-1 overflow-auto pt-14 pb-28"
+        className={`flex-1 overflow-auto pt-14 ${hideNav ? "pb-6" : "pb-28"}`}
       >
         {children || <Outlet />}
       </main>
 
+      {!hideNav && (
       <nav
         className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur border-t-[0.5px] border-mist flex justify-around items-center px-4 pb-safe pt-1"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom), 8px)" }}
@@ -78,6 +81,7 @@ function AppLayout({ children }: AppLayoutProps) {
           );
         })}
       </nav>
+      )}
     </div>
   );
 }

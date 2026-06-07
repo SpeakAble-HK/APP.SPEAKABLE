@@ -143,7 +143,7 @@ export function RewardsShop({ totalPoints, onSpendPoints }: RewardsShopProps) {
                     ? 'border-green-500/30 bg-green-500/5'
                     : canAfford
                       ? 'hover:border-primary/50 hover:-translate-y-0.5 cursor-pointer'
-                      : 'opacity-60'
+                      : 'opacity-85'
               }`}
             >
               <CardContent className="p-4 text-center">

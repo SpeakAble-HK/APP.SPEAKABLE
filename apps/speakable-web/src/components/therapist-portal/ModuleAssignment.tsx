@@ -1,7 +1,8 @@
-import React from 'react';
-
 
 import React, { useState } from 'react';
+
+// Temporary CSS-in-JS for demonstration; move to external CSS in production
+const selectStyle: React.CSSProperties = { marginRight: 16 };
 
 const students = [
   { id: 1, name: '陳小明' },
@@ -30,11 +31,22 @@ const ModuleAssignment: React.FC = () => {
       <div style={{ background: '#fff', borderRadius: 12, padding: 16, boxShadow: '0 1px 4px #e5e7eb' }}>
         <div style={{ marginBottom: 16 }}>
           <label style={{ marginRight: 8 }}>選擇學生：</label>
-          <select value={selectedStudent} onChange={e => setSelectedStudent(Number(e.target.value))} style={{ marginRight: 16 }}>
+          <select
+            value={selectedStudent}
+            onChange={e => setSelectedStudent(Number(e.target.value))}
+            style={selectStyle}
+            title="選擇學生"
+          >
             {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
-          <label style={{ marginRight: 8 }}>選擇模組：</label>
-          <select value={selectedModule} onChange={e => setSelectedModule(e.target.value)} style={{ marginRight: 16 }}>
+          <label htmlFor="module-select" style={{ marginRight: 8 }}>選擇模組：</label>
+          <select
+            id="module-select"
+            value={selectedModule}
+            onChange={e => setSelectedModule(e.target.value)}
+            style={selectStyle}
+            title="選擇模組"
+          >
             {modules.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
           </select>
           <button onClick={handleAssign}>分配</button>

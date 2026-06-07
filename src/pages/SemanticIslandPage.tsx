@@ -221,7 +221,7 @@ export default function SemanticIslandPage() {
                   <div className={`flip-inner w-full h-full ${showFace ? "flipped" : ""}`}>
                     {/* Back face (hidden) */}
                     <div className="flip-face absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center shadow-lg border border-white/20">
-                      <MaterialIcon icon="waves" filled className="text-3xl text-white/60" />
+                      <MaterialIcon icon="waves" filled className="text-3xl text-white/85" />
                     </div>
                     {/* Front face (content) */}
                     <div className={`flip-face flip-face--back absolute inset-0 rounded-xl flex items-center justify-center shadow-lg border border-white/30 ${

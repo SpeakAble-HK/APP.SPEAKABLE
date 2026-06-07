@@ -53,15 +53,15 @@ export function AchievementsList({ allAchievements, unlockedIds, onClose }: Prop
 
       {/* Locked */}
       {locked.length > 0 && (
-        <div className="space-y-2 opacity-60">
+        <div className="space-y-2">
           <p className="text-xs font-bold text-muted-foreground uppercase mt-4">
             {isEn ? "Locked" : isTW ? "未解鎖" : "未解锁"}
           </p>
           {locked.map(a => (
-            <div key={a.id} className="flex items-center gap-3 p-3 rounded-2xl border-2 border-border bg-muted/30">
-              <span className="text-2xl grayscale">🔒</span>
+            <div key={a.id} className="flex items-center gap-3 p-3 rounded-2xl border-2 border-border bg-muted/20">
+              <span className="text-2xl">🔒</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-extrabold text-muted-foreground">{getTitle(a)}</p>
+                <p className="text-sm font-extrabold text-foreground">{getTitle(a)}</p>
                 <p className="text-xs text-muted-foreground">{getDesc(a)}</p>
               </div>
               <Lock className="h-4 w-4 text-muted-foreground shrink-0" />

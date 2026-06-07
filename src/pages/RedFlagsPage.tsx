@@ -134,7 +134,7 @@ export default function RedFlagsPage() {
                         onChange={() => toggle(key)}
                         className="mt-0.5 h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary shrink-0"
                       />
-                      <span className={`text-sm ${isChecked ? "text-on-surface line-through opacity-60" : "text-on-surface"}`}>
+                      <span className={`text-sm ${isChecked ? "text-on-surface line-through opacity-85" : "text-on-surface"}`}>
                         {item}
                       </span>
                     </label>
