@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 // Supabase-backed data access for therapist assignments.
 // Replaces the former `fetch('/api/therapist/assignments')` call.
@@ -8,7 +9,7 @@ export interface AssignmentRow {
   learnerIds: string[];
   gameId: string;
   phonemeTargets: string[];
-  difficultyConfig: unknown;
+  difficultyConfig: Json;
   customPrompt?: string;
   passThreshold: number;
   scheduledFor?: string | null;
@@ -25,7 +26,7 @@ export async function insertAssignment(row: AssignmentRow): Promise<void> {
   const therapistId = await currentTherapistId(row.therapistId);
   if (!therapistId) throw new Error("Not authenticated");
 
-  const { error } = await supabase.from("therapist_assignments" as never).insert({
+  const { error } = await supabase.from("therapist_assignments").insert({
     therapist_id: therapistId,
     learner_ids: row.learnerIds,
     game_id: row.gameId,
@@ -35,7 +36,7 @@ export async function insertAssignment(row: AssignmentRow): Promise<void> {
     pass_threshold: row.passThreshold,
     scheduled_for: row.scheduledFor ?? null,
     allow_coop: row.allowCoop ?? true,
-  } as never);
+  });
 
   if (error) throw new Error(`Failed to create assignment: ${error.message}`);
 }
@@ -45,7 +46,7 @@ export async function listAssignments(): Promise<unknown[]> {
   if (!therapistId) return [];
 
   const { data, error } = await supabase
-    .from("therapist_assignments" as never)
+    .from("therapist_assignments")
     .select("*")
     .eq("therapist_id", therapistId)
     .order("created_at", { ascending: false });
@@ -72,8 +73,8 @@ export async function savePhonemeTags(
   }));
 
   const { error } = await supabase
-    .from("therapist_phoneme_tags" as never)
-    .upsert(rows as never, { onConflict: "therapist_id,learner_id,phoneme_symbol" });
+    .from("therapist_phoneme_tags")
+    .upsert(rows, { onConflict: "therapist_id,learner_id,phoneme_symbol" });
 
   if (error) throw new Error(`Failed to save phoneme tags: ${error.message}`);
 }

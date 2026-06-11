@@ -31,7 +31,6 @@ export function useUnifiedTelemetry({
     confidence: number
   ) => {
     trackEvent({
-      type: 'game',
       gameId,
       sessionId,
       learnerId,
@@ -41,7 +40,7 @@ export function useUnifiedTelemetry({
       isSuccess: success,
       confidenceScore: confidence,
       timestamp: Date.now(),
-    } as any);
+    });
   };
 
   const trackStoryScene = (
@@ -68,7 +67,7 @@ export function useUnifiedTelemetry({
       confidenceScore: confidence,
       branchTaken,
       timestamp: Date.now(),
-    } as any);
+    });
   };
 
   return {

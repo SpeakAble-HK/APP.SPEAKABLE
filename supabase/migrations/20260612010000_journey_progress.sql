@@ -40,7 +40,6 @@ begin
       for select using (
         auth.uid() = student_id
         or public.has_role(auth.uid(), 'therapist')
-        or public.has_role(auth.uid(), 'admin')
       );
   end if;
 
@@ -51,7 +50,6 @@ begin
     create policy jp_insert on public.journey_progress
       for insert with check (
         auth.uid() = student_id
-        or public.has_role(auth.uid(), 'admin')
       );
   end if;
 
@@ -62,7 +60,6 @@ begin
     create policy jp_update on public.journey_progress
       for update using (
         auth.uid() = student_id
-        or public.has_role(auth.uid(), 'admin')
       );
   end if;
 end $$;

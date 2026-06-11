@@ -14,7 +14,7 @@ export async function insertSessionResult(result: SessionResult): Promise<void> 
   const learnerId = await currentLearnerId(result.learnerId);
   if (!learnerId) return;
 
-  const { error } = await supabase.from("session_results" as never).insert({
+  const { error } = await supabase.from("session_results").insert({
     session_id: result.sessionId,
     learner_id: learnerId,
     game_id: result.gameId,
@@ -25,7 +25,7 @@ export async function insertSessionResult(result: SessionResult): Promise<void> 
     reward_payout: result.rewardPayout,
     carryover_recommendation: result.carryoverRecommendation,
     completed_at: result.completedAt,
-  } as never);
+  });
 
   if (error) console.error("insertSessionResult failed:", error.message);
 }
@@ -36,14 +36,13 @@ export async function upsertLearnerModel(result: SessionResult): Promise<void> {
 
   // Read the current model so totals/averages roll forward instead of resetting.
   const { data: existing } = await supabase
-    .from("learner_model" as never)
+    .from("learner_model")
     .select("*")
     .eq("learner_id", learnerId)
     .maybeSingle();
 
-  const prev = (existing as Record<string, unknown> | null) ?? {};
-  const prevSessions = Number(prev.total_sessions ?? 0);
-  const prevAvg = Number(prev.avg_session_duration ?? 0);
+  const prevSessions = existing?.total_sessions ?? 0;
+  const prevAvg = existing?.avg_session_duration ?? 0;
   const totalSessions = prevSessions + 1;
   const avgSessionDuration =
     (prevAvg * prevSessions + result.fatigueMarker.sessionDurationMs) /
@@ -53,16 +52,16 @@ export async function upsertLearnerModel(result: SessionResult): Promise<void> {
     ? "worsening"
     : result.successRate > 0.8
       ? "improving"
-      : (prev.fatigue_trend as string | undefined) ?? "stable";
+      : existing?.fatigue_trend ?? "stable";
 
-  const { error } = await supabase.from("learner_model" as never).upsert({
+  const { error } = await supabase.from("learner_model").upsert({
     learner_id: learnerId,
     last_game_played: result.gameId,
     total_sessions: totalSessions,
     avg_session_duration: avgSessionDuration,
     fatigue_trend: fatigueTrend,
     updated_at: new Date().toISOString(),
-  } as never);
+  });
 
   if (error) console.error("upsertLearnerModel failed:", error.message);
 }
@@ -72,7 +71,7 @@ export async function insertDashboardEvent(result: SessionResult): Promise<void>
   if (!learnerId) return;
 
   const { error } = await supabase
-    .from("therapist_dashboard_events" as never)
+    .from("therapist_dashboard_events")
     .insert({
       learner_id: learnerId,
       game_id: result.gameId,
@@ -80,7 +79,7 @@ export async function insertDashboardEvent(result: SessionResult): Promise<void>
       success_rate: result.successRate,
       fatigue_flag: result.fatigueMarker.isFatigued,
       carryover_note: result.carryoverRecommendation,
-    } as never);
+    });
 
   if (error) console.error("insertDashboardEvent failed:", error.message);
 }
@@ -97,7 +96,7 @@ export async function saveStoryState(state: {
   if (!learnerId) return;
 
   const { error } = await supabase
-    .from("learner_story_state" as never)
+    .from("learner_story_state")
     .upsert({
       learner_id: learnerId,
       story_id: state.storyId,
@@ -106,7 +105,7 @@ export async function saveStoryState(state: {
       phoneme_progress: state.phonemeProgress,
       emotional_state: state.emotionalState,
       last_updated: new Date().toISOString(),
-    } as never);
+    });
 
   if (error) console.error("saveStoryState failed:", error.message);
 }

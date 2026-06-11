@@ -36,7 +36,6 @@ begin
         auth.uid() = student_id
         or auth.uid() = therapist_id
         or public.has_role(auth.uid(), 'therapist')
-        or public.has_role(auth.uid(), 'admin')
       );
   end if;
 
@@ -48,7 +47,6 @@ begin
       for insert with check (
         auth.uid() = therapist_id
         or public.has_role(auth.uid(), 'therapist')
-        or public.has_role(auth.uid(), 'admin')
       );
   end if;
 
@@ -60,7 +58,6 @@ begin
       for update using (
         auth.uid() = therapist_id
         or public.has_role(auth.uid(), 'therapist')
-        or public.has_role(auth.uid(), 'admin')
       );
   end if;
 end $$;

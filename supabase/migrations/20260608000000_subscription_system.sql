@@ -83,22 +83,27 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies
+DROP POLICY IF EXISTS "Users can view own subscription" ON public.subscriptions;
 CREATE POLICY "Users can view own subscription" ON public.subscriptions
   FOR SELECT TO authenticated USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own subscription" ON public.subscriptions;
 CREATE POLICY "Users can insert own subscription" ON public.subscriptions
   FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own subscription" ON public.subscriptions;
 CREATE POLICY "Users can update own subscription" ON public.subscriptions
   FOR UPDATE TO authenticated USING (auth.uid() = user_id);
 
 -- Therapists can view their students' subscriptions (for collaboration)
+DROP POLICY IF EXISTS "Therapists can view student subscriptions" ON public.subscriptions;
 CREATE POLICY "Therapists can view student subscriptions" ON public.subscriptions
   FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM public.st_students WHERE therapist_id = auth.uid() AND student_id = subscriptions.user_id)
   );
 
 -- Parents can view their children's subscriptions
+DROP POLICY IF EXISTS "Parents can view child subscriptions" ON public.subscriptions;
 CREATE POLICY "Parents can view child subscriptions" ON public.subscriptions
   FOR SELECT TO authenticated USING (
     EXISTS (SELECT 1 FROM public.parent_students WHERE parent_id = auth.uid() AND student_id = subscriptions.user_id)
@@ -171,10 +176,15 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER on_auth_user_created
+-- NOTE: must use a UNIQUE trigger name. `on_auth_user_created` is already owned
+-- by the profile-creation trigger (migration 20260120185848); reusing it would
+-- silently replace profile creation and break new-user signup.
+DROP TRIGGER IF EXISTS on_auth_user_created_subscription ON auth.users;
+CREATE TRIGGER on_auth_user_created_subscription
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_subscription();
 
 -- Grant read access to subscription_plans for all authenticated users
+DROP POLICY IF EXISTS "Authenticated users can view plans" ON public.subscription_plans;
 CREATE POLICY "Authenticated users can view plans" ON public.subscription_plans
   FOR SELECT TO authenticated USING (true);

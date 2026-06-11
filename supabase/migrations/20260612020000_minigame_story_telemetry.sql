@@ -136,8 +136,8 @@ do $$ begin
   end if;
   if not exists (select 1 from pg_policies where tablename='game_metadata' and policyname='game_metadata_write') then
     create policy game_metadata_write on public.game_metadata for all
-      using (public.has_role(auth.uid(),'therapist') or public.has_role(auth.uid(),'admin'))
-      with check (public.has_role(auth.uid(),'therapist') or public.has_role(auth.uid(),'admin'));
+      using (public.has_role(auth.uid(),'therapist'))
+      with check (public.has_role(auth.uid(),'therapist'));
   end if;
 end $$;
 
@@ -198,8 +198,8 @@ do $$ begin
   end if;
   if not exists (select 1 from pg_policies where tablename='story_scenes' and policyname='story_scenes_write') then
     create policy story_scenes_write on public.story_scenes for all
-      using (public.has_role(auth.uid(),'therapist') or public.has_role(auth.uid(),'admin'))
-      with check (public.has_role(auth.uid(),'therapist') or public.has_role(auth.uid(),'admin'));
+      using (public.has_role(auth.uid(),'therapist'))
+      with check (public.has_role(auth.uid(),'therapist'));
   end if;
 end $$;
 

@@ -12,7 +12,7 @@ export async function loadScene(
   sceneId: string
 ): Promise<SceneMetadata | null> {
   const { data, error } = await supabase
-    .from('story_scenes' as never)
+    .from('story_scenes')
     .select('*')
     .eq('scene_id', sceneId)
     .maybeSingle();
@@ -22,20 +22,21 @@ export async function loadScene(
     return null;
   }
 
-  const row = data as Record<string, unknown>;
+  // target_phoneme, learner_task, success_condition, and branching_outcome are
+  // Json columns; cast each through the corresponding SceneMetadata sub-type.
   return {
-    sceneId: String(row.scene_id),
-    storyId: String(row.story_id ?? storyId),
-    chapterId: String(row.chapter_id),
-    order: Number(row.scene_order ?? 0),
-    narrativeState: String(row.narrative_state ?? ''),
-    targetPhoneme: row.target_phoneme as SceneMetadata['targetPhoneme'],
-    characterLine: String(row.character_line ?? ''),
-    learnerTask: row.learner_task as SceneMetadata['learnerTask'],
-    successCondition: row.success_condition as SceneMetadata['successCondition'],
-    branchingOutcome: row.branching_outcome as SceneMetadata['branchingOutcome'],
-    unlockCondition: row.unlock_condition ? String(row.unlock_condition) : undefined,
-    rewardOnComplete: Number(row.reward_on_complete ?? 0),
+    sceneId: data.scene_id,
+    storyId: data.story_id ?? storyId,
+    chapterId: data.chapter_id,
+    order: data.scene_order ?? 0,
+    narrativeState: data.narrative_state ?? '',
+    targetPhoneme: data.target_phoneme as SceneMetadata['targetPhoneme'],
+    characterLine: data.character_line ?? '',
+    learnerTask: data.learner_task as SceneMetadata['learnerTask'],
+    successCondition: data.success_condition as SceneMetadata['successCondition'],
+    branchingOutcome: data.branching_outcome as SceneMetadata['branchingOutcome'],
+    unlockCondition: data.unlock_condition ?? undefined,
+    rewardOnComplete: data.reward_on_complete ?? 0,
   };
 }
 

@@ -34,7 +34,7 @@ export async function getParentInsights(
   if (!id) return empty;
 
   const { data, error } = await supabase
-    .from("session_results" as never)
+    .from("session_results")
     .select("*")
     .eq("learner_id", id)
     .order("completed_at", { ascending: false })
@@ -45,29 +45,26 @@ export async function getParentInsights(
     return empty;
   }
 
-  const rows = data as Array<Record<string, unknown>>;
+  const rows = data;
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
+  // fatigue_marker is a JSON column; read its fields through a narrow shape.
+  const fatigueOf = (marker: unknown) =>
+    (marker as { sessionDurationMs?: number; isFatigued?: boolean }) ?? {};
+
   const weeklyMs = rows
-    .filter((r) => new Date(String(r.completed_at)).getTime() >= weekAgo)
-    .reduce((sum, r) => {
-      const fatigue = (r.fatigue_marker as { sessionDurationMs?: number }) ?? {};
-      return sum + (fatigue.sessionDurationMs ?? 0);
-    }, 0);
+    .filter((r) => new Date(r.completed_at).getTime() >= weekAgo)
+    .reduce((sum, r) => sum + (fatigueOf(r.fatigue_marker).sessionDurationMs ?? 0), 0);
 
   const recentGameResults = rows.slice(0, 5).map((r) => ({
-    gameName: String(r.game_id ?? "Game"),
-    date: String(r.completed_at ?? "").slice(0, 10),
-    stars: Number(r.reward_payout ?? 0),
-    fatigueFlag: Boolean(
-      (r.fatigue_marker as { isFatigued?: boolean })?.isFatigued,
-    ),
+    gameName: r.game_id ?? "Game",
+    date: (r.completed_at ?? "").slice(0, 10),
+    stars: r.reward_payout ?? 0,
+    fatigueFlag: Boolean(fatigueOf(r.fatigue_marker).isFatigued),
   }));
 
   // Streak: count consecutive days (ending today) with at least one session.
-  const days = new Set(
-    rows.map((r) => String(r.completed_at ?? "").slice(0, 10)),
-  );
+  const days = new Set(rows.map((r) => (r.completed_at ?? "").slice(0, 10)));
   let streakDays = 0;
   const cursor = new Date();
   for (;;) {

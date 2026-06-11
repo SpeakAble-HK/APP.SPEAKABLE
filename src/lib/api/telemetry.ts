@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import type { UnifiedEvent } from "../minigame-sdk/types";
 
 // Supabase-backed data access for unified telemetry events.
@@ -25,16 +26,23 @@ export async function insertUnifiedEvents(events: UnifiedEvent[]): Promise<void>
 
   const fallbackLearner = await currentLearnerId();
 
-  const rows = events.map((event) => ({
-    event_type: eventType(event),
-    learner_id: event.learnerId || fallbackLearner,
-    context_id: contextId(event),
-    event_data: event,
-  }));
+  const rows = events
+    .map((event) => {
+      const learnerId = event.learnerId || fallbackLearner;
+      if (!learnerId) return null;
+      return {
+        event_type: eventType(event),
+        learner_id: learnerId,
+        context_id: contextId(event),
+        // UnifiedEvent is a plain serialisable object; cast to the JSON column type.
+        event_data: event as unknown as Json,
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
 
-  const { error } = await supabase
-    .from("unified_telemetry" as never)
-    .insert(rows as never);
+  if (rows.length === 0) return;
+
+  const { error } = await supabase.from("unified_telemetry").insert(rows);
 
   if (error) console.error("insertUnifiedEvents failed:", error.message);
 }
@@ -57,7 +65,7 @@ export async function insertStoryTelemetry(row: {
   const learnerId = await currentLearnerId(row.learnerId);
   if (!learnerId) return;
 
-  const { error } = await supabase.from("story_telemetry" as never).insert({
+  const { error } = await supabase.from("story_telemetry").insert({
     learner_id: learnerId,
     story_id: row.storyId,
     chapter_id: row.chapterId,
@@ -71,7 +79,7 @@ export async function insertStoryTelemetry(row: {
     abandoned: row.abandoned ?? false,
     re_engaged: row.reEngaged ?? false,
     frustration_flag: row.frustrationFlag ?? false,
-  } as never);
+  });
 
   if (error) console.error("insertStoryTelemetry failed:", error.message);
 }
