@@ -57,7 +57,7 @@ const TherapistPortalPage = lazy(() => import("@/improvement/therapist-portal/pa
 const STDashboardPage = lazy(() => import("@/improvement/therapist-portal/pages/STDashboardPage"));
 const STAccountsPage = lazy(() => import("@/improvement/therapist-portal/pages/STAccountsPage"));
 const STSettingsPage = lazy(() => import("@/improvement/therapist-portal/pages/STSettingsPage"));
-const STLayout = lazy(() => import("@/improvement/therapist-portal/components/STLayout")).then(m => ({ default: m.STLayout }));
+const STLayout = lazy(() => import("@/improvement/therapist-portal/components/STLayout").then(m => ({ default: m.STLayout })));
 
 // Improvement - NEPA Portal
 const NEPADashboardPage = lazy(() => import("@/improvement/nepa-portal/pages/NEPADashboardPage"));
