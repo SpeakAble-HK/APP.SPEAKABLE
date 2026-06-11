@@ -67,5 +67,3 @@ export default function EnchantedForestMapScene() {
     </div>
   );
 }
-
-useGLTF.preload(FOREST_MODEL_URL);

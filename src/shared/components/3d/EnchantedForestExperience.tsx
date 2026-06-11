@@ -327,7 +327,6 @@ function ForestModel() {
   const { scene } = useGLTF("/assets/enchanted-forest/o_donkey_forest_river.gltf");
   return <primitive object={scene} position={[0, -2, -4]} scale={1.2} />;
 }
-useGLTF.preload("/assets/enchanted-forest/o_donkey_forest_river.gltf");
 
 function GlowingFlora() {
   return (

@@ -848,5 +848,3 @@ export default function OnboardingPage() {
     </main>
   );
 }
-
-useGLTF.preload(FOREST_MODEL_URL);

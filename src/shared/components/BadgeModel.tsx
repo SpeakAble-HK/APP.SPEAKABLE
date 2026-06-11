@@ -66,5 +66,3 @@ export function BadgeModel(props: BadgeModelProps) {
   }
   return <GltfBadgeModel {...props} />;
 }
-
-useGLTF.preload(badgeModelUrl);
