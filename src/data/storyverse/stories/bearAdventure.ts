@@ -9,7 +9,7 @@
  * Chapters: 3 (demo) / 10 (full)
  */
 
-import type { StoryWorld } from "@/types/storyverse";
+import type { StoryWorld } from "@/shared/types/storyverse";
 
 export const bearAdventureWorld: StoryWorld = {
   id: "bear-adventure",

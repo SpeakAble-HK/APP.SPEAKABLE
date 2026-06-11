@@ -1,4 +1,4 @@
-import type { SpeechLessonCatalog } from "@/types/speechLesson";
+import type { SpeechLessonCatalog } from "@/shared/types/speechLesson";
 
 /** Static catalog — extend or replace with CMS fetch later. */
 export const speechLessonsCatalog: SpeechLessonCatalog = {

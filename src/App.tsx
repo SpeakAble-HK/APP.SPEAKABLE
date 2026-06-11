@@ -1,57 +1,67 @@
-import AuthPage from "./pages/AuthPage";
 import React from "react";
-const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
-const TreasureMapPage = React.lazy(() => import("./pages/TreasureMapPage"));
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { lazy, Suspense } from "react";
+import { Toaster } from "@/shared/components/ui/toaster";
+import { Toaster as Sonner } from "@/shared/components/ui/sonner";
+import { TooltipProvider } from "@/shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import { LanguageProvider } from "@/contexts/LanguageContext";
-import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
-import AppLayout from "./components/AppLayout";
-import { STLayout } from "./components/STLayout";
-import { lazy, Suspense } from "react";
-import LandingNoVideoPage from "./pages/LandingNoVideoPage";
-import SignInFlowPage from "./pages/SignInFlowPage";
-import PricingPage from "./pages/PricingPage";
+import ProtectedRoute from "@/shared/components/ProtectedRoute";
+import { LanguageProvider } from "@/shared/contexts/LanguageContext";
+import { AccessibilityProvider } from "@/shared/contexts/AccessibilityContext";
+import AppLayout from "@/shared/components/AppLayout";
 
-const TherapistPortalPage = lazy(() => import("./pages/TherapistPortalPage"));
-const Index = lazy(() => import("./pages/Index"));
-const RoleSelectionPage = lazy(() => import("./pages/RoleSelectionPage"));
-const ExplorerOnboardingPage = lazy(() => import("./pages/ExplorerOnboardingPage"));
-const ExplorerDashboardPage = lazy(() => import("./pages/ExplorerDashboardPage"));
-const EchoSpeechPage = lazy(() => import("./pages/EchoSpeechPage"));
-const PronunciationResultsPage = lazy(() => import("./pages/PronunciationResultsPage"));
-const SpeechQuestPage = lazy(() => import("./pages/SpeechQuestPage"));
-const LessonPage = lazy(() => import("./pages/LessonPage"));
-const STDashboardPage = lazy(() => import("./pages/STDashboardPage"));
-const NEPADashboardPage = lazy(() => import("./pages/NEPADashboardPage"));
-const STAccountsPage = lazy(() => import("./pages/STAccountsPage"));
-const STSettingsPage = lazy(() => import("./pages/STSettingsPage"));
-const PiPiPage = lazy(() => import("./pages/PiPiPage"));
-const SettingsPage = lazy(() => import("./pages/SettingsPage"));
-const ProgressPage = lazy(() => import("./pages/ProgressPage"));
-const ResourcesPage = lazy(() => import("./pages/ResourcesPage"));
-const SpeechTherapyInfoPage = lazy(() => import("./pages/SpeechTherapyInfoPage"));
-const AboutSpeechTherapyPage = lazy(() => import("./pages/AboutSpeechTherapyPage"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const AuraStoryPage = lazy(() => import("./pages/AuraStoryPage"));
-const EnchantedForestPage = lazy(() => import("./pages/EnchantedForestPage"));
-const AuraJourneyPage = lazy(() => import("./pages/AuraJourneyPage"));
-const MiniGameBuilderPage = lazy(() => import("./pages/MiniGameBuilderPage"));
-const PirateTreasureMapPage = lazy(() => import("./pages/PirateTreasureMapPage"));
-const TermsPage = lazy(() => import("./pages/TermsPage"));
-const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
-const ParentDashboardPage = lazy(() => import("./pages/ParentDashboardPage"));
-const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
+// Shared pages
+import LandingNoVideoPage from "@/shared/pages/LandingNoVideoPage";
+import SignInFlowPage from "@/shared/pages/SignInFlowPage";
+import PricingPage from "@/shared/pages/PricingPage";
+const AuthPage = lazy(() => import("@/shared/pages/AuthPage"));
+const Index = lazy(() => import("@/shared/pages/Index"));
+const RoleSelectionPage = lazy(() => import("@/shared/pages/RoleSelectionPage"));
+const OnboardingPage = lazy(() => import("@/shared/pages/OnboardingPage"));
+const NotFound = lazy(() => import("@/shared/pages/NotFound"));
+const ResourcesPage = lazy(() => import("@/shared/pages/ResourcesPage"));
+const SpeechTherapyInfoPage = lazy(() => import("@/shared/pages/SpeechTherapyInfoPage"));
+const AboutSpeechTherapyPage = lazy(() => import("@/shared/pages/AboutSpeechTherapyPage"));
+const TermsPage = lazy(() => import("@/shared/pages/TermsPage"));
+const PrivacyPage = lazy(() => import("@/shared/pages/PrivacyPage"));
+const RedFlagsPage = lazy(() => import("@/shared/pages/RedFlagsPage"));
+const LazySoundPage = lazy(() => import("@/shared/pages/LazySoundPage"));
 
-const AdventureStartPage = lazy(() => import("./pages/AdventureStartPage"));
-const ExercisePage = lazy(() => import("./pages/ExercisePage"));
-const SemanticIslandPage = lazy(() => import("./pages/SemanticIslandPage"));
-const RedFlagsPage = lazy(() => import("./pages/RedFlagsPage"));
-const LazySoundPage = lazy(() => import("./pages/LazySoundPage"));
+// Enhancement - Student Portal
+const DashboardPage = lazy(() => import("@/enhancement/student-portal/pages/DashboardPage"));
+const TreasureMapPage = lazy(() => import("@/enhancement/student-portal/pages/TreasureMapPage"));
+const ExplorerOnboardingPage = lazy(() => import("@/enhancement/student-portal/pages/ExplorerOnboardingPage"));
+const ExplorerDashboardPage = lazy(() => import("@/enhancement/student-portal/pages/ExplorerDashboardPage"));
+const EchoSpeechPage = lazy(() => import("@/enhancement/student-portal/pages/EchoSpeechPage"));
+const PronunciationResultsPage = lazy(() => import("@/enhancement/student-portal/pages/PronunciationResultsPage"));
+const SpeechQuestPage = lazy(() => import("@/enhancement/student-portal/pages/SpeechQuestPage"));
+const LessonPage = lazy(() => import("@/enhancement/student-portal/pages/LessonPage"));
+const PiPiPage = lazy(() => import("@/enhancement/student-portal/pages/PiPiPage"));
+const SettingsPage = lazy(() => import("@/enhancement/student-portal/pages/SettingsPage"));
+const ProgressPage = lazy(() => import("@/enhancement/student-portal/pages/ProgressPage"));
+const PirateTreasureMapPage = lazy(() => import("@/enhancement/student-portal/pages/PirateTreasureMapPage"));
+const AdventureStartPage = lazy(() => import("@/enhancement/student-portal/pages/AdventureStartPage"));
+const ExercisePage = lazy(() => import("@/enhancement/student-portal/pages/ExercisePage"));
+const SemanticIslandPage = lazy(() => import("@/enhancement/student-portal/pages/SemanticIslandPage"));
+
+// Enhancement - Parent Portal
+const ParentDashboardPage = lazy(() => import("@/enhancement/parent-portal/pages/ParentDashboardPage"));
+
+// Enhancement - Aura Journey (Syali Studio merged)
+const AuraStoryPage = lazy(() => import("@/enhancement/aura-journey/AuraStoryPage"));
+const EnchantedForestPage = lazy(() => import("@/enhancement/aura-journey/EnchantedForestPage"));
+const AuraJourneyPage = lazy(() => import("@/enhancement/aura-journey/AuraJourneyPage"));
+
+// Improvement - Therapist Portal
+const TherapistPortalPage = lazy(() => import("@/improvement/therapist-portal/pages/TherapistPortalPage"));
+const STDashboardPage = lazy(() => import("@/improvement/therapist-portal/pages/STDashboardPage"));
+const STAccountsPage = lazy(() => import("@/improvement/therapist-portal/pages/STAccountsPage"));
+const STSettingsPage = lazy(() => import("@/improvement/therapist-portal/pages/STSettingsPage"));
+const STLayout = lazy(() => import("@/improvement/therapist-portal/components/STLayout")).then(m => ({ default: m.STLayout }));
+
+// Improvement - NEPA Portal
+const NEPADashboardPage = lazy(() => import("@/improvement/nepa-portal/pages/NEPADashboardPage"));
+const MiniGameBuilderPage = lazy(() => import("@/improvement/nepa-portal/pages/MiniGameBuilderPage"));
 
 const queryClient = new QueryClient();
 
@@ -91,7 +101,7 @@ const App = () => (
                 <Route path="/aura-journey" element={<AuraJourneyPage />} />
                 <Route path="/pirate-treasure-map" element={<PirateTreasureMapPage />} />
 
-                {/* ─── Therapist routes (require therapist role) ─── */}
+                {/* ─── Improvement: Therapist routes (require therapist role) ─── */}
                 <Route element={<ProtectedRoute allowedRoles={['therapist']} />}>
                   <Route element={<STLayout />}>
                     <Route path="/st-dashboard" element={<STDashboardPage />} />
@@ -103,12 +113,12 @@ const App = () => (
                   <Route path="/therapist-portal" element={<TherapistPortalPage />} />
                 </Route>
 
-                {/* ─── Parent routes (require parent role) ─── */}
+                {/* ─── Enhancement: Parent routes (require parent role) ─── */}
                 <Route element={<ProtectedRoute allowedRoles={['parent']} />}>
                   <Route path="/parent-dashboard" element={<ParentDashboardPage />} />
                 </Route>
 
-                {/* ─── Explorer routes (require explorer role) ─── */}
+                {/* ─── Enhancement: Explorer/Student routes (require explorer role) ─── */}
                 <Route element={<ProtectedRoute allowedRoles={['explorer']} />}>
                   <Route element={<AppLayout />}>
                     <Route path="/dashboard" element={<DashboardPage />} />

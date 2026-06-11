@@ -2,7 +2,7 @@
 // React hook to use the adaptation engine in Speakable
 import { useEffect, useRef } from 'react';
 import AuraAdaptiveSystem from './AuraAdaptiveSystem';
-import { getUserProfile, setUserProfile } from '@/lib/userProfileStore';
+import { getUserProfile, setUserProfile } from '@/shared/lib/userProfileStore';
 
 export function useAdaptationEngine() {
   const engineRef = useRef<AuraAdaptiveSystem | null>(null);

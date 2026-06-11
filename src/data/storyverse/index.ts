@@ -5,7 +5,7 @@
  * Provides lookup, filtering, and therapist recommendation logic.
  */
 
-import type { StoryWorld, StoryWorldId, StoryRecommendation, ToneLabel } from "@/types/storyverse";
+import type { StoryWorld, StoryWorldId, StoryRecommendation, ToneLabel } from "@/shared/types/storyverse";
 import { bearAdventureWorld } from "./stories/bearAdventure";
 
 // ─── World Registry ──────────────────────────────────────────────────────────

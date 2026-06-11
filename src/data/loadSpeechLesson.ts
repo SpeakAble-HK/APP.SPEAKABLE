@@ -1,6 +1,6 @@
 import type { QuestLessonData } from "@/data/questLessons";
 import { questWorldsData } from "@/data/questLessons";
-import type { SpeechLessonRecord } from "@/types/speechLesson";
+import type { SpeechLessonRecord } from "@/shared/types/speechLesson";
 import { getSpeechLessonRecord } from "@/data/speechLessonsCatalog";
 
 function worldIdForLesson(lessonId: number): string {
