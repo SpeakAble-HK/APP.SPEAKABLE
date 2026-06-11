@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, Lock, Play, ChevronRight, CheckCircle, XCircle, RotateCcw, Lightbulb, Gamepad2, Mic, Volume2, BookOpen, X, MessageSquare, Map, TrendingUp, Target, Award } from "lucide-react";
 import { getAuraStoryUnlocked } from "@/shared/lib/therapistMissionConfig";
-import { getMiniGameConfig, isQuizGameEnabled } from "@/shared/lib/miniGameConfigStore";
+import { getMiniGameConfig, isQuizGameEnabled, isAdaptGameEnabled, GAME_LABELS, GAME_EMOJIS } from "@/shared/lib/miniGameConfigStore";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { auraJourneyScenes } from "@/enhancement/aura-journey/components/auraJourney/auraJourneyScenes";
 import { useVoiceCloning } from "@/enhancement/aura-journey/components/auraJourney/useVoiceCloning";
@@ -18,6 +18,26 @@ const FOREST_STORIES = [
   { id: "portal", emoji: "🚪", label: "靈光之門", desc: "聲調挑戰：分辨「媽」嘅聲調", question: "哪一個係「媽」嘅聲調？", options: ["第一聲", "第二聲", "第三聲", "第四聲"], answer: "第一聲", hint: "高平調" },
   { id: "pipi", emoji: "🦜", label: "皮皮嘅回音", desc: "聲母挑戰：搵出「波」嘅聲母", question: "請輸入「波」嘅聲母。", options: ["b", "p", "m", "f"], answer: "b", hint: "雙唇音" },
   { id: "mushroom", emoji: "🍄", label: "光暈蘑菇", desc: "韻母挑戰：聽音辨認韻母", question: "聽聽聲音，呢個音嘅韻母係？", options: ["aa", "a", "o", "e"], answer: "a", hint: "開口大", audioText: "媽" },
+];
+
+const MINI_GAME_DESCRIPTIONS: Record<string, string> = {
+  "game-tone": "聽聲辨調，掌握粵語六聲",
+  "game-mouth": "觀察口型，配對正確發音",
+  "game-rhythm": "跟住節奏，讀出準確粵語",
+  "water-park": "幫聲母精靈搵返自己嘅位置",
+  "maze": "帶韻尾寶寶搵返屋企",
+  "fruit-ninja": "探索圓唇音嘅秘密世界",
+  "catch-fly": "接受聲調魔法師嘅終極挑戰",
+};
+
+const ALL_MINI_GAMES = [
+  { id: "game-tone", type: "quiz" as const },
+  { id: "game-mouth", type: "quiz" as const },
+  { id: "game-rhythm", type: "quiz" as const },
+  { id: "water-park", type: "adapt" as const },
+  { id: "maze", type: "adapt" as const },
+  { id: "fruit-ninja", type: "adapt" as const },
+  { id: "catch-fly", type: "adapt" as const },
 ];
 
 const MINIGAMES = [
@@ -1109,6 +1129,75 @@ export default function DashboardPage() {
               <ChevronRight className="w-5 h-5 text-amber-100" />
             </div>
           </button>
+        </section>
+
+        {/* ═══ 1.6 迷你遊戲 ═══ */}
+        <section aria-labelledby="mini-games-heading" className="shadow-lg shadow-indigo-900/10 rounded-xl"
+          style={{ perspective: "800px" }}>
+          <div className="rounded-t-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-5 py-3.5 text-left shadow-md"
+            style={{ backgroundSize: "200% 200%", animation: "gradientShift 7s ease infinite" }}>
+            <div className="flex items-center gap-2">
+              <Gamepad2 className="w-5 h-5 text-indigo-100" style={{ animation: "sparkle 2.5s ease-in-out infinite 0.3s" }} />
+              <h2 id="mini-games-heading" className="font-display text-lg font-bold text-white"
+                style={{ textShadow: "0 1px 0 rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.3)" }}>
+                迷你遊戲
+              </h2>
+              <span className="text-xs text-indigo-200/80 ml-auto">
+                {ALL_MINI_GAMES.filter((g) => g.type === "quiz" ? isQuizGameEnabled(miniGameConfig, g.id) : isAdaptGameEnabled(miniGameConfig, g.id)).length}/{ALL_MINI_GAMES.length} 可用
+              </span>
+            </div>
+          </div>
+          <div className="rounded-b-xl border-x-2 border-b-2 border-indigo-200 bg-white p-4 card-3d">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {ALL_MINI_GAMES.map((game) => {
+                const enabled = game.type === "quiz"
+                  ? isQuizGameEnabled(miniGameConfig, game.id)
+                  : isAdaptGameEnabled(miniGameConfig, game.id);
+                const emoji = GAME_EMOJIS[game.id] || "🎮";
+                const label = GAME_LABELS[game.id] || game.id;
+                const desc = MINI_GAME_DESCRIPTIONS[game.id] || "";
+                return (
+                  <button
+                    key={game.id}
+                    type="button"
+                    disabled={!enabled}
+                    onClick={() => enabled && navigate(`/mini-games/${game.id}`)}
+                    className={`relative rounded-xl border-2 p-4 text-left transition-all card-3d ${
+                      enabled
+                        ? "border-indigo-200 bg-white hover:border-indigo-400 hover:shadow-md cursor-pointer shadow-sm active:scale-[0.98]"
+                        : "border-mist bg-cloud/30 opacity-50 cursor-not-allowed"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className={`text-3xl shrink-0 ${enabled ? "" : "grayscale"}`}>{emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-ink truncate">{label}</p>
+                        <p className="text-xs text-slate mt-0.5 line-clamp-2">{desc}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
+                        game.type === "quiz"
+                          ? "bg-sky-50 text-sky-600 border border-sky-200"
+                          : "bg-violet-50 text-violet-600 border border-violet-200"
+                      }`}>
+                        {game.type === "quiz" ? "問答" : "適應"}
+                      </span>
+                      {enabled ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
+                          <Play className="w-3 h-3 fill-current" /> 開始
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-xs text-slate">
+                          <Lock className="w-3 h-3" /> 未啟用
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </section>
 
         {/* ═══ 2. 皮皮練習 ═══ */}

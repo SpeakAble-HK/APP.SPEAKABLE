@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MaterialIcon } from "@/shared/components/MaterialIcon";
 import { useSTDashboard, type StudentData } from "@/shared/hooks/useSTDashboard";
 import { useNEPAWorldModel, type DashboardSummary } from "@/shared/hooks/useNEPAWorldModel";
 import { FadeIn, Stagger, SkeletonCard, SkeletonList } from "@/shared/components/ui/animations";
+import {
+  fetchNEPASummary,
+  syncNEPASummary,
+  syncStudentProgress,
+  type NEPASummaryRow,
+} from "../components/nepaBackendSync";
 
 function TrendSparkline({ accuracy }: { accuracy: number }) {
   const bars = Array.from({ length: 8 }).map((_, i) => {
@@ -251,11 +257,65 @@ function MobileTopNav() {
   );
 }
 
+function SyncIndicator({ status }: { status: "idle" | "syncing" | "synced" | "error" }) {
+  if (status === "idle") return null;
+  const config = {
+    syncing: { icon: "sync", text: "同步中...", color: "text-blue-600", bg: "bg-blue-50", spin: true },
+    synced: { icon: "cloud_done", text: "已同步", color: "text-green-600", bg: "bg-green-50", spin: false },
+    error: { icon: "cloud_off", text: "同步失敗", color: "text-red-600", bg: "bg-red-50", spin: false },
+  };
+  const c = config[status];
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${c.bg} ${c.color}`}>
+      <MaterialIcon icon={c.icon} filled className={`text-xs ${c.spin ? "animate-spin" : ""}`} />
+      {c.text}
+    </span>
+  );
+}
+
 export default function NEPADashboardPage() {
   const { students, loading: studentsLoading } = useSTDashboard();
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   const { dashboard, recommendations, loading: nepLoading } = useNEPAWorldModel(selectedPatient);
   const [showTrace, setShowTrace] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "synced" | "error">("idle");
+  const [cachedSummary, setCachedSummary] = useState<NEPASummaryRow | null>(null);
+
+  useEffect(() => {
+    if (!selectedPatient) {
+      setCachedSummary(null);
+      return;
+    }
+    fetchNEPASummary(selectedPatient).then((s) => {
+      if (s) setCachedSummary(s);
+    });
+  }, [selectedPatient]);
+
+  useEffect(() => {
+    if (!selectedPatient || !dashboard) return;
+    setSyncStatus("syncing");
+    syncNEPASummary(selectedPatient, {
+      summary_data: dashboard as unknown as Record<string, unknown>,
+      fatigue_warnings: dashboard.fatigue_warnings || [],
+    }).then((res) => {
+      setSyncStatus(res.success ? "synced" : "error");
+    });
+  }, [selectedPatient, dashboard?.total_sessions]);
+
+  const handleExerciseComplete = useCallback(
+    async (exerciseId: string, accuracy: number, attempts: number) => {
+      if (!selectedPatient) return;
+      setSyncStatus("syncing");
+      const res = await syncStudentProgress(selectedPatient, {
+        exercise_id: exerciseId,
+        accuracy,
+        attempts,
+        completed_at: new Date().toISOString(),
+      });
+      setSyncStatus(res.success ? "synced" : "error");
+    },
+    [selectedPatient]
+  );
 
   const selectStudent = (id: string) => {
     setSelectedPatient(id);
@@ -277,6 +337,7 @@ export default function NEPADashboardPage() {
                 <h1 className="font-headline text-2xl font-extrabold text-on-surface">NEPA 神經網絡</h1>
                 <p className="text-xs text-on-surface-variant">Spike-Timing-Dependent Plasticity · 世界模型 · Hon9Kon9ize 校準</p>
               </div>
+              <SyncIndicator status={syncStatus} />
             </div>
           </div>
         </FadeIn>
