@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import TreasureMap from "@/enhancement/student-portal/components/TreasureMap";
 import { IntroSequence } from "@/shared/components/IntroSequence";
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import PirateTreasureMapPreview from "@/enhancement/student-portal/components/PirateTreasureMapPreview";
 import { shouldShowMissionPopup, setMissionPopupShown } from "@/shared/lib/missionPopupSession";
 
@@ -28,7 +29,13 @@ export default function TreasureMapPage() {
             <div
               className="w-full max-w-[680px] max-h-[90vh] overflow-auto rounded-2xl bg-white p-5 sm:p-6 shadow-[0_24px_70px_rgba(15,23,42,0.28)]"
             >
-              <PirateTreasureMapPreview />
+              <ErrorBoundary fallback={
+                <div className="h-[220px] rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+                  <p className="text-amber-800 font-bold">3D 藏寶圖預覽載入中...</p>
+                </div>
+              }>
+                <PirateTreasureMapPreview />
+              </ErrorBoundary>
               <div className="text-sm text-sky-600 font-extrabold mb-2">
                 皮皮旅程開放
               </div>
