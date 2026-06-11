@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/shared/hooks/useAuth";
 import Checkpoint from "@/shared/components/Checkpoint";
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import EnchantedForestMapScene from "./EnchantedForestMapScene";
 import PhoneticChallenge, { PhoneticChallengeData, PhoneticChallengeResult } from "@/shared/components/PhoneticChallenge";
 import { Gamepad2 } from "lucide-react";
@@ -13,6 +14,7 @@ import {
 } from "@/shared/lib/therapistMissionConfig";
 import pipiMascotUrl from "@/assets/pipi-mascot.png";
 import styles from "./TreasureMap.module.css";
+import PirateTreasureMapPreview from "./PirateTreasureMapPreview";
 
 type AudioTakeKey = "default" | "rr" | "lh" | "set68";
 
@@ -284,7 +286,16 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
       <div
         className="order-first relative w-full aspect-[16/9] sm:aspect-[16/7] min-h-[260px] sm:min-h-[300px] max-h-[min(480px,calc(100vh-180px))] mb-4 rounded-2xl overflow-hidden border border-black/10 bg-[#dff9d5] shadow-[0_12px_36px_rgba(2,132,199,0.2)]"
       >
-        <EnchantedForestMapScene />
+        <ErrorBoundary fallback={
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-emerald-100 to-teal-100">
+            <div className="text-center">
+              <p className="text-lg font-bold text-emerald-800"> 森林地圖</p>
+              <p className="text-sm text-emerald-600">3D 場景載入中...</p>
+            </div>
+          </div>
+        }>
+          <EnchantedForestMapScene />
+        </ErrorBoundary>
 
         <div
           key={`pipi-marker-${pipiJumpKey}`}
