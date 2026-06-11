@@ -26,3 +26,7 @@ dist-ssr
 # Generated synthetic data (regenerate with npm run nepa:generate)
 data/synthetic/*.json
 !data/synthetic/.gitkeep
+
+# Large files
+*.zip
+*.fbx
