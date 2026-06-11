@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import PortalShell from "@/shared/components/PortalShell";
 import { MaterialIcon } from "@/shared/components/MaterialIcon";
 import { useSTDashboard, type StudentData } from "@/shared/hooks/useSTDashboard";
 import { useNEPAWorldModel, type DashboardSummary } from "@/shared/hooks/useNEPAWorldModel";
@@ -238,25 +239,6 @@ function EmptyState({ icon, title, description }: { icon: string; title: string;
   );
 }
 
-function MobileTopNav() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  return (
-    <nav className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-2xl border-b border-surface-container-high">
-      <div className="flex items-center justify-between px-4 h-14">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <MaterialIcon icon="psychology" filled className="text-sm text-on-primary" />
-          </div>
-          <span className="font-headline font-bold text-sm text-on-surface">NEPA 網絡</span>
-        </div>
-        <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-lg hover:bg-surface-container-low">
-          <MaterialIcon icon={menuOpen ? "close" : "menu"} filled className="text-lg" />
-        </button>
-      </div>
-    </nav>
-  );
-}
-
 function SyncIndicator({ status }: { status: "idle" | "syncing" | "synced" | "error" }) {
   if (status === "idle") return null;
   const config = {
@@ -323,10 +305,7 @@ export default function NEPADashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface antialiased">
-      <MobileTopNav />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pt-20 lg:pt-6">
+    <PortalShell width="wide" hasBottomNav sidebarOffsetLg={72}>
         <FadeIn>
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-1">
@@ -479,7 +458,6 @@ export default function NEPADashboardPage() {
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </PortalShell>
   );
 }

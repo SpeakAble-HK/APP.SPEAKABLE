@@ -36,12 +36,38 @@ export function STLayout({ children }: STLayoutProps) {
         </button>
       </header>
 
-      <main className="flex-1 overflow-auto pb-28 pt-14">
+      {/* Shared desktop sidebar — single source of truth for every
+          therapist page so they all align identically at lg+. Pages set
+          sidebarOffsetLg={72} on their PortalShell to clear it. */}
+      <aside className="fixed left-0 top-14 bottom-0 w-72 flex-col p-6 z-40 bg-slate-50/80 backdrop-blur-2xl border-r border-outline-variant/15 hidden lg:flex">
+        <nav className="flex-1 space-y-1.5 mt-2">
+          {TABS.map((tab) => {
+            const active = isActive(tab.path);
+            return (
+              <button
+                key={tab.id}
+                onClick={() => navigate(tab.path)}
+                className={`w-full rounded-full p-3 flex items-center gap-3.5 transition-all hover:scale-[1.02] active:scale-95 ${
+                  active
+                    ? "bg-primary/10 text-primary shadow-sm"
+                    : "text-on-surface-variant hover:bg-surface-container-high/60"
+                }`}
+              >
+                <MaterialIcon icon={tab.icon} filled={active} />
+                <span className="font-semibold text-sm font-label">{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
+      <main className="flex-1 overflow-auto pb-28 lg:pb-6 pt-14">
         {children || <Outlet />}
       </main>
 
+      {/* Bottom nav — phones / tablets only; the desktop sidebar replaces it at lg+ */}
       <nav
-        className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-2xl border-t border-outline-variant/20 flex justify-around items-center px-2 pb-5 pt-2.5"
+        className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-2xl border-t border-outline-variant/20 flex lg:hidden justify-around items-center px-2 pb-5 pt-2.5"
         aria-label="Therapist navigation"
       >
         {TABS.map((tab) => {

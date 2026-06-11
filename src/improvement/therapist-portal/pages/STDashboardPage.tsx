@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { MaterialIcon } from "@/shared/components/MaterialIcon";
 import { PiPiWidget } from "@/enhancement/student-portal/components/PiPiWidget";
 import { useSTDashboard, type StudentData } from "@/shared/hooks/useSTDashboard";
 import { useNEPAWorldModel, type DashboardSummary, type ExerciseRecommendation } from "@/shared/hooks/useNEPAWorldModel";
 import { FadeIn, Stagger, SkeletonCard, SkeletonList } from "@/shared/components/ui/animations";
+import PortalShell from "@/shared/components/PortalShell";
 
 const PIPI_TIPS = [
   "定期查看個案進度！",
@@ -189,42 +189,7 @@ function EmptyState({ icon, title, description }: { icon: string; title: string;
   );
 }
 
-function TopNav() {
-  const navigate = useNavigate();
-  return (
-    <nav className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-2xl border-b border-surface-container-high">
-      <div className="flex items-center justify-between px-4 h-14">
-        <button onClick={() => navigate("/")} className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <MaterialIcon icon="smart_toy" filled className="text-sm text-on-primary" />
-          </div>
-          <span className="font-headline font-bold text-sm text-primary">SpeakAble</span>
-        </button>
-        <div className="flex items-center gap-1">
-          {[
-            { icon: "dashboard", label: "儀表板", path: "/st-dashboard" },
-            { icon: "monitoring", label: "個案", path: "/st-accounts" },
-            { icon: "analytics", label: "NEPA", path: "/st-nepa" },
-            { icon: "sports_esports", label: "遊戲", path: "/st-game-builder" },
-          ].map((item) => (
-            <button
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-                item.path === "/st-dashboard" ? "bg-primary/10 text-primary" : "text-on-surface-variant"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    </nav>
-  );
-}
-
 export default function STDashboardPage() {
-  const navigate = useNavigate();
   const { students, loading: studentsLoading } = useSTDashboard();
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   const { dashboard, recommendations, loading: nepLoading } = useNEPAWorldModel(selectedPatient);
@@ -250,48 +215,7 @@ export default function STDashboardPage() {
   const fatigueWarnings = dashboard?.fatigue_warnings || [];
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface antialiased">
-      <TopNav />
-
-      <aside className="fixed left-0 top-0 h-full w-72 flex-col p-6 z-40 bg-slate-50/80 backdrop-blur-2xl rounded-r-[3rem] my-4 ml-4 shadow-xl shadow-primary/5 hidden lg:flex">
-        <button onClick={() => navigate("/")} className="mb-10 flex items-center gap-3 hover:opacity-80 transition-opacity active:scale-95">
-          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
-            <MaterialIcon icon="smart_toy" filled className="text-2xl" />
-          </div>
-          <div className="text-left">
-            <h1 className="text-lg font-extrabold text-primary font-headline leading-tight tracking-tight">SpeakAble HK</h1>
-            <p className="text-[11px] text-on-surface-variant font-medium">治療師平台</p>
-          </div>
-        </button>
-        <nav className="flex-1 space-y-1.5">
-          {[
-            { icon: "dashboard", label: "儀表板", path: "/st-dashboard" },
-            { icon: "monitoring", label: "個案進度", path: "/st-accounts" },
-            { icon: "analytics", label: "神經數據", path: "/st-nepa" },
-            { icon: "sports_esports", label: "AI 遊戲工坊", path: "/st-game-builder" },
-          ].map((item) => (
-            <button
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              className={`w-full rounded-full mx-1 p-3 flex items-center gap-3.5 transition-all hover:scale-[1.02] active:scale-95 ${
-                item.path === "/st-dashboard"
-                  ? "bg-primary/10 text-primary shadow-sm"
-                  : "text-on-surface-variant hover:bg-surface-container-high/60"
-              }`}
-            >
-              <MaterialIcon icon={item.icon} filled={item.path === "/st-dashboard"} />
-              <span className="font-semibold text-sm font-label">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-        <div className="mt-auto space-y-4">
-          <button className="w-full bg-primary text-on-primary rounded-xl py-3.5 font-bold font-label flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all text-sm">
-            <MaterialIcon icon="person_add" /> 新增個案
-          </button>
-        </div>
-      </aside>
-
-      <main className="lg:ml-80 max-w-6xl mx-auto px-4 sm:px-6 py-6 pt-20 md:pt-20 lg:pt-6">
+      <PortalShell width="wide" hasBottomNav sidebarOffsetLg={72}>
         <FadeIn>
           <div className="mb-8">
             <h1 className="font-headline text-2xl font-bold text-on-surface">早安，治療師</h1>
@@ -422,9 +346,7 @@ export default function STDashboardPage() {
             )}
           </div>
         </FadeIn>
-      </main>
-
       <PiPiWidget tips={PIPI_TIPS} className="hidden xl:block" />
-    </div>
+    </PortalShell>
   );
 }

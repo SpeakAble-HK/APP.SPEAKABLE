@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo, lazy, Suspense } from "react";
 import { MaterialIcon } from "@/shared/components/MaterialIcon";
+import PortalShell from "@/shared/components/PortalShell";
 import { GameDirector } from "@/shared/lib/miniGameBuilder/GameDirector";
 import { useMiniGameBuilder } from "@/shared/lib/miniGameBuilder/useMiniGameBuilder";
 import { generateBlueprintFromDescription } from "@/shared/lib/miniGameBuilder/blueprintGenerator";
@@ -194,7 +195,7 @@ export default function MiniGameBuilderPage() {
     : selectedStudent?.nickname || null;
 
   return (
-    <div className="min-h-screen bg-surface p-4 md:p-6 max-w-3xl mx-auto">
+    <PortalShell width="narrow" hasBottomNav sidebarOffsetLg={72}>
       <div className="flex items-center gap-3 mb-6">
         <MaterialIcon icon="auto_awesome" className="text-3xl text-primary" filled />
         <div>
@@ -623,7 +624,7 @@ export default function MiniGameBuilderPage() {
           )}
         </>
       )}
-    </div>
+    </PortalShell>
   );
 }
 

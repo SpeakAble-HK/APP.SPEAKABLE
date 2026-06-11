@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import PortalShell from "@/shared/components/PortalShell";
 import { MaterialIcon } from "@/shared/components/MaterialIcon";
 import { phonemeCategories } from "@/data/lessons";
 import { toast } from "sonner";
@@ -27,7 +27,6 @@ const MOCK_ACCOUNTS: MockAccount[] = [
 const SKILL_LABELS = ["雙唇音", "齒齦音", "軟顎音", "擦音", "鼻音"];
 
 export default function STAccountsPage() {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -43,29 +42,7 @@ export default function STAccountsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface text-on-surface antialiased">
-      {/* Sidebar (desktop) */}
-      <aside className="fixed left-0 top-0 h-full w-72 flex-col p-6 z-40 bg-slate-50/80 backdrop-blur-2xl rounded-r-[3rem] my-4 ml-4 shadow-xl shadow-primary/5 hidden lg:flex">
-        <button onClick={() => navigate("/")} className="mb-10 flex items-center gap-3 hover:opacity-80 transition-opacity active:scale-95">
-          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
-            <MaterialIcon icon="smart_toy" filled className="text-2xl" />
-          </div>
-          <div className="text-left">
-            <h1 className="text-lg font-extrabold text-primary font-headline leading-tight tracking-tight">SpeakAble HK</h1>
-            <p className="text-[11px] text-on-surface-variant font-medium">治療師平台</p>
-          </div>
-        </button>
-        <nav className="flex-1 space-y-1.5">
-          <button onClick={() => navigate("/st-dashboard")} className="w-full text-on-surface-variant hover:bg-surface-container-high/60 mx-1 rounded-full p-3 flex items-center gap-3.5 transition-all">
-            <MaterialIcon icon="dashboard" /> <span className="font-semibold text-sm">儀表板</span>
-          </button>
-          <button className="w-full bg-primary/10 text-primary mx-1 rounded-full p-3 flex items-center gap-3.5">
-            <MaterialIcon icon="monitoring" filled /> <span className="font-semibold text-sm">個案進度</span>
-          </button>
-        </nav>
-      </aside>
-
-      <main className="lg:ml-80 max-w-6xl mx-auto px-4 sm:px-6 py-6 pt-4 md:pt-20">
+      <PortalShell width="wide" hasBottomNav sidebarOffsetLg={72}>
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left: client list (lg:col-span-8) */}
           <div className="flex-1 lg:max-w-[66%]">
@@ -209,7 +186,6 @@ export default function STAccountsPage() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </PortalShell>
   );
 }
