@@ -1,6 +1,7 @@
-import { useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useRef, useMemo, Suspense } from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
 import { Sparkles } from "@react-three/drei";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import {
   BoxGeometry,
   SphereGeometry,
@@ -11,8 +12,44 @@ import {
   MeshStandardMaterial,
   Color,
   type Mesh,
+  type Group,
 } from "three";
 import type { SceneConfig, SceneObject, ParticleConfig } from "./types";
+
+function GLTFModel({ object }: { object: SceneObject }) {
+  const groupRef = useRef<Group>(null);
+  const startPos = useMemo(() => ({ x: object.position[0], y: object.position[1], z: object.position[2] }), [object.position[0], object.position[1], object.position[2]]);
+
+  const gltf = useLoader(GLTFLoader, object.modelPath!);
+
+  useFrame(({ clock }) => {
+    if (!groupRef.current) return;
+    const t = clock.getElapsedTime();
+    const speed = object.animationSpeed ?? 1;
+    const amp = object.animationAmplitude ?? 0.5;
+
+    if (object.animation === "float") {
+      groupRef.current.position.y = startPos.y + Math.sin(t * speed) * amp;
+    }
+  });
+
+  const scale = object.scale ?? 1;
+  const sc = typeof scale === "number" ? [scale, scale, scale] : scale;
+
+  return (
+    <group ref={groupRef} position={object.position} scale={sc as [number, number, number]} rotation={object.rotation ?? [0, 0, 0]}>
+      <primitive object={gltf.scene} />
+    </group>
+  );
+}
+
+function GLTFModelWrapper({ object }: { object: SceneObject }) {
+  return (
+    <Suspense fallback={null}>
+      <GLTFModel object={object} />
+    </Suspense>
+  );
+}
 
 function AnimatedMesh({ object }: { object: SceneObject }) {
   const meshRef = useRef<Mesh>(null);
@@ -68,8 +105,14 @@ function AnimatedMesh({ object }: { object: SceneObject }) {
         return new TorusGeometry(object.radius ?? 0.5, object.tube ?? 0.2, 16, object.radialSegments ?? 64);
       case "plane":
         return new PlaneGeometry(object.dimensions?.[0] ?? 1, object.dimensions?.[1] ?? 1);
+      case "gltf":
+        return null;
     }
   }, [object.type, object.radius, object.radiusTop, object.radiusBottom, object.height, object.dimensions?.[0], object.dimensions?.[1], object.tube, object.radialSegments]);
+
+  if (object.type === "gltf") {
+    return <GLTFModel object={object} />;
+  }
 
   const scale = object.scale ?? 1;
   const sc = typeof scale === "number" ? [scale, scale, scale] : scale;
@@ -79,7 +122,7 @@ function AnimatedMesh({ object }: { object: SceneObject }) {
       ref={meshRef}
       position={object.position}
       scale={sc as [number, number, number]}
-      geometry={geometry}
+      geometry={geometry!}
     >
       <meshStandardMaterial
         color={object.color}

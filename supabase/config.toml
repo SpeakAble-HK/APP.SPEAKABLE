@@ -13,6 +13,8 @@ project_id = "shuhmvmdkjspgawygqyf"
     verify_jwt = false
   [functions.openrouter-insight]
     verify_jwt = false
+  [functions.ai-blueprint]
+    verify_jwt = false
   [functions.create-student]
     verify_jwt = true
   [functions.seed-demo]

@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from "react";
-import { Users, BarChart3, Settings, Volume2, MapPin, TreePine, Sparkles, Bell, BookOpen, Activity, Target, Save, GraduationCap, Star, TrendingUp, UserPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Users, BarChart3, Settings, Volume2, MapPin, TreePine, Sparkles, Bell, BookOpen, Activity, Target, Save, GraduationCap, Star, TrendingUp, UserPlus, Gamepad2, LayoutDashboard, ClipboardList, Brain, LogOut, Map } from "lucide-react";
 import styles from "./TherapistPortalPage.module.css";
 import { PatientHeader } from "@/components/PatientHeader";
 import { PhoneticAnalysis } from "@/components/PhoneticAnalysis";
@@ -78,6 +79,7 @@ function StudentAvatar({ name }: { name: string }) {
 }
 
 export default function TherapistPortalPage() {
+	const navigate = useNavigate();
 	const { students, loading: studentsLoading, createStudent } = useSTDashboard();
 	const [selectedSchool, setSelectedSchool] = useState(SCHOOL_OPTIONS[0]);
 	const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -135,6 +137,14 @@ export default function TherapistPortalPage() {
 		}
 	};
 
+	const sidebarNav = [
+		{ icon: LayoutDashboard, label: "控制台", path: "/therapist-portal", active: true },
+		{ icon: Gamepad2, label: "AI 遊戲工坊", path: "/st-game-builder", badge: "NEW" },
+		{ icon: Map, label: "藏寶圖學習", path: "/pirate-treasure-map", badge: "3D" },
+		{ icon: ClipboardList, label: "個案管理", path: "/st-accounts" },
+		{ icon: Brain, label: "NEPA 神經數據", path: "/st-nepa" },
+	];
+
 	const displayStudents = useMemo(() => {
 		if (!studentsLoading && students.length === 0) {
 			return [
@@ -168,8 +178,71 @@ export default function TherapistPortalPage() {
 	};
 
 	return (
-		<div className={styles.portalRoot}>
+		<div className={styles.portalLayout}>
+			{/* ── Fixed Sidebar ─── */}
+			<aside className={styles.sidebar}>
+				<div className={styles.sidebarBrand}>
+					<div className={styles.sidebarLogo}>
+						<GraduationCap size={24} color="#fff" />
+					</div>
+					<div>
+						<div className={styles.sidebarBrandName}>SpeakAble</div>
+						<div className={styles.sidebarBrandSub}>治療師平台</div>
+					</div>
+				</div>
+
+				<nav className={styles.sidebarNav}>
+					{sidebarNav.map((item) => {
+						const Icon = item.icon;
+						return (
+							<button
+								key={item.label}
+								onClick={() => navigate(item.path)}
+								className={`${styles.sidebarNavItem} ${item.active ? styles.sidebarNavItemActive : ""}`}
+							>
+								<Icon size={20} />
+								<span>{item.label}</span>
+								{item.badge && <span className={styles.sidebarBadge}>{item.badge}</span>}
+							</button>
+						);
+					})}
+				</nav>
+
+				<div className={styles.sidebarFooter}>
+					<div className={styles.sidebarSessionCard}>
+						<div className={styles.sessionCardHeader}>
+							<Sparkles size={14} color="#f59e0b" />
+							<span className={styles.sessionCardLabel}>預備會話</span>
+						</div>
+						<p className={styles.sessionCardText}>
+							為學生生成 AI 小遊戲，會前 5 分鐘快速準備
+						</p>
+						<button
+							className={styles.sessionCardBtn}
+							onClick={() => navigate("/st-game-builder")}
+						>
+							<Gamepad2 size={14} />
+							開始準備
+						</button>
+					</div>
+				</div>
+			</aside>
+
+			{/* ── Main Content ─── */}
+			<main className={styles.portalMain}>
+				<div className={styles.portalRoot}>
+			{/* ── Floating Background Orbs ─── */}
+			<div className={styles.bgOrbs}>
+				<div className={styles.orb} style={{ width: 300, height: 300, background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)", top: "-5%", left: "-5%", animationDelay: "0s" }} />
+				<div className={styles.orb} style={{ width: 250, height: 250, background: "radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)", top: "20%", right: "-3%", animationDelay: "3s" }} />
+				<div className={styles.orb} style={{ width: 200, height: 200, background: "radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)", bottom: "10%", left: "10%", animationDelay: "6s" }} />
+				<div className={styles.orb} style={{ width: 180, height: 180, background: "radial-gradient(circle, rgba(236,72,153,0.08) 0%, transparent 70%)", bottom: "30%", right: "15%", animationDelay: "9s" }} />
+			</div>
+
 			<div className={styles.portalHeader}>
+				<div className={styles.brandMark}>
+					<span className={styles.brand3d}>Speakable</span>
+				</div>
 				<h1 className={styles.portalTitle}>
 					<GraduationCap size={28} color={ACCENT_BLUE} />
 					治療師控制台
@@ -537,6 +610,8 @@ export default function TherapistPortalPage() {
 				儲存並同步到學生端
 			</button>
 			{status ? <p className={styles.statusSuccess}><Sparkles size={16} />{status}</p> : null}
-		</div>
+			</div>
+		</main>
+	</div>
 	);
 }

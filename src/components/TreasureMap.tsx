@@ -209,42 +209,32 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
   };
 
   return (
-    <div style={{ width: "100%", maxWidth: 1100, margin: "0 auto", display: "flex", flexDirection: "column" }}>
-      {!compactHeader && <h2 style={{ marginBottom: 12, fontWeight: 700 }}>皮皮旅程</h2>}
-      <p style={{ marginBottom: 12, color: "#334155", fontWeight: 600 }}>
+    <div className="w-full max-w-[1100px] mx-auto flex flex-col">
+      {!compactHeader && <h2 className="mb-3 font-bold text-lg sm:text-xl">皮皮旅程</h2>}
+      <p className="mb-3 text-slate-600 font-semibold text-sm sm:text-base">
         目前分數：{score}｜連勝：{streak}（最佳 {bestStreak}）｜錯誤次數：{mistakes}｜歷險印記：{progressLabel}
       </p>
       {lastRoundPoints !== null && (
-        <p style={{ marginBottom: 10, color: "#1f2937", fontSize: 14 }}>
+        <p className="mb-2 text-gray-800 text-sm">
           上一題得分：{lastRoundPoints}（{lastRoundBreakdown}）
         </p>
       )}
       {!compactHeader && (
-        <p style={{ marginBottom: 14, color: "#334155" }}>
+        <p className="mb-4 text-slate-600 text-sm sm:text-base">
           皮皮小幫手會先幫你準備好，再帶你進入皮皮旅程。跟住發光歷險印記完成廣東話發音挑戰，答啱就會推進到下一站。
         </p>
       )}
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 12,
-          padding: "8px 10px",
-          borderRadius: 10,
-          border: "1px dashed #93c5fd",
-          background: "#eff6ff",
-          width: "fit-content",
-        }}
+        className="flex items-center gap-2 mb-3 px-2.5 py-2 rounded-lg border border-dashed border-sky-300 bg-sky-50 w-fit"
       >
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase" }}>管理員</span>
-        <label htmlFor="audio-take-select" style={{ fontSize: 14, color: "#1f2937" }}>音檔版本</label>
+        <span className="text-xs font-bold text-blue-900 uppercase">管理員</span>
+        <label htmlFor="audio-take-select" className="text-sm text-gray-800">音檔版本</label>
         <select
           id="audio-take-select"
           aria-label="音檔版本選擇"
           value={audioTake}
           onChange={(event) => handleAudioTakeChange(event.target.value as AudioTakeKey)}
-          style={{ border: "1px solid #93c5fd", borderRadius: 8, padding: "6px 8px", background: "#fff" }}
+          className="border border-sky-300 rounded-lg px-2 py-1.5 bg-white text-sm"
         >
           {Object.entries(audioTakeMap).map(([key, config]) => (
             <option key={key} value={key}>
@@ -254,50 +244,45 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
         </select>
       </div>
 
-      <div style={{ marginBottom: 14, display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
-        <div style={{ borderRadius: 12, padding: 12, border: "1px solid #bae6fd", background: auraStoryUnlocked ? "#ecfeff" : "#f8fafc" }}>
+      <div className="mb-4 grid gap-3 grid-cols-1 sm:grid-cols-2">
+        <div className={`rounded-xl p-3 border ${auraStoryUnlocked ? "border-sky-200 bg-cyan-50" : "border-slate-200 bg-slate-50"}`}>
           <button
             type="button"
             onClick={() => navigate("/aura-story")}
             disabled={!auraStoryUnlocked}
-            style={{ float: "right", border: "none", borderRadius: 10, padding: "8px 12px", background: auraStoryUnlocked ? "#0284c7" : "#cbd5e1", color: auraStoryUnlocked ? "#fff" : "#64748b", fontWeight: 700, cursor: auraStoryUnlocked ? "pointer" : "not-allowed" }}
+            className={`float-right rounded-lg px-3 py-2 font-bold transition-colors ${
+              auraStoryUnlocked
+                ? "bg-sky-600 text-white hover:bg-sky-700 cursor-pointer"
+                : "bg-slate-300 text-slate-500 cursor-not-allowed"
+            }`}
           >
             Open
           </button>
           <strong>{auraStoryUnlocked ? "靈光故事（已點亮）" : "靈光故事（未點亮）"}</strong>
-          <div style={{ marginTop: 6, color: "#475569" }}>{auraStoryUnlocked ? "森林故事任務已解鎖。" : "等待治療師解鎖。"}</div>
+          <div className="mt-1.5 text-slate-600 text-sm">{auraStoryUnlocked ? "森林故事任務已解鎖。" : "等待治療師解鎖。"}</div>
         </div>
-        <div style={{ borderRadius: 12, padding: 12, border: "1px solid #bbf7d0", background: auraJourneyUnlocked ? "#f0fdf4" : "#f8fafc" }}>
+        <div className={`rounded-xl p-3 border ${auraJourneyUnlocked ? "border-green-200 bg-green-50" : "border-slate-200 bg-slate-50"}`}>
           <button
             type="button"
             onClick={() => navigate("/aura-journey")}
             disabled={!auraJourneyUnlocked}
-            style={{ float: "right", border: "none", borderRadius: 10, padding: "8px 12px", background: auraJourneyUnlocked ? "#16a34a" : "#cbd5e1", color: auraJourneyUnlocked ? "#fff" : "#64748b", fontWeight: 700, cursor: auraJourneyUnlocked ? "pointer" : "not-allowed" }}
+            className={`float-right rounded-lg px-3 py-2 font-bold transition-colors ${
+              auraJourneyUnlocked
+                ? "bg-green-600 text-white hover:bg-green-700 cursor-pointer"
+                : "bg-slate-300 text-slate-500 cursor-not-allowed"
+            }`}
           >
             Open
           </button>
           <strong>{auraJourneyUnlocked ? "皮皮旅程（已點亮）" : "皮皮旅程（未點亮）"}</strong>
-          <div style={{ marginTop: 6, color: "#475569" }}>
+          <div className="mt-1.5 text-slate-600 text-sm">
             {auraJourneyUnlocked ? "皮皮小幫手已經準備好，十二章互動旅程已解鎖。" : "等待治療師解鎖，之後由皮皮小幫手帶你出發。"}
           </div>
         </div>
       </div>
 
       <div
-        style={{
-          order: -1,
-          position: "relative",
-          width: "100%",
-          aspectRatio: "16 / 6",
-          minHeight: 280,
-          maxHeight: "min(430px, calc(100vh - 150px))",
-          marginBottom: 18,
-          borderRadius: 16,
-          overflow: "hidden",
-          border: "1px solid rgba(0,0,0,0.08)",
-          background: "#dff9d5",
-          boxShadow: "0 12px 36px rgba(2, 132, 199, 0.2)",
-        }}
+        className="order-first relative w-full aspect-[16/9] sm:aspect-[16/7] min-h-[260px] sm:min-h-[300px] max-h-[min(480px,calc(100vh-180px))] mb-4 rounded-2xl overflow-hidden border border-black/10 bg-[#dff9d5] shadow-[0_12px_36px_rgba(2,132,199,0.2)]"
       >
         <EnchantedForestMapScene />
 
@@ -347,53 +332,26 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
           return (
             <div
               key={game.id}
-              style={{
-                position: "absolute",
-                left: game.left,
-                top: game.top,
-                transform: "translate(-50%, -50%)",
-                width: 150,
-                borderRadius: 12,
-                border: isSelected ? "2px solid #f59e0b" : "1px solid rgba(255,255,255,0.78)",
-                background: "rgba(255,255,255,0.92)",
-                boxShadow: isSelected ? "0 14px 30px rgba(120, 53, 15, 0.26)" : "0 8px 20px rgba(15, 23, 42, 0.18)",
-                padding: 10,
-                zIndex: 5,
-              }}
+              className={`absolute -translate-x-1/2 -translate-y-1/2 w-[130px] sm:w-[150px] lg:w-[170px] rounded-xl border ${
+                isSelected ? "border-2 border-amber-500" : "border border-white/80"
+              } bg-white/92 ${
+                isSelected ? "shadow-[0_14px_30px_rgba(120,53,15,0.26)]" : "shadow-[0_8px_20px_rgba(15,23,42,0.18)]"
+              } p-2 sm:p-2.5 z-[5]`}
             >
               <button
                 type="button"
                 onClick={() => setActiveMiniGameId(game.id)}
                 aria-pressed={isSelected}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 7,
-                  border: "none",
-                  background: "transparent",
-                  color: "#1f2937",
-                  fontWeight: 800,
-                  textAlign: "left",
-                  cursor: "pointer",
-                  padding: 0,
-                }}
+                className="w-full flex items-center gap-1.5 sm:gap-2 border-none bg-transparent text-gray-800 font-extrabold text-left cursor-pointer p-0 text-xs sm:text-sm"
               >
                 <span
-                  style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    display: "grid",
-                    placeItems: "center",
-                    flexShrink: 0,
-                    background: isSelected ? "#f59e0b" : "#0ea5e9",
-                    color: "#fff",
-                  }}
+                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full grid place-items-center shrink-0 ${
+                    isSelected ? "bg-amber-500" : "bg-sky-500"
+                  } text-white`}
                 >
-                  <Gamepad2 size={17} />
+                  <Gamepad2 size={15} className="sm:w-4 sm:h-4" />
                 </span>
-                <span style={{ lineHeight: 1.2 }}>{game.name}</span>
+                <span className="leading-tight">{game.name}</span>
               </button>
               <select
                 value={selectedLevel}
@@ -402,15 +360,7 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
                   setSelectedDifficulty((prev) => ({ ...prev, [game.id]: event.target.value }));
                 }}
                 aria-label={`${game.name} 難度選擇`}
-                style={{
-                  marginTop: 8,
-                  width: "100%",
-                  border: "1px solid #cbd5e1",
-                  borderRadius: 8,
-                  padding: "6px 8px",
-                  background: "#fff",
-                  fontSize: 12,
-                }}
+                className="mt-2 w-full border border-slate-300 rounded-lg px-2 py-1.5 bg-white text-xs"
               >
                 {game.levels.map((level) => (
                   <option key={level} value={level}>{level}</option>
@@ -424,18 +374,11 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
                   setActiveMiniGameSession({ name: game.name, level: selectedLevel });
                 }}
                 disabled={!canStartMiniGames}
-                style={{
-                  marginTop: 8,
-                  width: "100%",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "7px 9px",
-                  background: canStartMiniGames ? "#16a34a" : "#cbd5e1",
-                  color: canStartMiniGames ? "#fff" : "#64748b",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  cursor: canStartMiniGames ? "pointer" : "not-allowed",
-                }}
+                className={`mt-2 w-full rounded-lg px-2 py-1.5 sm:py-2 text-xs font-extrabold transition-colors ${
+                  canStartMiniGames
+                    ? "bg-green-600 text-white hover:bg-green-700 cursor-pointer"
+                    : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                }`}
               >
                 {canStartMiniGames ? "開始" : "完成地圖後開放"}
               </button>
@@ -445,38 +388,18 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
 
         {activeMiniGameSession && (
           <div
-            style={{
-              position: "absolute",
-              right: 14,
-              bottom: 88,
-              width: "min(280px, calc(100% - 28px))",
-              borderRadius: 14,
-              border: "1px solid rgba(22, 163, 74, 0.35)",
-              background: "rgba(240,253,244,0.94)",
-              boxShadow: "0 14px 30px rgba(15, 23, 42, 0.2)",
-              padding: 12,
-              zIndex: 7,
-            }}
+            className="absolute right-3 sm:right-4 bottom-20 sm:bottom-24 w-[min(260px,calc(100%-24px))] sm:w-[min(280px,calc(100%-28px))] rounded-xl border border-green-600/35 bg-green-50/94 shadow-[0_14px_30px_rgba(15,23,42,0.2)] p-3 z-[7]"
           >
-            <strong style={{ display: "block", color: "#14532d", marginBottom: 4 }}>
+            <strong className="block text-green-900 mb-1 text-sm">
               {activeMiniGameSession.name}
             </strong>
-            <div style={{ color: "#166534", fontSize: 13, marginBottom: 10 }}>
+            <div className="text-green-800 text-xs sm:text-sm mb-2.5">
               Mock dev 已開放：{activeMiniGameSession.level}
             </div>
             <button
               type="button"
               onClick={() => setActiveMiniGameSession(null)}
-              style={{
-                border: "none",
-                borderRadius: 8,
-                background: "#15803d",
-                color: "#fff",
-                padding: "7px 10px",
-                fontSize: 12,
-                fontWeight: 800,
-                cursor: "pointer",
-              }}
+              className="border-none rounded-lg bg-green-700 text-white px-2.5 py-1.5 sm:py-2 text-xs font-extrabold cursor-pointer hover:bg-green-800 transition-colors"
             >
               收起
             </button>
@@ -484,22 +407,7 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
         )}
 
         <div
-          style={{
-            position: "absolute",
-            left: 14,
-            right: 14,
-            bottom: 12,
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-            overflowX: "auto",
-            padding: "10px 12px",
-            borderRadius: 14,
-            border: "1px solid rgba(255,255,255,0.72)",
-            background: "rgba(255,255,255,0.9)",
-            boxShadow: "0 10px 28px rgba(15, 23, 42, 0.18)",
-            zIndex: 6,
-          }}
+          className="absolute left-3 right-3 sm:left-4 sm:right-4 bottom-3 flex gap-2 items-center overflow-x-auto p-2.5 sm:p-3 rounded-xl border border-white/70 bg-white/90 shadow-[0_10px_28px_rgba(15,23,42,0.18)] z-[6]"
         >
           {checkpoints.map((cp, idx) => (
             <Checkpoint
@@ -514,31 +422,18 @@ const TreasureMap: React.FC<TreasureMapProps> = ({ compactHeader = false }) => {
         </div>
 
         <div
-          style={{
-            position: "absolute",
-            right: 14,
-            top: 14,
-            width: "min(250px, calc(100% - 28px))",
-            borderRadius: 14,
-            border: "1px solid rgba(255,255,255,0.7)",
-            background: "rgba(255,255,255,0.88)",
-            padding: "10px 12px",
-            color: "#334155",
-            fontSize: 12,
-            boxShadow: "0 10px 28px rgba(15, 23, 42, 0.16)",
-            zIndex: 5,
-          }}
+          className="absolute right-3 sm:right-4 top-3 sm:top-4 w-[min(220px,calc(100%-24px))] sm:w-[min(250px,calc(100%-28px))] rounded-xl border border-white/70 bg-white/88 p-2.5 sm:p-3 text-slate-600 text-xs shadow-[0_10px_28px_rgba(15,23,42,0.16)] z-[5]"
         >
-          <strong style={{ display: "block", marginBottom: 6, color: "#0f172a" }}>原版 Speakable 小遊戲</strong>
+          <strong className="block mb-1.5 text-slate-900 text-sm">原版 Speakable 小遊戲</strong>
           {legacyGames.map((item) => (
-            <div key={item} style={{ marginBottom: 4 }}>{item}</div>
+            <div key={item} className="mb-1">{item}</div>
           ))}
         </div>
       </div>
 
       {showChallenge && <PhoneticChallenge data={checkpoints[currentCheckpoint]} onResult={handleChallengeResult} />}
 
-      {completed && <div style={{ color: "#1b7f3a", fontWeight: 700 }}>恭喜你！你完成咗皮皮旅程主線任務，總分 {score}。</div>}
+      {completed && <div className="text-green-700 font-bold text-sm sm:text-base">恭喜你！你完成咗皮皮旅程主線任務，總分 {score}。</div>}
     </div>
   );
 };

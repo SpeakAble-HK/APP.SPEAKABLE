@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Lock, Play, ChevronRight, CheckCircle, XCircle, RotateCcw, Lightbulb, Gamepad2, Mic, Volume2, BookOpen, X, MessageSquare } from "lucide-react";
+import { Sparkles, Lock, Play, ChevronRight, CheckCircle, XCircle, RotateCcw, Lightbulb, Gamepad2, Mic, Volume2, BookOpen, X, MessageSquare, Map, TrendingUp, Target, Award } from "lucide-react";
 import { getAuraStoryUnlocked } from "@/lib/therapistMissionConfig";
 import { getMiniGameConfig, isQuizGameEnabled } from "@/lib/miniGameConfigStore";
 import { useAuth } from "@/hooks/useAuth";
@@ -238,36 +238,36 @@ function VoicePracticeModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm md:items-center"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="w-full max-w-lg rounded-2xl border border-amber-200/30 bg-gradient-to-b from-slate-900 to-slate-950 p-6 text-white shadow-2xl shadow-amber-900/20 animate-in"
+      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 text-slate-800 shadow-2xl animate-in"
         style={{ animation: "slideUp 0.3s ease-out" }}>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <img src={pipiParrot} alt="皮皮" className="w-8 h-8 object-contain" />
-            <span className="text-sm font-bold text-amber-200">同皮皮講嘢</span>
+            <img src={pipiParrot} alt="琪琪" className="w-8 h-8 object-contain" />
+            <span className="text-sm font-bold text-amber-700">同琪琪講嘢</span>
           </div>
           <button type="button" onClick={onClose}
-            className="rounded-full p-1.5 text-white/50 hover:bg-white/10 hover:text-white transition-colors">
+            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {step === "input" && (
           <>
-            <p className="text-sm text-white/70 mb-3">輸入你想練習嘅粵語句子，皮皮會幫你 AI 聲線克隆練習：</p>
+            <p className="text-sm text-slate-600 mb-3">輸入你想練習嘅粵語句子，琪琪會幫你 AI 聲線克隆練習：</p>
             <input ref={inputRef} value={text} onChange={(e) => setText(e.target.value)}
               placeholder="例如：今日天氣好好，我好開心！"
-              className="w-full rounded-xl border border-white/15 bg-white/[0.06] px-4 py-3 text-base text-white placeholder-white/30 outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 transition-all" />
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-800 placeholder-slate-400 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all" />
             <div className="flex gap-2 mt-4">
               <button type="button" onClick={handleRecord} disabled={!text.trim() || voice.recording}
                 className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-5 py-2.5 text-sm font-bold text-amber-950 hover:bg-amber-300 disabled:opacity-40 transition-all active:scale-95">
                 <Mic className="w-4 h-4" /> 錄音練習
               </button>
               <button type="button" onClick={() => speakCantonese(text || "輸入句子後可以聽示範")}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition-all">
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-200 transition-all">
                 <Volume2 className="w-4 h-4" /> 聽示範
               </button>
             </div>
-            {voice.error && <p className="mt-3 text-sm text-red-400">{voice.error}</p>}
+            {voice.error && <p className="mt-3 text-sm text-red-500">{voice.error}</p>}
           </>
         )}
 
@@ -275,9 +275,9 @@ function VoicePracticeModal({ onClose }: { onClose: () => void }) {
           <div className="text-center py-8">
             <div className="inline-flex items-center gap-3 mb-4">
               <div className="h-4 w-4 rounded-full bg-red-400 animate-pulse" />
-              <span className="text-base font-medium text-white/80">錄音中... 請講出句子</span>
+              <span className="text-base font-medium text-slate-700">錄音中... 請講出句子</span>
             </div>
-            <p className="text-sm text-white/50 italic">「{text}」</p>
+            <p className="text-sm text-slate-500 italic">「{text}」</p>
           </div>
         )}
 
@@ -286,19 +286,19 @@ function VoicePracticeModal({ onClose }: { onClose: () => void }) {
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-emerald-400/30">
               <CheckCircle className="w-8 h-8 text-white" />
             </div>
-            <p className="text-base font-bold text-emerald-300 mb-1">聲線克隆完成！</p>
-            <p className="text-xs text-white/50 mb-5">AI 已複製你把聲朗讀句子</p>
+            <p className="text-base font-bold text-emerald-600 mb-1">聲線克隆完成！</p>
+            <p className="text-xs text-slate-500 mb-5">AI 已複製你把聲朗讀句子</p>
             <div className="flex flex-wrap justify-center gap-2">
               <button type="button" onClick={handlePlayClone}
                 className="inline-flex items-center gap-2 rounded-full bg-emerald-400 px-5 py-2.5 text-sm font-bold text-emerald-950 hover:bg-emerald-300 transition-all active:scale-95">
                 <Play className="w-4 h-4 fill-current" /> 播放你把聲
               </button>
               <button type="button" onClick={handleReset}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition-all">
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-200 transition-all">
                 <RotateCcw className="w-4 h-4" /> 再試一次
               </button>
               <button type="button" onClick={onClose}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-bold text-white hover:bg-white/20 transition-all">
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-200 transition-all">
                 完成
               </button>
             </div>
@@ -576,6 +576,308 @@ function ExerciseRow({ exercise, unlocked, onStart }: { exercise: ExerciseDef; u
   );
 }
 
+// ─── Road Map Progress ───────────────────────────────────────────────
+
+interface RoadMapStep {
+  id: string;
+  label: string;
+  icon: string;
+  completed: boolean;
+  current: boolean;
+  progress?: number;
+  total?: number;
+}
+
+function RoadMapView({ helperDone, forestStories, sealsLit, completedIds, dreamLit }: {
+  helperDone: boolean;
+  forestStories: boolean[];
+  sealsLit: number;
+  completedIds: Set<string>;
+  dreamLit: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const totalExercises = PRACTICE_ISLANDS.reduce((sum, i) => sum + i.exercises.length, 0);
+  const completedExercises = Array.from(completedIds).filter(id =>
+    PRACTICE_ISLANDS.some(i => i.exercises.some(e => e.id === id))
+  ).length;
+
+  const steps: RoadMapStep[] = [
+    {
+      id: "onboarding",
+      label: "皮皮小幫手",
+      icon: "👋",
+      completed: helperDone,
+      current: !helperDone,
+    },
+    {
+      id: "forest",
+      label: "森林故事",
+      icon: "🌲",
+      completed: forestStories.filter(Boolean).length === 3,
+      current: helperDone && forestStories.filter(Boolean).length < 3,
+      progress: forestStories.filter(Boolean).length,
+      total: 3,
+    },
+    {
+      id: "seals",
+      label: "森林印記",
+      icon: "🏆",
+      completed: sealsLit === 3,
+      current: helperDone && sealsLit < 3,
+      progress: sealsLit,
+      total: 3,
+    },
+    {
+      id: "practice",
+      label: "發音練習",
+      icon: "🎯",
+      completed: completedExercises === totalExercises && totalExercises > 0,
+      current: helperDone && completedExercises < totalExercises,
+      progress: completedExercises,
+      total: totalExercises,
+    },
+    {
+      id: "dream",
+      label: "夢話歷險",
+      icon: "✨",
+      completed: dreamLit === 12,
+      current: false,
+      progress: dreamLit,
+      total: 12,
+    },
+  ];
+
+  const currentStepIndex = steps.findIndex(s => s.current);
+  const completedCount = steps.filter(s => s.completed).length;
+
+  return (
+    <div className="rounded-xl border-2 border-amber-200/50 bg-gradient-to-br from-amber-50/80 to-orange-50/50 overflow-hidden shadow-sm card-3d">
+      <button
+        type="button"
+        onClick={() => setExpanded(v => !v)}
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-amber-100/30 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
+            <Map className="w-5 h-5 text-white" />
+          </div>
+          <div className="text-left">
+            <h3 className="font-display text-base font-bold text-ink">學習路線圖</h3>
+            <p className="text-xs text-slate">{completedCount}/{steps.length} 階段完成</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1">
+            {steps.map((step, i) => (
+              <div
+                key={step.id}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  step.completed
+                    ? "bg-emerald-400"
+                    : step.current
+                    ? "bg-amber-400 animate-pulse"
+                    : "bg-slate-200"
+                }`}
+              />
+            ))}
+          </div>
+          <ChevronRight className={`w-5 h-5 text-slate transition-transform ${expanded ? "rotate-90" : ""}`} />
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="px-5 pb-5 pt-2 border-t border-amber-200/50">
+          <div className="relative">
+            {steps.map((step, index) => (
+              <div key={step.id} className="relative flex gap-4 pb-6 last:pb-0">
+                {index < steps.length - 1 && (
+                  <div className={`absolute left-5 top-10 w-0.5 h-[calc(100%-2.5rem)] ${
+                    step.completed ? "bg-emerald-300" : "bg-slate-200"
+                  }`} />
+                )}
+                <div className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg transition-all ${
+                  step.completed
+                    ? "bg-emerald-400 shadow-md shadow-emerald-200"
+                    : step.current
+                    ? "bg-amber-400 shadow-md shadow-amber-200 animate-pulse"
+                    : "bg-slate-100 border-2 border-dashed border-slate-300"
+                }`}>
+                  {step.completed ? (
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  ) : (
+                    <span className={step.current ? "" : "grayscale opacity-50"}>{step.icon}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 pt-1">
+                  <div className="flex items-center justify-between">
+                    <p className={`font-bold text-sm ${
+                      step.completed ? "text-emerald-700" : step.current ? "text-amber-800" : "text-slate-400"
+                    }`}>
+                      {step.label}
+                    </p>
+                    {step.progress !== undefined && step.total !== undefined && (
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        step.completed
+                          ? "bg-emerald-100 text-emerald-700"
+                          : step.current
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-slate-100 text-slate-400"
+                      }`}>
+                        {step.progress}/{step.total}
+                      </span>
+                    )}
+                  </div>
+                  {step.current && step.progress !== undefined && step.total !== undefined && (
+                    <div className="mt-2 h-2 rounded-full bg-amber-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-400 transition-all duration-500"
+                        style={{ width: `${(step.progress / step.total) * 100}%` }}
+                      />
+                    </div>
+                  )}
+                  {step.current && (
+                    <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
+                      <Target className="w-3 h-3" />
+                      進行中
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Interactive Practice Sidebar ────────────────────────────────────
+
+function PracticeSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [activeSession, setActiveSession] = useState<{
+    phoneme: string;
+    accuracy: number;
+    attempts: number;
+    tips: string[];
+  } | null>(null);
+
+  useEffect(() => {
+    const loadSession = () => {
+      try {
+        const raw = localStorage.getItem("speakable-active-practice");
+        if (raw) setActiveSession(JSON.parse(raw));
+      } catch {}
+    };
+    loadSession();
+    const interval = setInterval(loadSession, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 bg-black/30 z-40 md:hidden"
+        onClick={onClose}
+      />
+      <aside className={`fixed right-0 top-0 bottom-0 w-80 bg-white border-l border-slate-200 shadow-2xl z-50 transform transition-transform duration-300 ${
+        isOpen ? "translate-x-0" : "translate-x-full"
+      }`}>
+        <div className="h-full flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-sky-50 to-cyan-50">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-sky-500 flex items-center justify-center">
+                <Mic className="w-4 h-4 text-white" />
+              </div>
+              <h3 className="font-bold text-ink">練習助手</h3>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-5 h-5 text-slate" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {activeSession ? (
+              <>
+                <div className="rounded-xl border-2 border-sky-200 bg-gradient-to-br from-sky-50 to-white p-4">
+                  <p className="text-xs text-sky-600 font-medium mb-1">正在練習</p>
+                  <p className="text-2xl font-black text-ink">{activeSession.phoneme}</p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-slate">準確度</span>
+                    <span className={`text-lg font-black ${
+                      activeSession.accuracy >= 80 ? "text-emerald-500" :
+                      activeSession.accuracy >= 60 ? "text-amber-500" : "text-red-400"
+                    }`}>
+                      {Math.round(activeSession.accuracy * 100)}%
+                    </span>
+                  </div>
+                  <div className="h-3 rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        activeSession.accuracy >= 80 ? "bg-emerald-400" :
+                        activeSession.accuracy >= 60 ? "bg-amber-400" : "bg-red-400"
+                      }`}
+                      style={{ width: `${activeSession.accuracy * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="w-4 h-4 text-sky-500" />
+                    <span className="text-sm font-medium text-slate">嘗試次數</span>
+                  </div>
+                  <p className="text-3xl font-black text-ink">{activeSession.attempts}</p>
+                </div>
+
+                {activeSession.tips.length > 0 && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lightbulb className="w-4 h-4 text-amber-500" />
+                      <span className="text-sm font-bold text-amber-800">小貼士</span>
+                    </div>
+                    <ul className="space-y-1.5">
+                      {activeSession.tips.map((tip, i) => (
+                        <li key={i} className="text-xs text-amber-700 flex items-start gap-1.5">
+                          <span className="text-amber-400 mt-0.5">•</span>
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                  <Mic className="w-10 h-10 text-slate-300" />
+                </div>
+                <p className="font-bold text-ink mb-1">未有進行中嘅練習</p>
+                <p className="text-sm text-slate">開始練習後，呢度會顯示即時反饋</p>
+              </div>
+            )}
+          </div>
+
+          <div className="border-t border-slate-100 p-4 bg-slate-50">
+            <div className="flex items-center gap-2 text-xs text-slate">
+              <Award className="w-4 h-4 text-amber-400" />
+              <span>繼續努力，你做得好好！</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
+
 // ─── Main Dashboard ──────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -592,6 +894,7 @@ export default function DashboardPage() {
   const [practiceExpanded, setPracticeExpanded] = useState(true);
   const [dreamExpanded, setDreamExpanded] = useState(true);
   const [showVoicePractice, setShowVoicePractice] = useState(false);
+  const [showPracticeSidebar, setShowPracticeSidebar] = useState(false);
 
   useEffect(() => {
     setCompletedIds(getCompletedIds());
@@ -672,6 +975,27 @@ export default function DashboardPage() {
           </button>
           <div className="pointer-events-none absolute -top-8 -right-8 w-32 h-32 rounded-full bg-amber-200/20 blur-2xl" />
           <div className="pointer-events-none absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-sky-200/20 blur-2xl" />
+        </div>
+
+        {/* ═══ Road Map + Practice Sidebar Toggle ═══ */}
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <RoadMapView
+              helperDone={helperDone}
+              forestStories={forestStories}
+              sealsLit={sealsLit}
+              completedIds={completedIds}
+              dreamLit={dreamLit}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowPracticeSidebar(true)}
+            className="self-start shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
+            aria-label="開啟練習助手"
+          >
+            <Mic className="w-5 h-5" />
+          </button>
         </div>
 
         {/* ═══ 1. 森林故事任務 ═══ */}
@@ -763,6 +1087,28 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* ═══ 1.5 海盜藏寶圖 3D 學習 ═══ */}
+        <section className="shadow-lg shadow-amber-900/10 rounded-xl" style={{ perspective: "800px" }}>
+          <button
+            type="button"
+            onClick={() => navigate("/pirate-treasure-map")}
+            className="w-full rounded-xl bg-gradient-to-r from-amber-600 to-amber-800 px-5 py-4 text-left shadow-md transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/30 backdrop-blur">
+                <Map className="h-6 w-6 text-amber-100" />
+              </div>
+              <div className="flex-1">
+                <h2 className="font-display text-lg font-bold text-white" style={{ textShadow: "0 1px 0 rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.3)" }}>
+                  海盜藏寶圖 3D 學習
+                </h2>
+                <p className="text-sm text-amber-100/80">探索 3D 藏寶圖，解鎖粵語聲調、聲母、韻母挑戰</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-amber-100" />
+            </div>
+          </button>
         </section>
 
         {/* ═══ 2. 皮皮練習 ═══ */}
@@ -894,6 +1240,9 @@ export default function DashboardPage() {
       {/* Voice practice modal */}
       {showVoicePractice && <VoicePracticeModal onClose={() => setShowVoicePractice(false)} />}
 
+      {/* Practice sidebar */}
+      <PracticeSidebar isOpen={showPracticeSidebar} onClose={() => setShowPracticeSidebar(false)} />
+
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -906,6 +1255,27 @@ export default function DashboardPage() {
         .card-3d { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease; transform-style: preserve-3d; }
         .card-3d:hover { transform: translateY(-4px) rotateX(2deg) scale(1.01); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15); }
         .text-3d { text-shadow: 0 1px 0 rgba(255,255,255,0.6), 0 2px 0 rgba(0,0,0,0.08), 0 3px 8px rgba(0,0,0,0.06); }
+        
+        /* Unified typography for student dashboard */
+        .font-display, .font-body {
+          font-family: var(--font-family-base, 'Inter', 'Noto Sans HK', -apple-system, sans-serif);
+        }
+        
+        /* Unified color mappings */
+        .text-ink { color: var(--color-text-primary, #0f172a); }
+        .text-slate { color: var(--color-text-secondary, #475569); }
+        .text-mist { color: var(--color-text-muted, #64748b); }
+        .bg-cloud { background-color: var(--color-bg-page, #f8fafc); }
+        .bg-mist { background-color: var(--color-bg-muted, #e2e8f0); }
+        .border-mist { border-color: var(--color-border-default, #e2e8f0); }
+        .text-sky-400, .text-cyan-400 { color: var(--color-primary, #2563eb); }
+        .text-mint, .text-emerald-400 { color: var(--color-success, #10b981); }
+        .text-sunshine, .text-amber-400 { color: var(--color-warning, #f59e0b); }
+        .text-coral, .text-red-400 { color: var(--color-error, #ef4444); }
+        .bg-sky-400 { background-color: var(--color-primary, #2563eb); }
+        .bg-mint { background-color: var(--color-success, #10b981); }
+        .bg-sunshine { background-color: var(--color-warning, #f59e0b); }
+        .bg-coral { background-color: var(--color-error, #ef4444); }
       `}</style>
     </div>
   );

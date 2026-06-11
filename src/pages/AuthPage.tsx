@@ -242,13 +242,22 @@ export default function AuthPage() {
       return;
     }
     setIsSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: loginForm.email,
       password: loginForm.password,
     });
     setIsSubmitting(false);
     if (error) {
-      toast.error(error.message || '登入失敗');
+      console.error('Login error:', error);
+      let errorMsg = '登入失敗';
+      if (error.message?.includes('Invalid login credentials')) {
+        errorMsg = '電郵或密碼不正確';
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorMsg = '電郵尚未確認';
+      } else if (error.message?.includes('Too many requests')) {
+        errorMsg = '登入嘗試次數過多，請稍後再試';
+      }
+      toast.error(errorMsg);
     } else {
       toast.success('登入成功！');
       navigate('/dashboard');

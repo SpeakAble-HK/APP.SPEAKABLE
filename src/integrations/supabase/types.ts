@@ -425,6 +425,92 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          id: string
+          name: string
+          name_zh: string | null
+          monthly_price_hkd: number
+          annual_price_hkd: number
+          max_child_accounts: number
+          features: Json
+          active: boolean
+          created_at: string
+        }
+        Insert: {
+          id: string
+          name: string
+          name_zh?: string | null
+          monthly_price_hkd?: number
+          annual_price_hkd?: number
+          max_child_accounts?: number
+          features?: Json
+          active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          name_zh?: string | null
+          monthly_price_hkd?: number
+          annual_price_hkd?: number
+          max_child_accounts?: number
+          features?: Json
+          active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          plan_id: string
+          status: string
+          billing_cycle: string
+          current_period_start: string
+          current_period_end: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          plan_id: string
+          status?: string
+          billing_cycle?: string
+          current_period_start?: string
+          current_period_end?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          plan_id?: string
+          status?: string
+          billing_cycle?: string
+          current_period_start?: string
+          current_period_end?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       leaderboard_view: {
@@ -448,9 +534,22 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_user_subscription: {
+        Args: {
+          _user_id: string
+        }
+        Returns: Json
+      }
+      has_feature: {
+        Args: {
+          _user_id: string
+          _feature: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "explorer" | "therapist"
+      app_role: "explorer" | "therapist" | "parent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -578,7 +677,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["explorer", "therapist"],
+      app_role: ["explorer", "therapist", "parent"],
     },
   },
 } as const

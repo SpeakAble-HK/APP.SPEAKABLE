@@ -36,7 +36,7 @@ export interface MechanicConfig {
 }
 
 export interface SceneObject {
-  type: "sphere" | "box" | "cylinder" | "cone" | "torus" | "plane";
+  type: "sphere" | "box" | "cylinder" | "cone" | "torus" | "plane" | "gltf";
   position: [number, number, number];
   color: string;
   scale?: number | [number, number, number];
@@ -58,6 +58,8 @@ export interface SceneObject {
   animationAmplitude?: number;
   orbitCenter?: [number, number, number];
   orbitRadius?: number;
+  modelPath?: string;
+  rotation?: [number, number, number];
 }
 
 export interface ParticleConfig {

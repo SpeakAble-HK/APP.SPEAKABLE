@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import TreasureMap from "@/components/TreasureMap";
 import { IntroSequence } from "@/components/IntroSequence";
 import PirateTreasureMapPreview from "@/components/PirateTreasureMapPreview";
@@ -7,6 +7,7 @@ import { shouldShowMissionPopup, setMissionPopupShown } from "@/lib/missionPopup
 
 export default function TreasureMapPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const routeState = location.state as { skipIntro?: boolean; skipMissionPopup?: boolean } | null;
   const [showIntro, setShowIntro] = useState(() => !routeState?.skipIntro);
   const [showPopup, setShowPopup] = useState(() => !routeState?.skipMissionPopup && shouldShowMissionPopup());
@@ -19,69 +20,45 @@ export default function TreasureMapPage() {
   return (
     <div className="relative">
       {showIntro && <IntroSequence onFinish={() => setShowIntro(false)} />}
-      <div style={{ padding: 32 }}>
+      <div className="p-4 sm:p-6 lg:p-8">
         {showPopup && (
           <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 50,
-              background: "rgba(2, 6, 23, 0.65)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 16,
-            }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 p-4"
           >
             <div
-              style={{
-                width: "min(680px, 100%)",
-                maxHeight: "90vh",
-                overflow: "auto",
-                borderRadius: 20,
-                background: "#ffffff",
-                padding: 22,
-                boxShadow: "0 24px 70px rgba(15, 23, 42, 0.28)",
-              }}
+              className="w-full max-w-[680px] max-h-[90vh] overflow-auto rounded-2xl bg-white p-5 sm:p-6 shadow-[0_24px_70px_rgba(15,23,42,0.28)]"
             >
               <PirateTreasureMapPreview />
-              <div style={{ fontSize: 14, color: "#0369a1", fontWeight: 800, marginBottom: 8 }}>
+              <div className="text-sm text-sky-600 font-extrabold mb-2">
                 皮皮旅程開放
               </div>
-              <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 10, color: "#0f172a" }}>
+              <h2 className="text-2xl sm:text-3xl font-extrabold mb-3 text-slate-900">
                 皮皮旅程
               </h2>
-              <p style={{ color: "#334155", marginBottom: 16, lineHeight: 1.7 }}>
+              <p className="text-slate-600 mb-4 leading-relaxed">
                 皮皮小幫手會先幫你準備好，再帶你進入 3D 旅程地圖。跟住發光路線完成廣東話發音挑戰，逐個收集歷險印記。
               </p>
               <div
-                style={{
-                  borderRadius: 14,
-                  border: "1px solid #bae6fd",
-                  background: "linear-gradient(135deg, #ecfeff 0%, #fff7ed 100%)",
-                  padding: 14,
-                  marginBottom: 16,
-                  color: "#334155",
-                  lineHeight: 1.7,
-                }}
+                className="rounded-xl border border-sky-200 bg-gradient-to-br from-cyan-50 to-orange-50 p-3 sm:p-4 mb-4 text-slate-600 leading-relaxed"
               >
                 點擊目前發光嘅歷險印記開始任務；答啱題目就會去下一站。
               </div>
-              <button
-                type="button"
-                onClick={closePopup}
-                style={{
-                  borderRadius: 12,
-                  background: "#0284c7",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 16px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                進入皮皮旅程
-              </button>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={closePopup}
+                  className="rounded-xl bg-sky-600 text-white border-none px-4 py-2.5 font-bold cursor-pointer hover:bg-sky-700 transition-colors"
+                >
+                  進入皮皮旅程
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { closePopup(); navigate("/pirate-treasure-map"); }}
+                  className="rounded-xl bg-violet-600 text-white border-none px-4 py-2.5 font-bold cursor-pointer hover:bg-violet-700 transition-colors"
+                >
+                  🗺️ 3D 藏寶圖
+                </button>
+              </div>
             </div>
           </div>
         )}

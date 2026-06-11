@@ -5,6 +5,7 @@ import { useMiniGameBuilder } from "@/lib/miniGameBuilder/useMiniGameBuilder";
 import { generateBlueprintFromDescription } from "@/lib/miniGameBuilder/blueprintGenerator";
 import { useSTDashboard } from "@/hooks/useSTDashboard";
 import { useNEPAWorldModel } from "@/hooks/useNEPAWorldModel";
+import { useAIBlueprint } from "@/hooks/useAIBlueprint";
 import type { DifficultyLevel, MechanicType, MiniGameBlueprint, PatientContext, PatientPhonemeInfo } from "@/lib/miniGameBuilder/types";
 
 const ScenePreview = lazy(() => import("@/lib/miniGameBuilder/ScenePreview"));
@@ -68,6 +69,7 @@ export default function MiniGameBuilderPage() {
   const { students, loading: studentsLoading } = useSTDashboard();
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const { worldModel, dashboard, loading: nepaLoading } = useNEPAWorldModel(selectedPatientId);
+  const { generate: generateAIBlueprint, loading: aiLoading, error: aiError } = useAIBlueprint();
 
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
@@ -115,27 +117,53 @@ export default function MiniGameBuilderPage() {
     if (step !== "thinking") return;
     abRef.current = false;
     setThinkingIdx(0);
-    const durations = [700, 900, 800, 600];
-    const total = durations.reduce((a, b) => a + b, 0);
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    let elapsed = 0;
-    for (let i = 1; i < THINKING_STEPS.length; i++) {
-      elapsed += durations[i - 1];
-      timers.push(setTimeout(() => {
-        if (!abRef.current) setThinkingIdx(i);
-      }, elapsed));
-    }
-    timers.push(setTimeout(() => {
-      if (abRef.current) return;
-      const bp = generateBlueprintFromDescription(description, difficulty, patientContext, mechanicType !== "auto" ? mechanicType : undefined);
-      setPending(bp);
-      setConfirmed(false);
-      setStep("preview");
-    }, total));
-    return () => {
-      abRef.current = true;
-      timers.forEach(clearTimeout);
+
+    const generateWithAI = async () => {
+      // Animate through thinking steps
+      const durations = [700, 900, 800, 600];
+      const timers: ReturnType<typeof setTimeout>[] = [];
+      let elapsed = 0;
+      for (let i = 1; i < THINKING_STEPS.length; i++) {
+        elapsed += durations[i - 1];
+        timers.push(setTimeout(() => {
+          if (!abRef.current) setThinkingIdx(i);
+        }, elapsed));
+      }
+
+      // Call AI after animation
+      timers.push(setTimeout(async () => {
+        if (abRef.current) return;
+
+        let bp: MiniGameBlueprint | null = null;
+
+        // Try AI generation first
+        if (!aiLoading) {
+          bp = await generateAIBlueprint(description, difficulty, patientContext);
+        }
+
+        // Fallback to local generator if AI fails
+        if (!bp) {
+          bp = generateBlueprintFromDescription(
+            description,
+            difficulty,
+            patientContext,
+            mechanicType !== "auto" ? mechanicType : undefined,
+          );
+        }
+
+        setPending(bp);
+        setConfirmed(false);
+        setStep("preview");
+      }, elapsed + 500));
+
+      return () => {
+        abRef.current = true;
+        timers.forEach(clearTimeout);
+      };
     };
+
+    const cleanup = generateWithAI();
+    return () => { cleanup?.(); };
   }, [step === "thinking"]);
 
   const handleGenerate = useCallback(() => {
@@ -207,6 +235,12 @@ export default function MiniGameBuilderPage() {
                 ? `正在為 ${patientContext.name} 設計遊戲...`
                 : "AI 遊戲設計師正在工作中..."}
             </p>
+            {aiLoading && (
+              <p className="text-sm text-primary font-medium">AI 正在生成藍圖...</p>
+            )}
+            {aiError && (
+              <p className="text-sm text-amber-600 font-medium">AI 生成失敗，使用本地生成器...</p>
+            )}
             <div className="w-full max-w-sm space-y-3">
               {THINKING_STEPS.map((s, i) => (
                 <div

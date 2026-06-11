@@ -1,8 +1,92 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import { saveVoiceSample } from "@/hooks/useVoiceSampleStore";
 import { usePronunciationAPI } from "@/hooks/usePronunciationAPI";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import * as THREE from "three";
+
+const FOREST_MODEL_URL = "/assets/enchanted-forest/o_donkey_forest_river.gltf";
+const KIKI_IMAGES = {
+  intro: "/assets/kiki-stage1-intro.png",
+  micGranted: "/assets/kiki-stage8-mic-granted.png",
+  default: "/assets/pipi-flying-home.jpeg",
+};
+
+function ForestModel({ zoomed }: { zoomed: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const gltf = useGLTF(FOREST_MODEL_URL);
+  const targetPos = useRef(new THREE.Vector3(0, -1.4, 0));
+  const targetScale = useRef(new THREE.Vector3(0.42, 0.42, 0.42));
+
+  useEffect(() => {
+    if (zoomed) {
+      targetPos.current.set(0, -0.8, 2);
+      targetScale.current.set(0.7, 0.7, 0.7);
+    } else {
+      targetPos.current.set(0, -1.4, 0);
+      targetScale.current.set(0.42, 0.42, 0.42);
+    }
+  }, [zoomed]);
+
+  useFrame((_, delta) => {
+    if (!groupRef.current) return;
+    groupRef.current.rotation.y += delta * 0.04;
+    groupRef.current.position.lerp(targetPos.current, delta * 2);
+    groupRef.current.scale.lerp(targetScale.current, delta * 2);
+  });
+
+  return (
+    <group ref={groupRef} position={[0, -1.4, 0]} rotation={[0, -0.55, 0]} scale={0.42}>
+      <primitive object={gltf.scene} />
+    </group>
+  );
+}
+
+function LoadingForest() {
+  return (
+    <mesh position={[0, -0.9, 0]}>
+      <boxGeometry args={[3.5, 0.18, 2.4]} />
+      <meshStandardMaterial color="#3f8f52" transparent opacity={0.55} />
+    </mesh>
+  );
+}
+
+function TreasureMapBackground({ zoomed }: { zoomed: boolean }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="absolute inset-0 z-0"
+      style={{
+        background: "linear-gradient(180deg, #b9f2ff 0%, #dff9d5 54%, #7ccf87 100%)",
+      }}
+    >
+      <Canvas camera={{ position: [0, 3.4, 8.2], fov: 42 }} gl={{ alpha: true, antialias: true }} shadows>
+        <color attach="background" args={["#c9f5ff"]} />
+        <fog attach="fog" args={["#dff9d5", 8, 18]} />
+        <ambientLight intensity={1.25} />
+        <directionalLight position={[5, 8, 5]} intensity={1.8} castShadow />
+        <directionalLight position={[-4, 4, -4]} intensity={0.55} color="#b6f7d0" />
+        <Suspense fallback={<LoadingForest />}>
+          <ForestModel zoomed={zoomed} />
+        </Suspense>
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.62, 0]} receiveShadow>
+          <circleGeometry args={[8, 64]} />
+          <meshStandardMaterial color="#74c365" transparent opacity={0.42} />
+        </mesh>
+        <OrbitControls enablePan={false} enableZoom={false} enableRotate={false} />
+      </Canvas>
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06)), radial-gradient(circle at 22% 35%, rgba(255,244,171,0.34), transparent 24%)",
+        }}
+      />
+    </div>
+  );
+}
 
 type OnboardingStage =
   | "intro"
@@ -10,81 +94,69 @@ type OnboardingStage =
   | "voice-clone"
   | "challenge"
   | "mirror"
-  | "treasure";
+  | "treasure"
+  | "transition";
 
 const ONBOARDING_KEY = "speakable-onboarding-complete";
 
-function PipiAvatar({ size = 120, emotion = "happy" }: { size?: number; emotion?: "happy" | "excited" | "thinking" | "encouraging" }) {
-  const eyeStyle = emotion === "happy" ? "M0,0 Q5,-3 10,0" : emotion === "excited" ? "M0,-2 L5,2 L10,-2" : "M0,0 L10,0";
-  return (
-    <svg width={size} height={size} viewBox="0 0 120 120" className="drop-shadow-2xl">
-      <defs>
-        <radialGradient id="bodyGrad" cx="50%" cy="40%">
-          <stop offset="0%" stopColor="#fbbf24" />
-          <stop offset="100%" stopColor="#f59e0b" />
-        </radialGradient>
-        <radialGradient id="wingGrad" cx="50%" cy="50%">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="100%" stopColor="#059669" />
-        </radialGradient>
-      </defs>
-      <ellipse cx="60" cy="65" rx="35" ry="40" fill="url(#bodyGrad)" />
-      <ellipse cx="25" cy="55" rx="18" ry="12" fill="url(#wingGrad)" transform="rotate(-20 25 55)" />
-      <ellipse cx="95" cy="55" rx="18" ry="12" fill="url(#wingGrad)" transform="rotate(20 95 55)" />
-      <circle cx="48" cy="52" r="8" fill="white" />
-      <circle cx="72" cy="52" r="8" fill="white" />
-      <circle cx="50" cy="53" r="4" fill="#1e293b" />
-      <circle cx="74" cy="53" r="4" fill="#1e293b" />
-      <circle cx="51" cy="51" r="1.5" fill="white" />
-      <circle cx="75" cy="51" r="1.5" fill="white" />
-      <path d="M52 72 Q60 80 68 72" stroke="#92400e" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <path d="M50 30 Q55 15 60 25 Q65 15 70 30" fill="#ef4444" />
-      <ellipse cx="60" cy="100" rx="8" ry="5" fill="#f97316" />
-    </svg>
-  );
-}
+function KikiAvatar({ size = 120, emotion = "happy", zoomed = false, stage }: { size?: number; emotion?: "happy" | "excited" | "thinking" | "encouraging"; zoomed?: boolean; stage?: OnboardingStage }) {
+  const getImageUrl = () => {
+    if (stage === "intro") return KIKI_IMAGES.intro;
+    if (stage === "microphone" && emotion === "happy") return KIKI_IMAGES.micGranted;
+    return KIKI_IMAGES.default;
+  };
 
-function FloatingParticles() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {Array.from({ length: 20 }).map((_, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full opacity-40"
-          style={{
-            width: `${4 + Math.random() * 8}px`,
-            height: `${4 + Math.random() * 8}px`,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            background: `hsl(${180 + Math.random() * 60}, 80%, 70%)`,
-            animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
-            animationDelay: `${Math.random() * 3}s`,
-          }}
-        />
-      ))}
+    <div
+      className={`relative transition-all duration-700 ${zoomed ? "scale-110" : "scale-100"}`}
+      style={{
+        animation: "kikiFloat 3s ease-in-out infinite",
+        filter: emotion === "excited" ? "drop-shadow(0 0 20px rgba(251, 191, 36, 0.6))" : "drop-shadow(0 8px 16px rgba(0,0,0,0.3))",
+      }}
+    >
+      <img
+        src={getImageUrl()}
+        alt="琪琪 KiKi"
+        width={size}
+        height={size}
+        className="object-contain"
+        style={{ imageRendering: "auto" }}
+      />
+      {emotion === "excited" && (
+        <div className="absolute -inset-4 animate-ping opacity-30">
+          <div className="h-full w-full rounded-full bg-amber-400" />
+        </div>
+      )}
     </div>
   );
 }
 
-function VoiceIslandBackground() {
+function MapPopup({ children, position, delay = 0 }: { children: React.ReactNode; position: "left" | "right" | "center" | "top"; delay?: number }) {
+  const positionClasses = {
+    left: "left-8 top-1/2 -translate-y-1/2",
+    right: "right-8 top-1/2 -translate-y-1/2",
+    center: "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+    top: "left-1/2 top-16 -translate-x-1/2",
+  };
+
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-purple-950 to-cyan-950" />
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-emerald-900/40 to-transparent" />
-      <svg className="absolute bottom-0 w-full opacity-30" viewBox="0 0 800 200" preserveAspectRatio="none">
-        <path d="M0,200 Q200,100 400,150 Q600,200 800,120 L800,200 Z" fill="#065f46" />
-        <path d="M0,200 Q150,140 350,170 Q550,200 800,160 L800,200 Z" fill="#047857" />
-      </svg>
-      <FloatingParticles />
+    <div
+      className={`absolute ${positionClasses[position]} z-20 max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-700`}
+      style={{ animationDelay: `${delay}ms`, animationFillMode: "both" }}
+    >
+      <div className="rounded-2xl border-2 border-amber-400/40 bg-white/95 p-4 shadow-2xl backdrop-blur-md">
+        <div className="absolute -bottom-2 left-1/2 h-4 w-4 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-amber-400/40 bg-white/95" />
+        {children}
+      </div>
     </div>
   );
 }
 
 function SpeechBubble({ children, position = "bottom" }: { children: React.ReactNode; position?: "bottom" | "top" }) {
   return (
-    <div className={`relative mx-auto max-w-lg rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur-md ${position === "bottom" ? "mt-4" : "mb-4"}`}>
-      <div className={`absolute left-1/2 -translate-x-1/2 ${position === "bottom" ? "-top-2 border-b-8 border-l-8 border-r-8 border-b-white/10 border-l-transparent border-r-transparent" : "-bottom-2 border-t-8 border-l-8 border-r-8 border-t-white/10 border-l-transparent border-r-transparent"}`} />
-      <div className="text-center text-base leading-relaxed text-white">{children}</div>
+    <div className={`relative mx-auto max-w-lg rounded-2xl border-2 border-amber-400/30 bg-white/95 p-5 shadow-2xl backdrop-blur-md ${position === "bottom" ? "mt-4" : "mb-4"}`}>
+      <div className={`absolute left-1/2 -translate-x-1/2 ${position === "bottom" ? "-top-3 border-b-8 border-l-8 border-r-8 border-b-white/95 border-l-transparent border-r-transparent" : "-bottom-3 border-t-8 border-l-8 border-r-8 border-t-white/95 border-l-transparent border-r-transparent"}`} />
+      <div className="text-center text-base leading-relaxed text-slate-800">{children}</div>
     </div>
   );
 }
@@ -103,11 +175,11 @@ function GoldenButton({ onClick, children, disabled = false, pulse = false }: { 
 
 function StageIndicator({ current, total }: { current: number; total: number }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 rounded-full bg-black/30 px-4 py-2 backdrop-blur-md">
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
-          className={`h-2 rounded-full transition-all duration-500 ${i < current ? "w-6 bg-amber-400" : i === current ? "w-8 bg-amber-300" : "w-2 bg-white/30"}`}
+          className={`h-2 rounded-full transition-all duration-500 ${i < current ? "w-6 bg-amber-400" : i === current ? "w-8 bg-amber-300" : "w-2 bg-white/50"}`}
         />
       ))}
     </div>
@@ -126,6 +198,7 @@ export default function OnboardingPage() {
   const [showMirror, setShowMirror] = useState(false);
   const [showTreasure, setShowTreasure] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [micAvailable, setMicAvailable] = useState<boolean | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -135,6 +208,28 @@ export default function OnboardingPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const { processRecording, isProcessing, getGeneratedAudioUrl } = usePronunciationAPI();
+
+  const isZoomed = stage === "intro" || stage === "microphone" || stage === "voice-clone";
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const hasMic = devices.some(d => d.kind === "audioinput" && d.deviceId !== "");
+          if (hasMic) {
+            setMicAvailable(true);
+            return;
+          }
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+        setMicAvailable(true);
+      } catch {
+        setMicAvailable(false);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -153,7 +248,12 @@ export default function OnboardingPage() {
       setMicGranted(true);
       setTimeout(() => setStage("voice-clone"), 1500);
     } catch {
-      alert("請允許麥克風權限，皮皮需要聽到你嘅聲音！");
+      setMicAvailable(false);
+      alert("偵測唔到麥克風，我哋會跳過聲音步驟，直接進入冒險！");
+      setTimeout(() => {
+        setShowTreasure(true);
+        setStage("treasure");
+      }, 500);
     }
   }, []);
 
@@ -197,7 +297,7 @@ export default function OnboardingPage() {
         const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         await saveVoiceSample("sample1", blob);
 
-        const result = await processRecording(blob, "哈囉皮皮", "yue");
+        const result = await processRecording(blob, "哈囉琪琪", "yue");
         if (result?.clone) {
           setClonePlaying(true);
           const audioUrl = getGeneratedAudioUrl();
@@ -311,36 +411,56 @@ export default function OnboardingPage() {
 
   const finishOnboarding = useCallback(() => {
     localStorage.setItem(ONBOARDING_KEY, "1");
-    navigate("/dashboard");
+    // Trigger transition animation
+    setStage("transition");
+    // Navigate after animation completes
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 2000);
   }, [navigate]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
-      <VoiceIslandBackground />
+    <main className="relative min-h-screen overflow-hidden">
+      <TreasureMapBackground zoomed={isZoomed} />
 
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-8">
-        <div className="mb-6">
+        <div className="absolute left-1/2 top-6 z-30 -translate-x-1/2">
           <StageIndicator current={stageIndex} total={6} />
         </div>
 
         {/* ─── STAGE 1: INTRO ─── */}
         {stage === "intro" && (
           <div className="flex flex-col items-center gap-6 animate-in fade-in duration-1000">
-            <div className="animate-bounce">
-              <PipiAvatar size={160} emotion="excited" />
-            </div>
-            <SpeechBubble>
-              <p className="text-lg font-bold">
-                Hi！我係你嘅語音夥伴<span className="text-amber-300">皮皮</span>！
+            <MapPopup position="top" delay={300}>
+              <p className="text-lg font-bold text-slate-800">
+                Hi！我係你嘅語音夥伴<span className="text-amber-600">琪琪</span>！
               </p>
-              <p className="mt-2 text-sm text-white/80">
+              <p className="mt-2 text-sm text-slate-600">
                 語音島嘅彩色能量石失去咗光芒，我需要你嘅聲音魔法幫手。一齊開始我哋嘅聲音冒險啦！
               </p>
-            </SpeechBubble>
-            <GoldenButton onClick={() => setStage("microphone")} pulse>
+              {micAvailable === false && (
+                <p className="mt-3 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 border border-amber-200">
+                  ⚠️ 偵測唔到麥克風，聲音步驟會自動跳過
+                </p>
+              )}
+            </MapPopup>
+            <div className="mt-32">
+              <KikiAvatar size={180} emotion="excited" zoomed stage="intro" />
+            </div>
+            <GoldenButton
+              onClick={() => {
+                if (micAvailable === false) {
+                  setShowTreasure(true);
+                  setStage("treasure");
+                } else {
+                  setStage("microphone");
+                }
+              }}
+              pulse
+            >
               <span className="flex items-center gap-2">
                 <MaterialIcon icon="play_arrow" filled className="text-xl" />
-                同皮皮啟航冒險！
+                同琪琪啟航冒險！
               </span>
             </GoldenButton>
           </div>
@@ -349,24 +469,49 @@ export default function OnboardingPage() {
         {/* ─── STAGE 2: MICROPHONE ─── */}
         {stage === "microphone" && (
           <div className="flex flex-col items-center gap-6 animate-in fade-in duration-700">
-            <PipiAvatar size={120} emotion={micGranted ? "happy" : "thinking"} />
-            <SpeechBubble>
-              {!micGranted ? (
+            <MapPopup position="top" delay={200}>
+              {micAvailable === false ? (
                 <>
-                  <p className="text-lg font-bold">在出發之前，我哋要先解鎖呢個<span className="text-amber-300">魔法麥克風</span>！</p>
-                  <p className="mt-2 text-sm text-white/80">
+                  <p className="text-lg font-bold text-slate-800">偵測唔到你嘅麥克風！</p>
+                  <p className="mt-2 text-sm text-slate-600">
+                    冇關係！我哋可以跳過聲音步驟，直接開始冒險。之後有麥克風嘅時候再返嚟玩都可以㗎！
+                  </p>
+                </>
+              ) : !micGranted ? (
+                <>
+                  <p className="text-lg font-bold text-slate-800">在出發之前，我哋要先解鎖呢個<span className="text-amber-600">魔法麥克風</span>！</p>
+                  <p className="mt-2 text-sm text-slate-600">
                     等我可以聽到你美妙嘅聲音。請幫我點擊下面嘅按鈕，然後喺彈出嘅視窗點擊「允許」！
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-lg font-bold text-emerald-300">魔法麥克風解鎖成功！</p>
-                  <p className="mt-2 text-sm text-white/80">皮皮已經可以聽到你喇！準備好進入下一步！</p>
+                  <p className="text-lg font-bold text-emerald-600">魔法麥克風解鎖成功！</p>
+                  <p className="mt-2 text-sm text-slate-600">琪琪已經可以聽到你喇！準備好進入下一步！</p>
                 </>
               )}
-            </SpeechBubble>
+            </MapPopup>
 
-            {!micGranted ? (
+            <div className="mt-32">
+              <KikiAvatar size={140} emotion={micAvailable === false ? "thinking" : micGranted ? "happy" : "thinking"} zoomed stage="microphone" />
+            </div>
+
+            {micAvailable === false ? (
+              <div className="flex flex-col items-center gap-4">
+                <button
+                  onClick={() => {
+                    setShowTreasure(true);
+                    setStage("treasure");
+                  }}
+                  className="rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 px-8 py-4 text-lg font-black text-amber-950 shadow-lg shadow-amber-500/30 transition-all hover:scale-105"
+                >
+                  <span className="flex items-center gap-2">
+                    <MaterialIcon icon="skip_next" filled className="text-xl" />
+                    跳過，直接冒險！
+                  </span>
+                </button>
+              </div>
+            ) : !micGranted ? (
               <div className="flex flex-col items-center gap-4">
                 <div className="relative">
                   <div className="absolute inset-0 animate-ping rounded-full bg-amber-400/30" />
@@ -377,16 +522,16 @@ export default function OnboardingPage() {
                     <MaterialIcon icon="mic" filled className="text-4xl text-amber-950" />
                   </button>
                 </div>
-                <p className="text-sm text-white/60">點擊解鎖魔法麥克風</p>
+                <p className="rounded-full bg-black/30 px-4 py-2 text-sm text-white backdrop-blur-md">點擊解鎖魔法麥克風</p>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <div className="flex h-24 w-24 items-center justify-center rounded-full bg-emerald-500/20 ring-4 ring-emerald-400/50">
-                  <MaterialIcon icon="mic" filled className="text-4xl text-emerald-400" />
+                  <MaterialIcon icon="mic" filled className="text-4xl text-emerald-600" />
                 </div>
-                <div className="flex items-center gap-2 text-emerald-300">
-                  <MaterialIcon icon="check_circle" filled className="text-xl" />
-                  <span className="font-bold">已解鎖</span>
+                <div className="flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-2 backdrop-blur-md">
+                  <MaterialIcon icon="check_circle" filled className="text-xl text-emerald-600" />
+                  <span className="font-bold text-emerald-700">已解鎖</span>
                 </div>
               </div>
             )}
@@ -394,31 +539,34 @@ export default function OnboardingPage() {
         )}
 
         {/* ─── STAGE 3: VOICE CLONE ─── */}
-        {stage === "voice-clone" && (
+        {stage === "voice-clone" && micAvailable !== false && (
           <div className="flex flex-col items-center gap-6 animate-in fade-in duration-700">
-            <PipiAvatar size={120} emotion={clonePlaying ? "excited" : "encouraging"} />
-            <SpeechBubble>
+            <MapPopup position="top" delay={200}>
               {!recordingComplete ? (
                 <>
-                  <p className="text-lg font-bold">
-                    而家請你對住麥克風講一聲<span className="text-amber-300">「哈囉皮皮」</span>！
+                  <p className="text-lg font-bold text-slate-800">
+                    而家請你對住麥克風講一聲<span className="text-amber-600">「哈囉琪琪」</span>！
                   </p>
-                  <p className="mt-2 text-sm text-white/80">
+                  <p className="mt-2 text-sm text-slate-600">
                     將你最初嘅聲音魔法注入能量瓶入面！
                   </p>
                 </>
               ) : clonePlaying ? (
                 <>
-                  <p className="text-lg font-bold text-emerald-300">我收到你嘅聲音魔法喇！</p>
-                  <p className="mt-2 text-sm text-white/80">聽下皮皮用你嘅聲音講嘢！</p>
+                  <p className="text-lg font-bold text-emerald-600">我收到你嘅聲音魔法喇！</p>
+                  <p className="mt-2 text-sm text-slate-600">聽下琪琪用你嘅聲音講嘢！</p>
                 </>
               ) : (
                 <>
-                  <p className="text-lg font-bold">聲音魔法注入成功！</p>
-                  <p className="mt-2 text-sm text-white/80">準備好進入限時挑戰！</p>
+                  <p className="text-lg font-bold text-slate-800">聲音魔法注入成功！</p>
+                  <p className="mt-2 text-sm text-slate-600">準備好進入限時挑戰！</p>
                 </>
               )}
-            </SpeechBubble>
+            </MapPopup>
+
+            <div className="mt-32">
+              <KikiAvatar size={140} emotion={clonePlaying ? "excited" : "encouraging"} zoomed stage="voice-clone" />
+            </div>
 
             {!recordingComplete && (
               <div className="flex flex-col items-center gap-4">
@@ -438,7 +586,7 @@ export default function OnboardingPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-sm text-white/60">
+                <p className="rounded-full bg-black/30 px-4 py-2 text-sm text-white backdrop-blur-md">
                   {isRecording ? "再次點擊停止錄音" : "點擊開始注入聲音魔法"}
                 </p>
                 {isRecording && (
@@ -456,9 +604,9 @@ export default function OnboardingPage() {
             )}
 
             {clonePlaying && (
-              <div className="flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-2">
-                <div className="h-3 w-3 animate-pulse rounded-full bg-emerald-400" />
-                <span className="text-sm font-bold text-emerald-300">播放緊皮皮嘅聲音克隆...</span>
+              <div className="flex items-center gap-2 rounded-full bg-emerald-500/20 px-4 py-2 backdrop-blur-md">
+                <div className="h-3 w-3 animate-pulse rounded-full bg-emerald-500" />
+                <span className="text-sm font-bold text-emerald-700">播放緊琪琪嘅聲音克隆...</span>
               </div>
             )}
           </div>
@@ -468,26 +616,26 @@ export default function OnboardingPage() {
         {stage === "challenge" && (
           <div className="flex flex-col items-center gap-5 animate-in fade-in duration-700">
             <div className="flex w-full max-w-md items-center justify-between">
-              <PipiAvatar size={60} emotion="excited" />
-              <div className="flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-2">
-                <MaterialIcon icon="hourglass_top" filled className="text-amber-400" />
-                <span className={`font-mono text-xl font-black ${challengeTime <= 10 ? "text-red-400 animate-pulse" : "text-amber-300"}`}>
+              <KikiAvatar size={60} emotion="excited" stage="challenge" />
+              <div className="flex items-center gap-2 rounded-full bg-amber-500/80 px-4 py-2 backdrop-blur-md">
+                <MaterialIcon icon="hourglass_top" filled className="text-amber-900" />
+                <span className={`font-mono text-xl font-black ${challengeTime <= 10 ? "text-red-600 animate-pulse" : "text-amber-900"}`}>
                   {challengeTime}s
                 </span>
               </div>
             </div>
 
-            <SpeechBubble>
-              <p className="text-lg font-bold">
-                寶箱被鎖住咗！我哋要在 <span className="text-amber-300">60 秒</span>之內讀出發音密碼！
+            <MapPopup position="top">
+              <p className="text-lg font-bold text-slate-800">
+                寶箱被鎖住咗！我哋要在 <span className="text-amber-600">60 秒</span>之內讀出發音密碼！
               </p>
-              <p className="mt-2 text-sm text-white/80">請讀出呢個字：</p>
-            </SpeechBubble>
+              <p className="mt-2 text-sm text-slate-600">請讀出呢個字：</p>
+            </MapPopup>
 
-            <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-amber-400/30 bg-amber-500/10 px-8 py-6">
-              <span className="text-7xl font-black text-amber-200">魚</span>
-              <span className="text-2xl font-bold text-amber-300/80">/jyu5/</span>
-              <span className="text-sm text-white/60">意思：fish</span>
+            <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border-2 border-amber-400/50 bg-white/90 px-8 py-6 shadow-xl backdrop-blur-md">
+              <span className="text-7xl font-black text-amber-700">魚</span>
+              <span className="text-2xl font-bold text-amber-600">/jyu5/</span>
+              <span className="text-sm text-slate-500">意思：fish</span>
             </div>
 
             {challengeResult === null && (
@@ -502,13 +650,13 @@ export default function OnboardingPage() {
                     <MaterialIcon icon="play_arrow" filled className="text-3xl text-white" />
                   )}
                 </button>
-                <p className="text-sm text-white/60">
+                <p className="rounded-full bg-black/30 px-4 py-2 text-sm text-white backdrop-blur-md">
                   {isRecording ? "再次點擊停止" : "點擊開始錄音"}
                 </p>
                 {isProcessing && (
-                  <div className="flex items-center gap-2 text-amber-300">
-                    <MaterialIcon icon="hourglass_top" className="animate-spin" filled />
-                    <span className="text-sm font-bold">皮皮分析緊...</span>
+                  <div className="flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-2 backdrop-blur-md">
+                    <MaterialIcon icon="hourglass_top" className="animate-spin text-amber-600" filled />
+                    <span className="text-sm font-bold text-amber-700">琪琪分析緊...</span>
                   </div>
                 )}
               </div>
@@ -516,8 +664,8 @@ export default function OnboardingPage() {
 
             {challengeResult === "success" && (
               <div className="flex flex-col items-center gap-2 animate-in zoom-in duration-500">
-                <MaterialIcon icon="check_circle" filled className="text-5xl text-emerald-400" />
-                <p className="text-xl font-black text-emerald-300">發音正確！寶箱解鎖緊...</p>
+                <MaterialIcon icon="check_circle" filled className="text-5xl text-emerald-500" />
+                <p className="rounded-full bg-emerald-500/80 px-6 py-3 text-xl font-black text-white backdrop-blur-md">發音正確！寶箱解鎖緊...</p>
               </div>
             )}
           </div>
@@ -526,26 +674,26 @@ export default function OnboardingPage() {
         {/* ─── STAGE 5: MAGIC MIRROR ─── */}
         {stage === "mirror" && (
           <div className="flex flex-col items-center gap-6 animate-in fade-in duration-700">
-            <PipiAvatar size={100} emotion="thinking" />
+            <KikiAvatar size={100} emotion="thinking" stage="mirror" />
 
-            <SpeechBubble>
-              <p className="text-lg font-bold">唔緊要！我哋用<span className="text-purple-300">神奇魔法鏡子</span>睇下點樣改善！</p>
-            </SpeechBubble>
+            <MapPopup position="top">
+              <p className="text-lg font-bold text-slate-800">唔緊要！我哋用<span className="text-purple-600">神奇魔法鏡子</span>睇下點樣改善！</p>
+            </MapPopup>
 
-            <div className="relative flex flex-col items-center gap-4">
-              <div className="relative flex h-48 w-48 items-center justify-center rounded-full border-4 border-purple-400/50 bg-gradient-to-br from-purple-900/60 to-indigo-900/60 shadow-2xl shadow-purple-500/20">
-                <div className="absolute inset-2 rounded-full border-2 border-purple-300/20" />
+            <div className="mt-4 relative flex flex-col items-center gap-4">
+              <div className="relative flex h-48 w-48 items-center justify-center rounded-full border-4 border-purple-400/50 bg-gradient-to-br from-purple-100 to-indigo-100 shadow-2xl shadow-purple-500/20">
+                <div className="absolute inset-2 rounded-full border-2 border-purple-300/40" />
                 <div className="flex flex-col items-center gap-2">
                   <div className="text-5xl">👄</div>
                   <div className="rounded-lg bg-purple-500/20 px-3 py-1">
-                    <p className="text-xs font-bold text-purple-200">嘴巴要縮圓</p>
+                    <p className="text-xs font-bold text-purple-700">嘴巴要縮圓</p>
                   </div>
                 </div>
               </div>
 
-              <div className="max-w-sm rounded-xl border border-purple-400/20 bg-purple-500/10 p-4 text-center">
-                <p className="text-sm text-white/90">
-                  讀「魚 /jyu5/」嘅時候，嘴巴要<span className="font-bold text-purple-300">像吹口哨一樣縮圓圓地</span>。
+              <div className="max-w-sm rounded-xl border border-purple-400/30 bg-white/90 p-4 text-center shadow-lg backdrop-blur-md">
+                <p className="text-sm text-slate-700">
+                  讀「魚 /jyu5/」嘅時候，嘴巴要<span className="font-bold text-purple-600">像吹口哨一樣縮圓圓地</span>。
                   舌頭放平，聲音從喉咙流出。我哋再試一次！
                 </p>
               </div>
@@ -587,22 +735,22 @@ export default function OnboardingPage() {
                   ))}
                 </>
               )}
-              <PipiAvatar size={140} emotion="excited" />
+              <KikiAvatar size={140} emotion="excited" stage="treasure" />
             </div>
 
-            <SpeechBubble>
-              <p className="text-xl font-black text-amber-300">太棒了！</p>
-              <p className="mt-2 text-sm text-white/80">
+            <MapPopup position="top">
+              <p className="text-xl font-black text-amber-600">太棒了！</p>
+              <p className="mt-2 text-sm text-slate-600">
                 你已經解鎖咗語音島嘅冒險地圖。你可以隨時選擇不同嘅關卡，或者返去睇下治療師同老師為你準備嘅專屬任務。
               </p>
-            </SpeechBubble>
+            </MapPopup>
 
-            <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-amber-400/30 bg-amber-500/10 p-6">
+            <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-amber-400/50 bg-white/90 p-6 shadow-xl backdrop-blur-md">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 text-4xl shadow-lg shadow-amber-500/30">
                 🏆
               </div>
-              <p className="text-lg font-black text-amber-200">語音島勇士</p>
-              <p className="text-xs text-white/60">你嘅第一個電子貼紙！</p>
+              <p className="text-lg font-black text-amber-700">語音島勇士</p>
+              <p className="text-xs text-slate-500">你嘅第一個電子貼紙！</p>
             </div>
 
             <GoldenButton onClick={finishOnboarding} pulse>
@@ -613,14 +761,92 @@ export default function OnboardingPage() {
             </GoldenButton>
           </div>
         )}
+
+        {/* ─── TRANSITION: Seamless journey to dashboard ─── */}
+        {stage === "transition" && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center">
+            {/* Animated background */}
+            <div
+              className="absolute inset-0 animate-[zoomIn_2s_ease-in-out_forwards]"
+              style={{
+                background: "linear-gradient(180deg, #b9f2ff 0%, #dff9d5 54%, #7ccf87 100%)",
+              }}
+            >
+              <Canvas camera={{ position: [0, 3.4, 8.2], fov: 42 }} gl={{ alpha: true, antialias: true }} shadows>
+                <color attach="background" args={["#c9f5ff"]} />
+                <fog attach="fog" args={["#dff9d5", 8, 18]} />
+                <ambientLight intensity={1.25} />
+                <directionalLight position={[5, 8, 5]} intensity={1.8} castShadow />
+                <directionalLight position={[-4, 4, -4]} intensity={0.55} color="#b6f7d0" />
+                <Suspense fallback={<LoadingForest />}>
+                  <ForestModel zoomed={true} />
+                </Suspense>
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.62, 0]} receiveShadow>
+                  <circleGeometry args={[8, 64]} />
+                  <meshStandardMaterial color="#74c365" transparent opacity={0.42} />
+                </mesh>
+              </Canvas>
+            </div>
+
+            {/* Overlay content */}
+            <div className="relative z-10 flex flex-col items-center gap-6 animate-[fadeInUp_1s_ease-out_forwards]">
+              <div className="relative">
+                <KikiAvatar size={180} emotion="excited" stage="transition" zoomed />
+                {/* Sparkles around Kiki */}
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute text-2xl animate-ping"
+                    style={{
+                      left: `${Math.cos((i / 12) * Math.PI * 2) * 120 + 60}px`,
+                      top: `${Math.sin((i / 12) * Math.PI * 2) * 120 + 60}px`,
+                      animationDelay: `${i * 0.15}s`,
+                      animationDuration: "1.5s",
+                    }}
+                  >
+                    {["⭐", "🌟", "✨", "💫"][i % 4]}
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-3xl border-4 border-amber-400/60 bg-white/95 px-8 py-6 shadow-2xl backdrop-blur-md">
+                <p className="text-2xl font-black text-amber-600 animate-pulse">出發啦！</p>
+                <p className="mt-2 text-center text-sm text-slate-600">
+                  帶你去語音島嘅冒險地圖...
+                </p>
+              </div>
+
+              {/* Progress indicator */}
+              <div className="flex gap-2">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="h-2 w-2 rounded-full bg-amber-400 animate-bounce"
+                    style={{ animationDelay: `${i * 0.2}s` }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
-        @keyframes float {
+        @keyframes kikiFloat {
           0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
+          50% { transform: translateY(-12px); }
+        }
+        @keyframes zoomIn {
+          0% { transform: scale(1); opacity: 1; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
+        @keyframes fadeInUp {
+          0% { transform: translateY(30px); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
         }
       `}</style>
     </main>
   );
 }
+
+useGLTF.preload(FOREST_MODEL_URL);

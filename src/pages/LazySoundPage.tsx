@@ -216,22 +216,22 @@ export default function LazySoundPage() {
       <BrandHeader />
 
       {/* Header */}
-      <div className="pt-20 pb-6 px-4 bg-gradient-to-b from-primary/10 to-transparent">
-        <div className="max-w-2xl mx-auto">
+      <div className="pt-20 pb-6 px-4 sm:px-6 bg-gradient-to-b from-primary/10 to-transparent">
+        <div className="max-w-4xl mx-auto">
           <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-primary font-medium mb-4 hover:underline">
             <MaterialIcon icon="arrow_back" className="text-lg" /> 返回
           </button>
           <div className="flex items-center gap-3 mb-2">
             <img src={mascot} alt="" className="w-12 h-12 object-contain" />
             <div>
-              <h1 className="font-headline text-2xl font-extrabold">懶音檢測</h1>
+              <h1 className="font-headline text-2xl sm:text-3xl font-extrabold">懶音檢測</h1>
               <p className="text-sm text-on-surface-variant">錄音即測，即時分析你嘅發音</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 pb-24 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 pb-24 space-y-6">
         {/* Category Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); handleReset(); }}>
           <TabsList className="w-full flex flex-wrap h-auto gap-1 bg-muted/50 p-1 rounded-xl">

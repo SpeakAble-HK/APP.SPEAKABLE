@@ -205,6 +205,7 @@ function TopNav() {
             { icon: "dashboard", label: "儀表板", path: "/st-dashboard" },
             { icon: "monitoring", label: "個案", path: "/st-accounts" },
             { icon: "analytics", label: "NEPA", path: "/st-nepa" },
+            { icon: "sports_esports", label: "遊戲", path: "/st-game-builder" },
           ].map((item) => (
             <button
               key={item.label}
@@ -267,6 +268,7 @@ export default function STDashboardPage() {
             { icon: "dashboard", label: "儀表板", path: "/st-dashboard" },
             { icon: "monitoring", label: "個案進度", path: "/st-accounts" },
             { icon: "analytics", label: "神經數據", path: "/st-nepa" },
+            { icon: "sports_esports", label: "AI 遊戲工坊", path: "/st-game-builder" },
           ].map((item) => (
             <button
               key={item.label}

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-export type AppRole = 'explorer' | 'therapist';
+export type AppRole = 'explorer' | 'therapist' | 'parent';
 
 export function useRole() {
   const { user } = useAuth();
@@ -38,5 +38,9 @@ export function useRole() {
     return { error };
   }, [user]);
 
-  return { role, loading, setUserRole };
+  const isTherapist = role === 'therapist';
+  const isParent = role === 'parent';
+  const isExplorer = role === 'explorer';
+
+  return { role, loading, setUserRole, isTherapist, isParent, isExplorer };
 }

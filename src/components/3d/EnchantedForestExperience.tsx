@@ -461,11 +461,44 @@ function CameraRig({
 }
 
 /* ------------------------------------------------------------------ */
+/* Loading screen                                                      */
+/* ------------------------------------------------------------------ */
+
+function LoadingScreen() {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0a0e27]">
+      <div className="relative">
+        <div className="h-20 w-20 rounded-full border-4 border-cyan-400/30 border-t-cyan-400 animate-spin" />
+        <Sparkles className="absolute inset-0 m-auto h-8 w-8 text-cyan-400 animate-pulse" />
+      </div>
+      <p className="mt-6 text-lg font-bold text-cyan-100 animate-pulse">進入魔法森林...</p>
+      <p className="mt-2 text-sm text-cyan-200/60">正在載入 3D 場景</p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Canvas loading fallback                                             */
+/* ------------------------------------------------------------------ */
+
+function CanvasLoader() {
+  return (
+    <Html center>
+      <div className="flex flex-col items-center gap-2">
+        <div className="h-12 w-12 rounded-full border-4 border-cyan-400/30 border-t-cyan-400 animate-spin" />
+        <p className="text-sm text-cyan-100">載入中...</p>
+      </div>
+    </Html>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Main experience component                                           */
 /* ------------------------------------------------------------------ */
 
 export default function EnchantedForestExperience() {
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   const miniGameConfig = user?.id ? getMiniGameConfig(user.id) : null;
   const visibleHotspots = useMemo(() =>
     HOTSPOTS.filter((h) => {
@@ -611,6 +644,16 @@ export default function EnchantedForestExperience() {
     setActiveGame(null);
   };
 
+  // Simulate loading time for the 3D scene
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="fixed inset-0 z-50 bg-[#0a0e27]">
       <div
@@ -630,7 +673,7 @@ export default function EnchantedForestExperience() {
           <color attach="background" args={["#0a0e27"]} />
           <fog attach="fog" args={["#0a0e27", 8, 60]} />
 
-          <Suspense fallback={null}>
+          <Suspense fallback={<CanvasLoader />}>
             <ForestModel />
             <GlowingFlora />
             <PortalMesh />

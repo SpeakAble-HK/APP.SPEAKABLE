@@ -4,7 +4,7 @@ import { Check, X, ArrowLeft, Mail, GraduationCap, Stethoscope, ChevronDown } fr
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import Badge from "@/components/ui/badge";
 import {
   Select,
   SelectContent,

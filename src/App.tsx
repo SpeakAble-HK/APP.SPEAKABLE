@@ -15,6 +15,7 @@ import { STLayout } from "./components/STLayout";
 import { lazy, Suspense } from "react";
 import LandingNoVideoPage from "./pages/LandingNoVideoPage";
 import SignInFlowPage from "./pages/SignInFlowPage";
+import PricingPage from "./pages/PricingPage";
 
 const TherapistPortalPage = lazy(() => import("./pages/TherapistPortalPage"));
 const Index = lazy(() => import("./pages/Index"));
@@ -40,6 +41,7 @@ const AuraStoryPage = lazy(() => import("./pages/AuraStoryPage"));
 const EnchantedForestPage = lazy(() => import("./pages/EnchantedForestPage"));
 const AuraJourneyPage = lazy(() => import("./pages/AuraJourneyPage"));
 const MiniGameBuilderPage = lazy(() => import("./pages/MiniGameBuilderPage"));
+const PirateTreasureMapPage = lazy(() => import("./pages/PirateTreasureMapPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 const ParentDashboardPage = lazy(() => import("./pages/ParentDashboardPage"));
@@ -71,12 +73,13 @@ const App = () => (
           <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <Suspense fallback={<LazyFallback />}>
               <Routes>
-                {/* Standalone pages (no bottom nav) */}
+                {/* ─── Public routes (no auth required) ─── */}
                 <Route path="/" element={<LandingNoVideoPage />} />
                 <Route path="/legacy-home" element={<Index />} />
                 <Route path="/auth" element={<SignInFlowPage />} />
                 <Route path="/auth-legacy" element={<AuthPage />} />
                 <Route path="/role-select" element={<RoleSelectionPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/explorer/onboarding/*" element={<ExplorerOnboardingPage />} />
                 <Route path="/onboarding" element={<OnboardingPage />} />
                 <Route path="/adventure-start" element={<AdventureStartPage />} />
@@ -86,18 +89,27 @@ const App = () => (
                 <Route path="/aura-story" element={<AuraStoryPage />} />
                 <Route path="/enchanted-forest" element={<EnchantedForestPage />} />
                 <Route path="/aura-journey" element={<AuraJourneyPage />} />
+                <Route path="/pirate-treasure-map" element={<PirateTreasureMapPage />} />
 
-                {/* ST pages with therapist nav */}
-                <Route element={<STLayout />}>
-                  <Route path="/st-dashboard" element={<STDashboardPage />} />
-                  <Route path="/st-nepa" element={<NEPADashboardPage />} />
-                  <Route path="/st-game-builder" element={<MiniGameBuilderPage />} />
-                  <Route path="/st-accounts" element={<STAccountsPage />} />
-                  <Route path="/st-settings" element={<STSettingsPage />} />
+                {/* ─── Therapist routes (require therapist role) ─── */}
+                <Route element={<ProtectedRoute allowedRoles={['therapist']} />}>
+                  <Route element={<STLayout />}>
+                    <Route path="/st-dashboard" element={<STDashboardPage />} />
+                    <Route path="/st-nepa" element={<NEPADashboardPage />} />
+                    <Route path="/st-game-builder" element={<MiniGameBuilderPage />} />
+                    <Route path="/st-accounts" element={<STAccountsPage />} />
+                    <Route path="/st-settings" element={<STSettingsPage />} />
+                  </Route>
+                  <Route path="/therapist-portal" element={<TherapistPortalPage />} />
                 </Route>
 
-                {/* Explorer pages with learner bottom nav, protected by auth */}
-                <Route element={<ProtectedRoute />}>
+                {/* ─── Parent routes (require parent role) ─── */}
+                <Route element={<ProtectedRoute allowedRoles={['parent']} />}>
+                  <Route path="/parent-dashboard" element={<ParentDashboardPage />} />
+                </Route>
+
+                {/* ─── Explorer routes (require explorer role) ─── */}
+                <Route element={<ProtectedRoute allowedRoles={['explorer']} />}>
                   <Route element={<AppLayout />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/explorer" element={<Navigate to="/dashboard" replace />} />
@@ -105,7 +117,6 @@ const App = () => (
                     <Route path="/progress" element={<ProgressPage />} />
                     <Route path="/echo-speech" element={<EchoSpeechPage />} />
                     <Route path="/pronunciation/results" element={<PronunciationResultsPage />} />
-                    <Route path="/speech-quest" element={<SpeechQuestPage />} />
                     <Route path="/lesson/:lessonId" element={<LessonPage />} />
                     <Route path="/semantic-island" element={<SemanticIslandPage />} />
                     <Route path="/pipi" element={<PiPiPage />} />
@@ -116,10 +127,20 @@ const App = () => (
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/treasure-map" element={<TreasureMapPage />} />
-                    <Route path="/therapist-portal" element={<TherapistPortalPage />} />
                   </Route>
-                  <Route path="/parent-dashboard" element={<ParentDashboardPage />} />
                 </Route>
+
+                {/* ─── Premium routes (require plus or pro plan) ─── */}
+                <Route element={<ProtectedRoute allowedRoles={['explorer']} requiredPlan="plus" requireSubscription />}>
+                  <Route path="/speech-quest" element={<SpeechQuestPage />} />
+                </Route>
+
+                {/* ─── Pro-only routes ─── */}
+                <Route element={<ProtectedRoute allowedRoles={['explorer']} requiredPlan="pro" requireSubscription />}>
+                  {/* Future pro-only features can be added here */}
+                </Route>
+
+                {/* ─── Catch-all ─── */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

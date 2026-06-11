@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import { useCurrency } from "@/hooks/useCurrency";
+import { saveVoiceSample } from "@/hooks/useVoiceSampleStore";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 import mascot from "@/assets/pipi-mascot.png";
 
@@ -76,14 +78,38 @@ export function VoiceOnboarding({ onComplete, onCancel }: VoiceOnboardingProps) 
     if (!blobRef.current) return;
     setUploadStatus("上傳中⋯");
     setStage("uploading");
-    const fd = new FormData();
-    fd.append("audio", blobRef.current, "voice-sample.webm");
     try {
-      const res = await fetch("/api/voice/clone", { method: "POST", body: fd });
-      const data = await res.json().catch(() => ({}));
-      setUploadStatus(data.message || "語音模型已準備好！");
+      await saveVoiceSample("sample1", blobRef.current);
+      setUploadStatus("語音樣本已儲存！");
+      const token = await (async () => {
+        let { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          const { data, error } = await supabase.auth.signInAnonymously();
+          if (error || !data.session?.access_token) throw new Error("No session");
+          session = data.session;
+        }
+        return session.access_token;
+      })();
+      const projectUrl = import.meta.env.VITE_SUPABASE_URL;
+      const fd = new FormData();
+      fd.append("prompt_audio", blobRef.current, "voice-sample.webm");
+      fd.append("prompt_text", "你好，我正在學習說話！");
+      fd.append("text", "你好，我正在學習說話！");
+      const res = await fetch(`${projectUrl}/functions/v1/voice-clone`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: fd,
+      });
+      if (res.ok) {
+        setUploadStatus("語音模型已準備好！");
+      } else {
+        setUploadStatus("語音樣本已儲存，複製功能稍後可用。");
+      }
     } catch {
-      setUploadStatus("無法連接伺服器。已啟用示範模式。");
+      setUploadStatus("語音樣本已本地儲存。");
     }
     setStage("demo");
   };
@@ -92,16 +118,53 @@ export function VoiceOnboarding({ onComplete, onCancel }: VoiceOnboardingProps) 
     if (!demoText.trim()) { setDemoResult("請輸入文字。"); return; }
     setDemoResult("生成中⋯");
     try {
-      const res = await fetch("/api/voice/demo-tts", {
+      const sample = blobRef.current;
+      if (!sample) {
+        if (window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(demoText);
+          u.lang = "zh-HK";
+          u.rate = 0.8;
+          u.onend = () => setDemoResult("正在播放預設語音！");
+          window.speechSynthesis.speak(u);
+        } else {
+          setDemoResult("語音複製功能即將推出，敬請期待！");
+        }
+        return;
+      }
+      const token = await (async () => {
+        let { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          const { data, error } = await supabase.auth.signInAnonymously();
+          if (error || !data.session?.access_token) throw new Error("No session");
+          session = data.session;
+        }
+        return session.access_token;
+      })();
+      const projectUrl = import.meta.env.VITE_SUPABASE_URL;
+      const fd = new FormData();
+      fd.append("text", demoText);
+      fd.append("prompt_text", demoText);
+      fd.append("prompt_audio", sample, "voice-sample.webm");
+      const res = await fetch(`${projectUrl}/functions/v1/voice-clone`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: demoText }),
+        headers: {
+          Authorization: `Bearer ${token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: fd,
       });
       const data = await res.json().catch(() => ({}));
-      if (data.audioUrl) {
-        const a = new Audio(data.audioUrl);
-        a.play().catch(() => {});
-        setDemoResult("正在播放你的複製語音！");
+      if (data.audio_base64 && data.content_type) {
+        const raw = atob(data.audio_base64);
+        const u8 = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) u8[i] = raw.charCodeAt(i);
+        const audioBlob = new Blob([u8], { type: data.content_type });
+        const url = URL.createObjectURL(audioBlob);
+        const a = new Audio(url);
+        a.onended = () => { URL.revokeObjectURL(url); setDemoResult("正在播放你的複製語音！"); };
+        a.onerror = () => URL.revokeObjectURL(url);
+        await a.play();
       } else {
         setDemoResult("語音複製功能即將推出，敬請期待！");
       }

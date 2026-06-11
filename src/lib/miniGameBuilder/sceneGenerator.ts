@@ -11,7 +11,22 @@ interface EnvTheme {
   cameraHeight: number;
   cameraDistance: number;
   objectCount: number;
+  models?: { path: string; position: [number, number, number]; scale: number; rotation?: [number, number, number] }[];
 }
+
+const MODELS_BY_ENV: Record<string, { path: string; position: [number, number, number]; scale: number; rotation?: [number, number, number] }[]> = {
+  forest: [
+    { path: "/assets/enchanted-forest/o_donkey_forest_river.gltf", position: [0, -1.5, 0], scale: 0.35, rotation: [0, -0.55, 0] },
+  ],
+  underwater: [],
+  space: [],
+  room: [
+    { path: "/assets/pipi-room/dining-desk-chair.gltf", position: [-2, -0.6, 1.5], scale: 2.0, rotation: [0, 0.85, 0] },
+    { path: "/assets/pipi-room/office-table/office-table.gltf", position: [0.35, -0.65, 1.2], scale: 1.8, rotation: [0, -0.2, 0] },
+    { path: "/assets/pipi-room/utensils.gltf", position: [1.65, -0.52, 1.45], scale: 3.2, rotation: [0, -0.25, 0] },
+  ],
+  desert: [],
+};
 
 const THEMES: Record<string, EnvTheme> = {
   forest: {
@@ -25,6 +40,7 @@ const THEMES: Record<string, EnvTheme> = {
     cameraHeight: 3,
     cameraDistance: 8,
     objectCount: 10,
+    models: MODELS_BY_ENV.forest,
   },
   underwater: {
     background: "#0a2a4a",
@@ -61,6 +77,7 @@ const THEMES: Record<string, EnvTheme> = {
     cameraHeight: 3,
     cameraDistance: 7,
     objectCount: 8,
+    models: MODELS_BY_ENV.room,
   },
   desert: {
     background: "#c8a050",
@@ -89,6 +106,23 @@ function pick<T>(arr: T[]): T {
 function buildSceneObjects(theme: EnvTheme, count: number, target?: PhonemeTarget): SceneObject[] {
   const objects: SceneObject[] = [];
   const shapes: SceneObject["type"][] = ["sphere", "box", "cylinder", "cone", "torus"];
+
+  // Add GLTF models if available
+  if (theme.models) {
+    for (const model of theme.models) {
+      objects.push({
+        type: "gltf",
+        position: model.position,
+        color: "#ffffff",
+        scale: model.scale,
+        modelPath: model.path,
+        rotation: model.rotation ?? [0, 0, 0],
+        animation: "float",
+        animationSpeed: 0.3,
+        animationAmplitude: 0.1,
+      });
+    }
+  }
 
   for (let i = 0; i < count; i++) {
     const shape = pick(shapes);
