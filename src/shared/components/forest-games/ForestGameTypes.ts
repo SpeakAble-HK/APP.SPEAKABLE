@@ -5,6 +5,8 @@ export interface GameResult {
   total: number;
   elapsedMs: number;
   won: boolean;
+  /** Per-challenge correctness log, for phoneme-level analytics reporting. */
+  answerLog?: { word: string; correct: boolean }[];
 }
 
 export interface WaterParkSettings {

@@ -6,6 +6,7 @@ import { SceneIndicator } from "./SceneIndicator";
 import { CreditsScreen } from "./CreditsScreen";
 import { AuraVideoPlayer } from "./AuraVideoPlayer";
 import { VoiceCloningPrompt } from "./VoiceCloningPrompt";
+import { MyVoiceStory } from "./MyVoiceStory";
 import { auraJourneyScenes } from "./auraJourneyScenes";
 import { useAuraJourneyState } from "./useAuraJourneyState";
 import { useVoiceCloning } from "./useVoiceCloning";
@@ -27,10 +28,17 @@ export const AuraJourneyExperience: React.FC = () => {
   } = state;
   const [showVoicePrompt, setShowVoicePrompt] = useState(false);
   const [paused, setPaused] = useState(false);
+  // When set, the current scene is being replayed MUTED with the child's cloned
+  // voice overlaid (the story re-told in the child's own voice). It holds the
+  // cloned-audio URL to overlay; null means normal playback.
+  const [replayOverlayUrl, setReplayOverlayUrl] = useState<string | null>(null);
+  // The stitched end-of-journey "My Voice Story" replay.
+  const [showVoiceStory, setShowVoiceStory] = useState(false);
   const voice = useVoiceCloning();
   const { audioUrl, reset: resetVoice, recording, processing, duration, cloneResult, error } = voice;
 
   const scene = auraJourneyScenes[currentScene];
+  const voiceReplaced = replayOverlayUrl != null;
 
   React.useEffect(() => {
     if (!showChapter) return;
@@ -44,17 +52,30 @@ export const AuraJourneyExperience: React.FC = () => {
     setPaused(false);
   };
   const handlePlayPause = () => setPaused((value) => !value);
+
+  // Video reached its end.
   const handleEnded = () => {
     setPaused(false);
+    // If we were replaying the scene in the cloned voice, the retelling is done —
+    // advance to the next chapter.
+    if (voiceReplaced) {
+      setReplayOverlayUrl(null);
+      nextScene();
+      return;
+    }
+    // Otherwise prompt the child to lend their voice to this chapter.
     setShowVoicePrompt(true);
   };
+
   const handleNext = () => {
     setShowVoicePrompt(false);
+    setReplayOverlayUrl(null);
     setPaused(false);
     nextScene();
   };
   const handlePrev = () => {
     setShowVoicePrompt(false);
+    setReplayOverlayUrl(null);
     setPaused(false);
     prevScene();
   };
@@ -72,35 +93,37 @@ export const AuraJourneyExperience: React.FC = () => {
     voice.playGeneratedAudio();
   };
 
+  // A clone was produced for the current scene. Store it, dismiss the prompt, and
+  // replay THIS scene's video muted with the cloned voice overlaid so the child
+  // immediately hears the story retold in their own voice. handleEnded then
+  // advances once the replay finishes (graceful fallback: if the overlay audio
+  // cannot play we still rely on the video's onEnded to move on).
   React.useEffect(() => {
-    if (audioUrl) {
-      recordVoice(currentScene, audioUrl);
-      const audio = new Audio(audioUrl);
-      audio.onended = () => {
-        resetVoice();
-        setShowVoicePrompt(false);
-        nextScene();
-      };
-      audio.play().catch(() => {
-        resetVoice();
-        setShowVoicePrompt(false);
-        nextScene();
-      });
-    }
-  }, [audioUrl, currentScene, nextScene, recordVoice, resetVoice]);
+    if (!audioUrl) return;
+    recordVoice(currentScene, audioUrl);
+    setShowVoicePrompt(false);
+    setReplayOverlayUrl(audioUrl);
+    setPaused(false);
+    resetVoice();
+  }, [audioUrl, currentScene, recordVoice, resetVoice]);
 
   const handleSkip = () => {
     setShowVoicePrompt(false);
+    setReplayOverlayUrl(null);
     setPaused(false);
     nextScene();
   };
 
   const handleReplay = () => {
     setShowCredits(false);
+    setShowVoiceStory(false);
     setShowIntro(true);
     setPaused(false);
+    setReplayOverlayUrl(null);
     state.setCurrentScene(0);
   };
+
+  const hasVoiceStory = Object.keys(voiceData).length > 0;
 
   return (
     <div className="relative h-full min-h-screen w-full overflow-hidden bg-slate-950">
@@ -114,12 +137,16 @@ export const AuraJourneyExperience: React.FC = () => {
       />
       <SceneIndicator title={scene.title} visible={!showIntro && !showChapter && !showCredits} />
       <AuraVideoPlayer
+        key={`${currentScene}-${voiceReplaced ? "voice" : "orig"}`}
         src={scene.video}
         chapter={scene.chapter}
         title={scene.title}
         cinematicPrompt={scene.cinematicPrompt}
         therapistGoal={scene.therapistGoal}
-        playing={!showIntro && !showChapter && !showCredits && !showVoicePrompt && !paused}
+        playing={!showIntro && !showChapter && !showCredits && !showVoicePrompt && !showVoiceStory && !paused}
+        muted={voiceReplaced}
+        audioOverlayUrl={replayOverlayUrl}
+        voiceReplaced={voiceReplaced}
         onPlayPause={handlePlayPause}
         onEnded={handleEnded}
         onNext={handleNext}
@@ -143,7 +170,19 @@ export const AuraJourneyExperience: React.FC = () => {
           error={error}
         />
       )}
-      <CreditsScreen visible={showCredits} onReplay={handleReplay} />
+      <CreditsScreen
+        visible={showCredits}
+        onReplay={handleReplay}
+        hasVoiceStory={hasVoiceStory}
+        onViewVoiceStory={() => setShowVoiceStory(true)}
+      />
+      {showVoiceStory && (
+        <MyVoiceStory
+          voiceData={voiceData}
+          onClose={() => setShowVoiceStory(false)}
+          onReplayJourney={handleReplay}
+        />
+      )}
     </div>
   );
-}
+};

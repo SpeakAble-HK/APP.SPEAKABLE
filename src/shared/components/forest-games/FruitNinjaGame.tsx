@@ -21,8 +21,9 @@ export default function FruitNinjaGame({ settings, onComplete, onClose }: Props)
   useEffect(() => {
     if (game.phase === "result" && !completedRef.current) {
       completedRef.current = true;
-      onComplete({ score: game.score, total: game.totalChallenges, elapsedMs: game.elapsedMs, won: game.earnedBadge });
+      onComplete({ score: game.score, total: game.totalChallenges, elapsedMs: game.elapsedMs, won: game.earnedBadge, answerLog: game.answerLog });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.phase, game.score, game.totalChallenges, game.elapsedMs, game.earnedBadge, onComplete]);
 
   if (game.phase === "start") {
@@ -71,6 +72,11 @@ export default function FruitNinjaGame({ settings, onComplete, onClose }: Props)
           <span>{game.currentIndex + 1}/{game.totalChallenges}</span>
           <span>💪 {game.streak > 0 ? `x${game.streak}` : ""}</span>
         </div>
+        {game.audioUnavailable && (
+          <div className="absolute top-8 left-3 right-3 z-10 rounded-md bg-amber-500/90 px-2 py-1 text-center text-[10px] font-semibold text-white">
+            ⚠️ 此裝置未安裝粵語語音，請睇字或叫大人示範讀音
+          </div>
+        )}
 
         <div className="flex flex-col items-center justify-center h-full gap-4 px-4 pt-9 pb-5 relative z-5">
           <div onClick={game.replayAudio} className="flex items-center gap-1.5 bg-white/10 px-3.5 py-1.5 rounded-full cursor-pointer text-[#93c5fd] text-xs font-medium">

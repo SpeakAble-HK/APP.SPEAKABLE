@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { UserAnalytics } from './useTherapistAnalytics';
 import { generateReport } from './reportTemplate';
+import type { SavedNarrativeAssessment } from '../../hooks/useNarrativeAssessment';
 
 interface Props {
   analytics: UserAnalytics;
+  latestAssessment?: SavedNarrativeAssessment;
   onClose: () => void;
 }
 
-const ProgressReportGenerator: React.FC<Props> = ({ analytics, onClose }) => {
+const ProgressReportGenerator: React.FC<Props> = ({ analytics, latestAssessment, onClose }) => {
   const [therapistName, setTherapistName] = useState('');
   const [dateRange, setDateRange] = useState('2026-05-01 to 2026-05-30');
   const [comments, setComments] = useState('');
 
-  const reportHtml = generateReport(analytics, therapistName, dateRange, comments);
+  const reportHtml = generateReport(analytics, therapistName, dateRange, comments, latestAssessment);
 
   const handleExport = () => {
     const win = window.open('', '_blank');

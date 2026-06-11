@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useSTDashboard } from '@/shared/hooks/useSTDashboard';
 import { useTherapistAnalytics } from './useTherapistAnalytics';
 import { useNEPAWorldModel, type ExerciseRecommendation } from '@/shared/hooks/useNEPAWorldModel';
-import { ProgressReportGenerator } from './ProgressReportGenerator';
+import ProgressReportGenerator from './ProgressReportGenerator';
+import { NarrativeRubricPanel } from './NarrativeRubricPanel';
+import { useNarrativeAssessment } from '../../hooks/useNarrativeAssessment';
 
 const TherapistDashboard: React.FC = () => {
   const { students, loading: studentsLoading } = useSTDashboard();
@@ -10,6 +12,41 @@ const TherapistDashboard: React.FC = () => {
   const { data, loading, error } = useTherapistAnalytics(selectedUser || '');
   const { recommendations, loading: nepLoading } = useNEPAWorldModel(selectedUser);
   const [showReport, setShowReport] = useState(false);
+  const [showRubric, setShowRubric] = useState(false);
+  const {
+    history: assessmentHistory,
+    save: saveAssessment,
+    usingFallback: assessmentFallback,
+  } = useNarrativeAssessment(selectedUser || undefined);
+  const [savingAssessment, setSavingAssessment] = useState(false);
+
+  // Build evidence (evidenceKey -> 0..1) from phoneme accuracy so the rubric can
+  // auto-suggest intelligibility scores. Mini-game ids map to phoneme contrasts.
+  const rubricEvidence: Record<string, number> = {};
+  if (data) {
+    const acc = (substr: string) => {
+      const hits = data.phonemeStats.filter((p) => p.phoneme.includes(substr));
+      if (hits.length === 0) return undefined;
+      return hits.reduce((s, p) => s + p.accuracy, 0) / hits.length;
+    };
+    const nl = acc('n') ?? acc('l');
+    if (nl !== undefined) rubricEvidence['water-park'] = nl;
+    const ng = acc('ng');
+    if (ng !== undefined) rubricEvidence['maze'] = ng;
+    const gw = acc('gw') ?? acc('kw');
+    if (gw !== undefined) rubricEvidence['fruit-ninja'] = gw;
+    if (typeof data.accuracy === 'number') rubricEvidence['catch-fly'] = data.accuracy;
+  }
+
+  const handleSaveAssessment = async (
+    scores: Record<string, number>,
+    evidence: Record<string, number>,
+    notes: string,
+  ) => {
+    setSavingAssessment(true);
+    await saveAssessment(scores, evidence, notes);
+    setSavingAssessment(false);
+  };
 
   useEffect(() => {
     if (!selectedUser && students.length > 0) {
@@ -111,15 +148,52 @@ const TherapistDashboard: React.FC = () => {
               <li key={p.date}>{p.date}: {(p.accuracy * 100).toFixed(1)}%</li>
             ))}
           </ul>
-          <button
-            onClick={() => setShowReport(true)}
-            className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Generate Progress Report
-          </button>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              onClick={() => setShowReport(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Generate Progress Report
+            </button>
+            <button
+              onClick={() => setShowRubric((v) => !v)}
+              className="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700"
+            >
+              {showRubric ? '收起敘事評估' : '敘事評估檔案 / Narrative Rubric'}
+            </button>
+          </div>
+
+          {assessmentHistory.length > 0 && (
+            <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+              <p className="font-semibold text-emerald-800 text-sm mb-1">
+                敘事評估記錄 Narrative Assessment History
+              </p>
+              <ul className="text-xs text-emerald-700 space-y-0.5">
+                {assessmentHistory.slice(0, 5).map((a) => (
+                  <li key={a.id}>
+                    {new Date(a.assessed_at).toLocaleDateString('zh-HK')} · 整體 {a.total_proficiency.toFixed(0)}/100 · {a.band}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {showRubric && (
+            <div className="mt-4 p-4 border border-emerald-200 rounded-xl bg-slate-50">
+              <NarrativeRubricPanel
+                studentName={data.name}
+                evidence={rubricEvidence}
+                saving={savingAssessment}
+                usingFallback={assessmentFallback}
+                onSave={handleSaveAssessment}
+              />
+            </div>
+          )}
+
           {showReport && data && (
             <ProgressReportGenerator
               analytics={data}
+              latestAssessment={assessmentHistory[0]}
               onClose={() => setShowReport(false)}
             />
           )}

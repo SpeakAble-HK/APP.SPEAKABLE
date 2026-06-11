@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { useAdaptationEngine } from "@/adaptation/useAdaptationEngine";
+import { useGameResultReporter } from "./useGameResultReporter";
 import { getMiniGameConfig, DIFFICULTY_LABELS } from "@/shared/lib/miniGameConfigStore";
 import WaterParkGame from "./WaterParkGame";
 import MazeGame from "./MazeGame";
@@ -27,6 +28,7 @@ const DIFFICULTY_MULTIPLIER: Record<string, number> = {
 export default function GameLauncher({ gameId, studentId, onClose, onComplete }: Props) {
   const [result, setResult] = useState<GameResult | null>(null);
   const { getGameSettings, updateProfile } = useAdaptationEngine();
+  const { report } = useGameResultReporter();
 
   const config = studentId ? getMiniGameConfig(studentId) : null;
   const allGames = config ? { ...config.quizGames, ...config.adaptationGames } : null;
@@ -46,6 +48,8 @@ export default function GameLauncher({ gameId, studentId, onClose, onComplete }:
       accuracy: r.score / Math.max(r.total, 1),
       reactionTimeMs: r.elapsedMs / Math.max(r.score, 1),
     });
+    // Report phoneme-level outcomes to analytics (feeds therapist rubric evidence).
+    report({ gameId, answerLog: r.answerLog ?? [], score: r.score, total: r.total });
     onComplete?.(gameId);
   };
 

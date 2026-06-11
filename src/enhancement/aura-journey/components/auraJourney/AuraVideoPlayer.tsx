@@ -8,6 +8,12 @@ interface AuraVideoPlayerProps {
   cinematicPrompt: string;
   therapistGoal: string;
   playing: boolean;
+  /** Mute the video's ORIGINAL narration (used once the child's cloned voice replaces it). */
+  muted?: boolean;
+  /** Cloned-voice audio to overlay in sync with the (muted) video. */
+  audioOverlayUrl?: string | null;
+  /** Whether this scene is being narrated in the child's own cloned voice. */
+  voiceReplaced?: boolean;
   onPlayPause: () => void;
   onEnded: () => void;
   onNext: () => void;
@@ -22,6 +28,9 @@ export const AuraVideoPlayer: React.FC<AuraVideoPlayerProps> = ({
   cinematicPrompt,
   therapistGoal,
   playing,
+  muted = false,
+  audioOverlayUrl,
+  voiceReplaced = false,
   onPlayPause,
   onEnded,
   onNext,
@@ -29,6 +38,7 @@ export const AuraVideoPlayer: React.FC<AuraVideoPlayerProps> = ({
   onProgress,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const overlayAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -42,6 +52,36 @@ export const AuraVideoPlayer: React.FC<AuraVideoPlayerProps> = ({
       video.pause();
     }
   }, [playing, src]);
+
+  // Keep the video element's own audio track muted when the cloned voice takes over.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) video.muted = muted;
+  }, [muted]);
+
+  // Overlay the cloned voice in sync with playback (best-effort — starts with the scene).
+  useEffect(() => {
+    if (overlayAudioRef.current) {
+      overlayAudioRef.current.pause();
+      overlayAudioRef.current = null;
+    }
+    if (!audioOverlayUrl) return;
+    const audio = new Audio(audioOverlayUrl);
+    overlayAudioRef.current = audio;
+    if (playing) audio.play().catch(() => { /* gesture/autoplay guard */ });
+    return () => {
+      audio.pause();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioOverlayUrl]);
+
+  // Pause/resume overlay audio alongside the video.
+  useEffect(() => {
+    const audio = overlayAudioRef.current;
+    if (!audio) return;
+    if (playing) audio.play().catch(() => {});
+    else audio.pause();
+  }, [playing]);
 
   return (
     <div className="fixed inset-0 z-20 overflow-hidden bg-slate-950">
@@ -62,6 +102,11 @@ export const AuraVideoPlayer: React.FC<AuraVideoPlayerProps> = ({
       )}
 
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.72)_0%,rgba(0,0,0,0.18)_42%,rgba(0,0,0,0.58)_100%)]" />
+      {voiceReplaced && (
+        <div className="pointer-events-none absolute right-4 top-4 z-30 rounded-full border border-purple-300/40 bg-purple-600/80 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+          🎤 故事正用你嘅聲音旁白
+        </div>
+      )}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/70 to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black/85 to-transparent" />
 
