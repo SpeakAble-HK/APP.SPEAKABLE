@@ -1,10 +1,185 @@
-# SpeakAble HK — How It Works
+# SpeakAble HK — Architecture & Development Roadmap
+
+## Current Development Phase
+
+We are now in **two parallel development tracks**:
+
+### 🚀 Speakable Enhancement (P1-P3 Focus)
+Core user-facing features that directly impact students, parents, and the Aura Journey experience.
+
+### 🔧 Speakable Improvement
+Backend infrastructure, therapist tools, and NEPA analytics platform.
+
+---
 
 ## Who Uses SpeakAble?
 
 👶 **學生 (Student/Explorer)** — 每日練習廣東話發音
 👨‍⚕️ **治療師 (Therapist)** — 管理學生進度、設計練習、俾語音榜樣
 👪 **家長 (Parent)** — 睇住小朋友嘅練習報告同 AI 建議
+
+---
+
+## Codebase Structure
+
+```
+src/
+├── enhancement/              # 🚀 SPEAKABLE ENHANCEMENT (P1-P3)
+│   ├── student-portal/       # P1: Student Portal (Explorer)
+│   │   ├── pages/            # Dashboard, Exercise, Progress, TreasureMap, PiPi, etc.
+│   │   └── components/       # TreasureMap, Quest*, RewardsShop, PiPi*, EnchantedForest*, MiniGames
+│   ├── parent-portal/        # P2: Parent Portal
+│   │   ├── pages/            # ParentDashboardPage
+│   │   └── components/       # parentPortal/
+│   └── aura-journey/         # P3: AuraJourney + Syali Studio (merged)
+│       ├── AuraJourneyPage.tsx
+│       ├── AuraStoryPage.tsx
+│       ├── EnchantedForestPage.tsx
+│       └── components/       # auraJourney/, SyaliStudio.tsx, VoiceCloning
+│
+├── improvement/              # 🔧 SPEAKABLE IMPROVEMENT
+│   ├── therapist-portal/     # Therapist Portal
+│   │   ├── pages/            # TherapistPortalPage, STDashboard, STAccounts, STSettings
+│   │   └── components/       # therapistPortal/, STLayout, TherapistCalibrationSection
+│   └── nepa-portal/          # NEPA Portal
+│       ├── pages/            # NEPADashboardPage, MiniGameBuilderPage
+│       └── components/       # nepaBackendSync.ts (Supabase integration)
+│
+└── shared/                   # 📦 SHARED RESOURCES
+    ├── components/           # UI components, layouts, ProtectedRoute, BilabialStation*, etc.
+    ├── pages/                # Landing, Auth, Onboarding, Pricing, Index, etc.
+    ├── hooks/                # All hooks (useAuth, useRole, useToast, usePronunciationAPI, etc.)
+    ├── lib/                  # Utilities, stores, miniGameBuilder/, storyverse/
+    ├── contexts/             # LanguageContext, AccessibilityContext
+    ├── i18n/                 # Translations (en, zh-HK, zh-CN)
+    ├── types/                # TypeScript types
+    ├── styles/               # CSS files
+    └── utils/                # Helper functions
+```
+
+---
+
+## 🚀 Enhancement Track (P1-P3)
+
+### P1: Student Portal (`/enhancement/student-portal`)
+**Status: ✅ Active Development**
+
+**Routes:**
+- `/dashboard` — Main student dashboard with minigames, practice islands, road map
+- `/practice/:exerciseId` — Individual practice sessions
+- `/progress` — Student progress tracking
+- `/treasure-map` — 3D treasure map with jumping animation
+- `/pirate-treasure-map` — Pirate-themed 3D learning map
+- `/echo-speech` — Voice cloning practice
+- `/lesson/:lessonId` — Structured lessons
+- `/semantic-island` — Semantic learning island
+- `/pipi` — PiPi parrot AI chatbot
+- `/settings` — Student settings
+
+**Key Features:**
+- ✅ Minigames display on dashboard (7 games: 3 quiz + 4 adaptation)
+- ✅ 3D TreasureMap with PiPi jumping animation between checkpoints
+- ✅ Voice cloning with start/stop recording + ASR phoneme feedback
+- ✅ Practice islands (bilabial, alveolar) with progressive difficulty
+- ✅ Road map visualization showing learning progress
+- ✅ Practice sidebar with real-time feedback
+
+**Recent Changes:**
+- Added dedicated "迷你遊戲" section to dashboard showing all 7 minigames
+- Enhanced voice cloning with proper start/stop buttons, duration timer, phoneme-level confidence scores
+- Integrated NEPA backend sync for student progress persistence
+
+---
+
+### P2: Parent Portal (`/enhancement/parent-portal`)
+**Status: ✅ Implemented**
+
+**Routes:**
+- `/parent-dashboard` — Parent dashboard with AI insights
+
+**Key Features:**
+- ✅ Linked children list
+- ✅ Practice statistics (total practice, completion rate, accuracy, XP)
+- ✅ AI insights (OpenRouter AI-generated Cantonese suggestions)
+  - 👍 What they did well
+  - 📈 Areas for improvement
+  - 💡 Parent tips
+- ✅ Billing management (monthly plans)
+
+---
+
+### P3: Aura Journey + Syali Studio (`/enhancement/aura-journey`)
+**Status: ✅ Active Development**
+
+**Routes:**
+- `/aura-journey` — Interactive voice story journey
+- `/aura-story` — Aura story interactive forest
+- `/enchanted-forest` — 3D forest adventure map
+
+**Key Features:**
+- ✅ Syali Studio merged into Aura Journey
+- ✅ Voice cloning with ASR feedback (phoneme-level analysis)
+- ✅ 12-chapter cinematic Cantonese practice
+- ✅ Each scene has storyline + recording tasks
+- ✅ AI instant scoring + pronunciation feedback
+- ✅ Unlock next chapter by completing tasks
+- ✅ XP collection, trophies, progress tracking
+
+**Voice Cloning Flow:**
+```
+🎤 Student records "我今日好開心"
+    ↓
+🤖 AI analyzes voice characteristics (timbre, pitch, rhythm)
+    ↓
+🔊 AI plays back standard pronunciation using student's voice
+    ↓
+🧠 Brain compares own speech vs standard → learns faster!
+```
+
+---
+
+## 🔧 Improvement Track
+
+### Therapist Portal (`/improvement/therapist-portal`)
+**Status: ✅ Implemented**
+
+**Routes:**
+- `/therapist-portal` — Main therapist portal entry
+- `/st-dashboard` — World model + dashboard + trend charts
+- `/st-nepa` — NEPA neural network analysis (phoneme confusion matrix)
+- `/st-game-builder` — Custom mini games for students
+- `/st-accounts` — Case management (add/remove students, link)
+- `/st-settings` — Calibration management + voice clone settings
+
+**Key Features:**
+- ✅ Link students
+- ✅ Voice calibration (record standard pronunciation → AI uses as baseline)
+- ✅ Therapist voice clone (students hear therapist's voice, not robot voice)
+- ✅ Assign practice homework
+- ✅ View trend data (accuracy over time, weakest 3 phonemes, fastest improving 3, fatigue detection, peer comparison)
+- ✅ Custom game builder
+
+---
+
+### NEPA Portal (`/improvement/nepa-portal`)
+**Status: ✅ Implemented + Supabase Sync**
+
+**Routes:**
+- `/st-nepa` — NEPA dashboard (accessible via therapist portal)
+- `/st-game-builder` — Mini game builder
+
+**Key Features:**
+- ✅ NEPA neural network analysis
+- ✅ Phoneme-level confusion matrix
+- ✅ Fatigue detection (STDP model)
+- ✅ Trend sparklines for each phoneme
+- ✅ Supabase backend sync (student_progress, phoneme_results, nepa_summaries tables)
+- ✅ Fallback to localStorage if Supabase not configured
+
+**Recent Changes:**
+- Added `nepaBackendSync.ts` for Supabase integration
+- Auto-syncs NEPA summary when student data loads
+- Sync indicator shows syncing/synced/error states
 
 ---
 
@@ -88,29 +263,6 @@ flowchart LR
       你聽返自己把聲講正確版本，大腦學得更快！
 ```
 
-## 互動故事冒險
-
-```
-📖 Aura Journey (/aura-journey) — 互動語音故事
-├── 🎬 每個場景有劇情 + 錄音任務
-├── 🎤 你要讀故事入面嘅對白
-├── 🤖 AI 即時比分 + 發音回饋
-├── 🔓 完成任務解鎖下一章
-└── 🏆 儲 XP、拎獎盃、睇自己進步
-
-🌳 Enchanted Forest (/enchanted-forest)
-├── 🎮 3D 森林冒險地圖
-├── 🗺️ 每個地點對應一組發音練習
-├── 🐸 捉飛蟲、忍者生果、迷宮等迷你遊戲
-└── 🎯 遊戲中練習目標發音
-
-🦜 PiPi 鸚鵡 (/pipi)
-├── 💬 AI 對話機械人（用廣東話傾偈）
-├── 🎤 你講嘢，PiPi 回應
-├── 😄 輕鬆冇壓力，好似同朋友傾偈
-└── 📝 不知不覺練習發音
-```
-
 ## AI 聲線克隆（Voice Clone）
 
 ```
@@ -137,30 +289,6 @@ AI 克隆治療師把聲
 ```
 
 **點解咁勁？** 傳統語言 app 只係話你知「錯」，但唔話你知「點先啱」。Voice clone 俾你聽返「自己把聲講標準版」，大腦直接記住個正確發音，唔使靠估。治療師版更加有親切感。
-
-## 治療師 Portal 完整功能
-
-```
-/st-dashboard     — 世界模型 + 儀錶板 + 趨勢圖
-/st-nepa          — NEPA 神經網絡分析（逐個音嘅混淆矩陣）
-/st-game-builder  — 自訂 mini game 俾學生
-/st-accounts      — 個案管理（加/刪學生，連結）
-/st-settings      — 校準管理 + 聲線克隆設定
-/therapist-portal — 入口，整合以上所有功能
-```
-
-## 家長睇到咩？
-
-```
-家長專區 (/parent-dashboard)
-├── 👶 已連結嘅小朋友列表
-├── 📊 練習統計（總練習、完成率、準確度、經驗值）
-├── 🤖 AI 洞察（OpenRouter AI 生成嘅廣東話建議）
-│   ├── 👍 做得好嘅地方
-│   ├── 📈 可以改善嘅地方
-│   └── 💡 家長小貼士
-└── 💳 帳單管理（月費計劃）
-```
 
 ## 每日程式係點行？
 
@@ -195,3 +323,42 @@ AI 克隆治療師把聲
 | 🌉 Speakable Bridge | `:8300` | 路由代理 |
 | 📨 NATS | `:4222` | 訊息傳遞 |
 | ☁️ Supabase | Cloud | 用戶認證、資料庫、Edge Functions、聲線克隆 |
+
+## Deployment
+
+**Live at:** https://app.speakable.hk
+**Server:** 76.13.218.52
+**Stack:** Docker Compose (speakable frontend + Caddy for HTTPS/TLS)
+
+**Deployment Commands:**
+```bash
+# Pull latest code
+ssh root@76.13.218.52 "cd /var/www/speakable && git pull origin main"
+
+# Rebuild and deploy
+ssh root@76.13.218.52 "cd /var/www/speakable && docker compose down && docker compose up -d --build"
+```
+
+---
+
+## Development Priorities
+
+### Current Focus: Enhancement P1-P3
+1. ✅ Voice cloning with ASR feedback (start/stop buttons, phoneme analysis)
+2. ✅ Minigames display on student dashboard
+3. ✅ 3D TreasureMap with jumping animation
+4. ✅ NEPA backend Supabase sync
+5. 🔄 Student portal UX improvements
+6. 🔄 Parent portal AI insights enhancement
+7. 🔄 Aura Journey chapter progression
+
+### Next Up: Improvement Track
+1. Therapist voice clone workflow optimization
+2. NEPA confusion matrix visualization
+3. Student-therapist linking improvements
+4. Game builder enhancement
+
+---
+
+*Last Updated: 2026-06-12*
+*Version: 2.0 (Enhancement/Improvement Split)*
