@@ -12,6 +12,7 @@ const TABS = [
   { id: "nepa", icon: "psychology", label: "NEPA", path: "/st-nepa" },
   { id: "game-builder", icon: "auto_awesome", label: "遊戲工坊", path: "/st-game-builder" },
   { id: "accounts", icon: "folder_shared", label: "個案管理", path: "/st-accounts" },
+  { id: "phoneme-tags", icon: "label", label: "語音標籤", path: "/st-phoneme-tags" },
   { id: "settings", icon: "settings", label: "設定", path: "/st-settings" },
 ] as const;
 

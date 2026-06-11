@@ -1,4 +1,5 @@
-import type { GameEvent, StorySceneEvent, UnifiedEvent } from '../minigame-sdk/types';
+import type { UnifiedEvent } from '../minigame-sdk/types';
+import { insertUnifiedEvents } from '../api/telemetry';
 
 export interface TelemetryQueue {
   events: UnifiedEvent[];
@@ -29,15 +30,7 @@ export function flushQueue(queue: TelemetryQueue): UnifiedEvent[] {
 
 export async function postTelemetry(events: UnifiedEvent[]): Promise<void> {
   try {
-    const response = await fetch('/api/telemetry/unified', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(events),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Telemetry POST failed: ${response.status}`);
-    }
+    await insertUnifiedEvents(events);
   } catch (error) {
     console.error('Failed to post telemetry:', error);
     // Re-queue would happen at a higher level

@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import type { GameEvent, FatigueMarker, SessionResult, PhonemeTarget } from './types';
+import { insertSessionResult } from '../api/sessions';
+import { completeSession } from './session-writer';
 
 export function useGameTelemetry(
   gameId: string,
@@ -88,11 +90,8 @@ export function useGameTelemetry(
   const flush = useCallback(async (): Promise<void> => {
     const result = finalizeSession();
     try {
-      await fetch('/api/telemetry/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result),
-      });
+      await insertSessionResult(result);
+      await completeSession(result);
     } catch (error) {
       console.error('Failed to flush telemetry:', error);
     }

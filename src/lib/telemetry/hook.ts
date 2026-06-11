@@ -1,4 +1,5 @@
 import type { UnifiedEvent } from '../minigame-sdk/types';
+import { insertUnifiedEvents } from '../api/telemetry';
 
 export interface UnifiedTelemetryProps {
   context: 'game' | 'story';
@@ -18,8 +19,7 @@ export function useUnifiedTelemetry({
       onEvent(event);
     }
 
-    // In production, this would queue and flush to the unified telemetry endpoint
-    console.log('Unified telemetry event:', event);
+    void insertUnifiedEvents([event]);
   };
 
   const trackGameAttempt = (

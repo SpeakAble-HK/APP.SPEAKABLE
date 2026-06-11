@@ -1,42 +1,42 @@
+import { supabase } from '@/integrations/supabase/client';
 import type {
   SceneMetadata,
-  StoryState,
   SceneResult,
   NextSceneDecision,
 } from './types';
-
-// Mock Supabase client - replace with actual implementation
-const supabase = {
-  from: (table: string) => ({
-    select: () => ({ data: null, error: null }),
-    upsert: (data: any) => ({ data, error: null }),
-    insert: (data: any) => ({ data, error: null }),
-  }),
-};
+import { saveStoryState } from '../api/sessions';
+import { insertStoryTelemetry } from '../api/telemetry';
 
 export async function loadScene(
   storyId: string,
   sceneId: string
 ): Promise<SceneMetadata | null> {
-  // Mock implementation - replace with actual Supabase query
-  const mockScene: SceneMetadata = {
-    sceneId,
-    storyId,
-    chapterId: 'ch1',
-    order: 1,
-    narrativeState: 'opening',
-    targetPhoneme: { symbol: '/b/', ipa: 'b', position: 'initial' },
-    characterLine: '波波，你好！',
-    learnerTask: 'repeat',
-    successCondition: { minConfidence: 0.55, maxAttempts: 3 },
-    branchingOutcome: {
-      onSuccess: 'scene-2',
-      onFailure: 'scene-support-1',
-    },
-    rewardOnComplete: 10,
-  };
+  const { data, error } = await supabase
+    .from('story_scenes' as never)
+    .select('*')
+    .eq('scene_id', sceneId)
+    .maybeSingle();
 
-  return mockScene;
+  if (error || !data) {
+    if (error) console.error('loadScene failed:', error.message);
+    return null;
+  }
+
+  const row = data as Record<string, unknown>;
+  return {
+    sceneId: String(row.scene_id),
+    storyId: String(row.story_id ?? storyId),
+    chapterId: String(row.chapter_id),
+    order: Number(row.scene_order ?? 0),
+    narrativeState: String(row.narrative_state ?? ''),
+    targetPhoneme: row.target_phoneme as SceneMetadata['targetPhoneme'],
+    characterLine: String(row.character_line ?? ''),
+    learnerTask: row.learner_task as SceneMetadata['learnerTask'],
+    successCondition: row.success_condition as SceneMetadata['successCondition'],
+    branchingOutcome: row.branching_outcome as SceneMetadata['branchingOutcome'],
+    unlockCondition: row.unlock_condition ? String(row.unlock_condition) : undefined,
+    rewardOnComplete: Number(row.reward_on_complete ?? 0),
+  };
 }
 
 export async function completeScene(
@@ -74,19 +74,27 @@ export async function completeScene(
     nextSceneId = scene.branchingOutcome.onFailure;
   }
 
-  // Update learner story state
-  const storyState: StoryState = {
-    storyId: scene.storyId,
+  await saveStoryState({
     learnerId,
+    storyId: scene.storyId,
     currentSceneId: nextSceneId,
     completedScenes: [sceneId],
     phonemeProgress: { [scene.targetPhoneme.symbol]: confidenceScore },
     emotionalState: 'engaged',
-    lastUpdated: new Date().toISOString(),
-  };
+  });
 
-  // Mock upsert to Supabase
-  await supabase.from('learner_story_state').upsert(storyState);
+  await insertStoryTelemetry({
+    learnerId,
+    storyId: scene.storyId,
+    chapterId: scene.chapterId,
+    sceneId,
+    completed: branchTaken !== 'failure',
+    attempts,
+    phonemeSymbol: scene.targetPhoneme.symbol,
+    confidenceScore,
+    branchTaken,
+    timeOnSceneMs: result.timeOnSceneMs,
+  });
 
   return {
     nextSceneId,

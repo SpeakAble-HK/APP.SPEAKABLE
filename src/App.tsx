@@ -43,9 +43,15 @@ const PirateTreasureMapPage = lazy(() => import("@/enhancement/student-portal/pa
 const AdventureStartPage = lazy(() => import("@/enhancement/student-portal/pages/AdventureStartPage"));
 const ExercisePage = lazy(() => import("@/enhancement/student-portal/pages/ExercisePage"));
 const SemanticIslandPage = lazy(() => import("@/enhancement/student-portal/pages/SemanticIslandPage"));
+const GamesHubPage = lazy(() => import("@/enhancement/student-portal/pages/GamesHubPage"));
+const PhonemePairsGamePage = lazy(() => import("@/enhancement/student-portal/pages/PhonemePairsGamePage"));
+const ToneMatchGamePage = lazy(() => import("@/enhancement/student-portal/pages/ToneMatchGamePage"));
+const StoriesHubPage = lazy(() => import("@/enhancement/student-portal/pages/StoriesHubPage"));
+const StoryScenePage = lazy(() => import("@/enhancement/student-portal/pages/StoryScenePage"));
 
 // Enhancement - Parent Portal
 const ParentDashboardPage = lazy(() => import("@/enhancement/parent-portal/pages/ParentDashboardPage"));
+const ParentInsightsPage = lazy(() => import("@/enhancement/parent-portal/pages/ParentInsightsPage"));
 
 // Enhancement - Aura Journey (Syali Studio merged)
 const AuraStoryPage = lazy(() => import("@/enhancement/aura-journey/AuraStoryPage"));
@@ -58,6 +64,8 @@ const STDashboardPage = lazy(() => import("@/improvement/therapist-portal/pages/
 const STAccountsPage = lazy(() => import("@/improvement/therapist-portal/pages/STAccountsPage"));
 const STSettingsPage = lazy(() => import("@/improvement/therapist-portal/pages/STSettingsPage"));
 const STLayout = lazy(() => import("@/improvement/therapist-portal/components/STLayout").then(m => ({ default: m.STLayout })));
+
+const PhonemeTagsPage = lazy(() => import("@/improvement/therapist-portal/pages/PhonemeTagsPage"));
 
 // Improvement - NEPA Portal
 const NEPADashboardPage = lazy(() => import("@/improvement/nepa-portal/pages/NEPADashboardPage"));
@@ -108,6 +116,7 @@ const App = () => (
                     <Route path="/st-nepa" element={<NEPADashboardPage />} />
                     <Route path="/st-game-builder" element={<MiniGameBuilderPage />} />
                     <Route path="/st-accounts" element={<STAccountsPage />} />
+                    <Route path="/st-phoneme-tags" element={<PhonemeTagsPage />} />
                     <Route path="/st-settings" element={<STSettingsPage />} />
                   </Route>
                   <Route path="/therapist-portal" element={<TherapistPortalPage />} />
@@ -116,6 +125,7 @@ const App = () => (
                 {/* ─── Enhancement: Parent routes (require parent role) ─── */}
                 <Route element={<ProtectedRoute allowedRoles={['parent']} />}>
                   <Route path="/parent-dashboard" element={<ParentDashboardPage />} />
+                  <Route path="/parent/insights" element={<ParentInsightsPage />} />
                 </Route>
 
                 {/* ─── Enhancement: Explorer/Student routes (require explorer role) ─── */}
@@ -137,6 +147,11 @@ const App = () => (
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/treasure-map" element={<TreasureMapPage />} />
+                    <Route path="/games" element={<GamesHubPage />} />
+                    <Route path="/games/phoneme-pairs" element={<PhonemePairsGamePage />} />
+                    <Route path="/games/tone-match" element={<ToneMatchGamePage />} />
+                    <Route path="/stories" element={<StoriesHubPage />} />
+                    <Route path="/stories/aura-journey/:chapterId" element={<StoryScenePage />} />
                   </Route>
                 </Route>
 

@@ -1,4 +1,5 @@
-import type { GameEvent, StorySceneEvent, UnifiedEvent } from '../minigame-sdk/types';
+import type { UnifiedEvent } from '../minigame-sdk/types';
+import { insertUnifiedEvents } from '../api/telemetry';
 
 export type TelemetryContext = 'game' | 'story';
 
@@ -29,11 +30,7 @@ export function useTelemetry(
     queue.length = 0;
 
     try {
-      await fetch('/api/telemetry/unified', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(eventsToFlush),
-      });
+      await insertUnifiedEvents(eventsToFlush);
     } catch (error) {
       console.error('Failed to flush unified telemetry:', error);
       // Re-queue failed events

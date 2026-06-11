@@ -1,5 +1,5 @@
-import type { GameMetadata } from '../minigame-sdk/types';
-import { GAME_REGISTRY } from '../minigame-sdk/game-registry';
+import { GAME_REGISTRY, getGameMetadata } from '../minigame-sdk/game-registry';
+import { insertAssignment } from '../api/assignments';
 
 export interface GameTemplate {
   gameId: string;
@@ -31,17 +31,19 @@ export interface AssignmentConfig {
 }
 
 export async function createAssignment(config: AssignmentConfig): Promise<void> {
-  // Mock API call
-  console.log('Creating assignment:', config);
+  const game = getGameMetadata(config.gameId);
+  const difficultyConfig =
+    game?.difficulties.find((d) => d.level === config.difficultyLevel) ??
+    { level: config.difficultyLevel };
 
-  // In production, this would POST to /api/therapist/assignments
-  const response = await fetch('/api/therapist/assignments', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(config),
+  await insertAssignment({
+    therapistId: config.therapistId,
+    learnerIds: config.learnerIds,
+    gameId: config.gameId,
+    phonemeTargets: config.phonemeTargets,
+    difficultyConfig,
+    customPrompt: config.customPrompt,
+    passThreshold: config.passThreshold,
+    scheduledFor: config.scheduledFor,
   });
-
-  if (!response.ok) {
-    throw new Error(`Failed to create assignment: ${response.status}`);
-  }
 }
