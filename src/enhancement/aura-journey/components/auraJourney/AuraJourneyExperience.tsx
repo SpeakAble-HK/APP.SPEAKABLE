@@ -10,6 +10,7 @@ import { MyVoiceStory } from "./MyVoiceStory";
 import { auraJourneyScenes } from "./auraJourneyScenes";
 import { useAuraJourneyState } from "./useAuraJourneyState";
 import { useVoiceCloning } from "./useVoiceCloning";
+import { recordJourneyEvidence } from "../../lib/journeyEvidence";
 
 export const AuraJourneyExperience: React.FC = () => {
   const state = useAuraJourneyState();
@@ -101,6 +102,13 @@ export const AuraJourneyExperience: React.FC = () => {
   React.useEffect(() => {
     if (!audioUrl) return;
     recordVoice(currentScene, audioUrl);
+    // Adaptation engine: a produced clone = strong engagement with this chapter's
+    // therapy target. Feed it to the narrative rubric (keyed by adaptationKey).
+    void recordJourneyEvidence({
+      adaptationKey: auraJourneyScenes[currentScene].adaptationKey,
+      signal: 0.9,
+      sceneIndex: currentScene,
+    });
     setShowVoicePrompt(false);
     setReplayOverlayUrl(audioUrl);
     setPaused(false);
@@ -108,6 +116,12 @@ export const AuraJourneyExperience: React.FC = () => {
   }, [audioUrl, currentScene, recordVoice, resetVoice]);
 
   const handleSkip = () => {
+    // Skipping the voice task = weak engagement signal for this chapter's target.
+    void recordJourneyEvidence({
+      adaptationKey: auraJourneyScenes[currentScene].adaptationKey,
+      signal: 0.3,
+      sceneIndex: currentScene,
+    });
     setShowVoicePrompt(false);
     setReplayOverlayUrl(null);
     setPaused(false);

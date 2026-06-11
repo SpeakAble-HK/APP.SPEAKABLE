@@ -74,7 +74,7 @@ const macroElements: RubricElement[] = [
     saltCode: "CH",
     description: "Mentions and differentiates main vs. supporting characters.",
     descriptionZh: "提及並區分主角與配角。",
-    evidenceKeys: ["sentence_turn_taking", "descriptive_language"],
+    evidenceKeys: ["sentence_turn_taking", "descriptive_language", "wh_question_response", "full_narrative_retell"],
     levels: anchors(
       "No character named, or only ambiguous pronouns.",
       "冇講出角色，或只用含糊代名詞。",
@@ -92,7 +92,7 @@ const macroElements: RubricElement[] = [
     saltCode: "ST",
     description: "Establishes where/when the story takes place.",
     descriptionZh: "建立故事發生嘅時間同地點。",
-    evidenceKeys: ["descriptive_language", "calm_listening"],
+    evidenceKeys: ["descriptive_language", "calm_listening", "full_narrative_retell"],
     levels: anchors(
       "No setting provided.",
       "冇提供場景。",
@@ -110,7 +110,7 @@ const macroElements: RubricElement[] = [
     saltCode: "IE",
     description: "States the problem/event that drives the story.",
     descriptionZh: "講出推動故事嘅問題或事件。",
-    evidenceKeys: ["shape_request_response", "following_directions"],
+    evidenceKeys: ["shape_request_response", "following_directions", "story_sequencing", "full_narrative_retell"],
     levels: anchors(
       "No initiating event.",
       "冇起始事件。",
@@ -128,7 +128,7 @@ const macroElements: RubricElement[] = [
     saltCode: "IR",
     description: "Characters' feelings, thoughts or intentions.",
     descriptionZh: "角色嘅感受、諗法或意圖。",
-    evidenceKeys: ["calm_listening", "voice_volume_turns"],
+    evidenceKeys: ["calm_listening", "voice_volume_turns", "cause_effect_reasoning", "emotion_vocabulary", "full_narrative_retell"],
     levels: anchors(
       "No internal response.",
       "冇內在反應。",
@@ -146,7 +146,7 @@ const macroElements: RubricElement[] = [
     saltCode: "PL/AT",
     description: "Character's plan and actions to solve the problem.",
     descriptionZh: "角色解決問題嘅計劃同行動。",
-    evidenceKeys: ["following_directions", "repair_attempts"],
+    evidenceKeys: ["following_directions", "repair_attempts", "cause_effect_reasoning", "full_narrative_retell"],
     levels: anchors(
       "No plan or attempt.",
       "冇計劃或嘗試。",
@@ -164,7 +164,7 @@ const macroElements: RubricElement[] = [
     saltCode: "CON",
     description: "Outcome of the attempt and story resolution.",
     descriptionZh: "嘗試嘅結果同故事結局。",
-    evidenceKeys: ["repair_attempts", "home_practice_transfer"],
+    evidenceKeys: ["repair_attempts", "home_practice_transfer", "story_sequencing", "confident_generalisation", "full_narrative_retell"],
     levels: anchors(
       "No consequence/resolution.",
       "冇結果或結局。",
@@ -185,7 +185,7 @@ const microElements: RubricElement[] = [
     labelZh: "句法複雜度",
     description: "Sentence length and use of subordinate/coordinate clauses.",
     descriptionZh: "句子長度同主從／並列句嘅運用。",
-    evidenceKeys: ["sentence_turn_taking", "descriptive_language", "syllable_segmentation"],
+    evidenceKeys: ["sentence_turn_taking", "descriptive_language", "syllable_segmentation", "connective_expansion"],
     levels: anchors(
       "Single words / fragments only.",
       "只有單字或片語。",
@@ -202,7 +202,7 @@ const microElements: RubricElement[] = [
     labelZh: "連接詞／連貫",
     description: "Temporal & causal connectives (e.g. 然後, 因為, 但係) linking events.",
     descriptionZh: "用時間／因果連接詞（如：然後、因為、但係）連繫事件。",
-    evidenceKeys: ["following_directions", "syllable_segmentation"],
+    evidenceKeys: ["following_directions", "syllable_segmentation", "connective_expansion", "story_sequencing"],
     levels: anchors(
       "No connectives; events listed.",
       "冇連接詞，事件零散羅列。",
@@ -219,7 +219,7 @@ const microElements: RubricElement[] = [
     labelZh: "指稱",
     description: "Clear antecedents for pronouns; listener can track who/what.",
     descriptionZh: "代名詞有清晰先行詞，聽者可追蹤人物／事物。",
-    evidenceKeys: ["descriptive_language", "rhyme_matching"],
+    evidenceKeys: ["descriptive_language", "rhyme_matching", "wh_question_response"],
     levels: anchors(
       "Ambiguous referents throughout.",
       "全篇指稱含糊。",
@@ -236,7 +236,7 @@ const microElements: RubricElement[] = [
     labelZh: "語義／詞彙",
     description: "Lexical diversity, elaborated noun phrases, mental/linguistic verbs.",
     descriptionZh: "詞彙多樣性、修飾名詞短語、心理／言語動詞。",
-    evidenceKeys: ["descriptive_language", "initial_sound_blending"],
+    evidenceKeys: ["descriptive_language", "initial_sound_blending", "emotion_vocabulary"],
     levels: anchors(
       "Immature / repetitive vocabulary.",
       "詞彙幼嫩或重複。",
@@ -274,7 +274,7 @@ const intelligibilityElements: RubricElement[] = [
     labelZh: "音素準確度",
     description: "Accuracy on target Cantonese phoneme contrasts (n/l, ng/n, gw/kw).",
     descriptionZh: "目標粵語音素對比嘅準確度（n/l、ng/n、gw/kw）。",
-    evidenceKeys: ["water-park", "maze", "fruit-ninja"],
+    evidenceKeys: ["water-park", "maze", "fruit-ninja", "minimal_pair_discrimination"],
     levels: anchors(
       "<40% target phonemes accurate.",
       "目標音素準確率 <40%。",
@@ -291,7 +291,7 @@ const intelligibilityElements: RubricElement[] = [
     labelZh: "聲調準確度",
     description: "Accuracy on the six Cantonese lexical tones.",
     descriptionZh: "六個粵語聲調嘅準確度。",
-    evidenceKeys: ["catch-fly", "vowel_imitation"],
+    evidenceKeys: ["catch-fly", "vowel_imitation", "minimal_pair_discrimination", "self_repair_tone"],
     levels: anchors(
       "Tones largely inaccurate (<40%).",
       "聲調大致不準（<40%）。",
@@ -308,7 +308,7 @@ const intelligibilityElements: RubricElement[] = [
     labelZh: "流暢度同節奏",
     description: "Smoothness, rate, and listener effort during connected speech.",
     descriptionZh: "連續說話嘅流暢度、語速同聽者所需努力。",
-    evidenceKeys: ["calm_listening", "voice_volume_turns"],
+    evidenceKeys: ["calm_listening", "voice_volume_turns", "pacing_fluency", "confident_generalisation"],
     levels: anchors(
       "Frequent breakdowns; high listener effort.",
       "經常中斷，聽者需高度努力。",

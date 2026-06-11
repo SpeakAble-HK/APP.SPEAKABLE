@@ -5,6 +5,7 @@ import { useNEPAWorldModel, type ExerciseRecommendation } from '@/shared/hooks/u
 import ProgressReportGenerator from './ProgressReportGenerator';
 import { NarrativeRubricPanel } from './NarrativeRubricPanel';
 import { useNarrativeAssessment } from '../../hooks/useNarrativeAssessment';
+import { useJourneyEvidence } from '../../hooks/useJourneyEvidence';
 
 const TherapistDashboard: React.FC = () => {
   const { students, loading: studentsLoading } = useSTDashboard();
@@ -18,11 +19,14 @@ const TherapistDashboard: React.FC = () => {
     save: saveAssessment,
     usingFallback: assessmentFallback,
   } = useNarrativeAssessment(selectedUser || undefined);
+  const { journeyEvidence } = useJourneyEvidence(selectedUser || undefined);
   const [savingAssessment, setSavingAssessment] = useState(false);
 
-  // Build evidence (evidenceKey -> 0..1) from phoneme accuracy so the rubric can
-  // auto-suggest intelligibility scores. Mini-game ids map to phoneme contrasts.
-  const rubricEvidence: Record<string, number> = {};
+  // Build evidence (evidenceKey -> 0..1) for the rubric's auto-suggest.
+  //  • Mini-game phoneme accuracy → intelligibility (water-park/maze/fruit-ninja/catch-fly).
+  //  • Aura Journey adaptation signals → macro/microstructure (adaptationKey-keyed).
+  // The narrative rubric maps both sets of keys via each element's evidenceKeys.
+  const rubricEvidence: Record<string, number> = { ...journeyEvidence };
   if (data) {
     const acc = (substr: string) => {
       const hits = data.phonemeStats.filter((p) => p.phoneme.includes(substr));
