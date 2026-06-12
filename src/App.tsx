@@ -12,8 +12,9 @@ import AppLayout from "@/shared/components/AppLayout";
 
 // Shared pages
 import LandingNoVideoPage from "@/shared/pages/LandingNoVideoPage";
-import SignInFlowPage from "@/shared/pages/SignInFlowPage";
 import PricingPage from "@/shared/pages/PricingPage";
+const AuthFlowPage = lazy(() => import("@/shared/pages/AuthFlowPage"));
+const ResetPasswordPage = lazy(() => import("@/shared/pages/ResetPasswordPage"));
 const AuthPage = lazy(() => import("@/shared/pages/AuthPage"));
 const Index = lazy(() => import("@/shared/pages/Index"));
 const RoleSelectionPage = lazy(() => import("@/shared/pages/RoleSelectionPage"));
@@ -94,7 +95,13 @@ const App = () => (
                 {/* ─── Public routes (no auth required) ─── */}
                 <Route path="/" element={<LandingNoVideoPage />} />
                 <Route path="/legacy-home" element={<Index />} />
-                <Route path="/auth" element={<SignInFlowPage />} />
+                <Route path="/auth" element={<AuthFlowPage />} />
+                <Route path="/auth/signin" element={<AuthFlowPage initialStage="signin" />} />
+                <Route path="/auth/signup" element={<AuthFlowPage initialStage="signup" />} />
+                <Route path="/auth/subscribe" element={<AuthFlowPage initialStage="subscribe" />} />
+                <Route path="/auth/forgot" element={<AuthFlowPage initialStage="forgot" />} />
+                <Route path="/auth/verify-email" element={<AuthFlowPage initialStage="verify-email" />} />
+                <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/auth-legacy" element={<AuthPage />} />
                 <Route path="/role-select" element={<RoleSelectionPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
